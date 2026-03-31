@@ -64,7 +64,8 @@ export const actions: Actions = {
 		// Generate order number via DB function
 		const { data: orderNum } = await supabase.rpc('generate_order_number');
 
-		const { data: order, error } = await supabase
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { data: order, error } = await (supabase as any)
 			.from('orders')
 			.insert({
 				order_number: orderNum ?? `KL-${Date.now()}`,

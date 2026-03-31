@@ -1,4 +1,5 @@
 import type { PageServerLoad } from './$types';
+import type { Product, Category } from '$lib/types';
 
 export const load: PageServerLoad = async ({ locals: { supabase }, url }) => {
 	const category = url.searchParams.get('category');
@@ -43,8 +44,8 @@ export const load: PageServerLoad = async ({ locals: { supabase }, url }) => {
 	]);
 
 	return {
-		products: products ?? [],
-		categories: categories ?? [],
+		products: (products ?? []) as unknown as Product[],
+		categories: (categories ?? []) as unknown as Category[],
 		category,
 		sort,
 		q

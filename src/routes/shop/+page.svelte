@@ -5,12 +5,17 @@
 	import CategoryChip from '$lib/components/CategoryChip.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type { PageData } from './$types';
+	import type { Product, Category } from '$lib/types';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	// Explicit types to work around Supabase join inference
+	const products: Product[] = $derived(data.products as Product[]);
+	const categories: Category[] = $derived(data.categories as Category[]);
 
 	// ─── Local UI state ───────────────────────────────────────────────────────
 	// Mobile filter drawer toggle
@@ -32,10 +37,8 @@
 	);
 
 	// Apply client-side price range filter on top of server-filtered list.
-	// The server handles category/sort/search; price range is a bonus UX nicety
-	// that avoids a round-trip for a simple numeric check.
 	const filteredProducts = $derived(() => {
-		let list = data.products;
+		let list = products;
 		const min = minPrice !== '' ? parseInt(minPrice, 10) * 100 : null;
 		const max = maxPrice !== '' ? parseInt(maxPrice, 10) * 100 : null;
 		if (min !== null) list = list.filter((p) => p.price_paise >= min);
@@ -183,7 +186,7 @@
 						>
 							All Products
 						</button>
-						{#each data.categories as cat (cat.id)}
+						{#each categories as cat (cat.id)}
 							<CategoryChip
 								category={cat}
 								active={selectedCategory === cat.slug}
@@ -434,7 +437,7 @@
 					>
 						All Products
 					</button>
-					{#each data.categories as cat (cat.id)}
+					{#each categories as cat (cat.id)}
 						<CategoryChip
 							category={cat}
 							active={selectedCategory === cat.slug}

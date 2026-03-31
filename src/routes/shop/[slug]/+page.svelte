@@ -7,6 +7,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type { PageData } from './$types';
+	import type { Product, ProductImage } from '$lib/types';
 
 	interface Props {
 		data: PageData;
@@ -14,9 +15,9 @@
 
 	let { data }: Props = $props();
 
-	// Shorthand aliases — keep template readable
-	const product = $derived(data.product);
-	const related = $derived(data.related);
+	// Shorthand aliases — explicit types resolve Supabase join inference issues
+	const product: Product = $derived(data.product as Product);
+	const related: Product[] = $derived(data.related as Product[]);
 
 	// ─── Image gallery state ──────────────────────────────────────────────────
 	let activeImageIndex = $state(0);

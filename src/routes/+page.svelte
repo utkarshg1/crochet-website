@@ -51,10 +51,13 @@
 
 <svelte:head>
 	<title>Krafted Loops Studio — Handmade Crochet from India</title>
-	<meta
-		name="description"
-		content="Every piece from Krafted Loops Studio is lovingly handmade by Kalyani Gaikwad. Shop amigurumi, home decor, baby collections, and accessories — all crocheted with care."
-	/>
+	<meta name="description" content="Every piece from Krafted Loops Studio is lovingly handmade by Kalyani Gaikwad. Shop amigurumi, home décor, baby collections, and accessories — all crocheted with care." />
+	<meta property="og:title" content="Krafted Loops Studio — Handmade Crochet from India" />
+	<meta property="og:description" content="Discover beautifully handcrafted crochet products by Kalyani Gaikwad. Each piece is made with love in India." />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="Krafted Loops Studio" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<link rel="canonical" href="https://kraftedloops.in/" />
 </svelte:head>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════

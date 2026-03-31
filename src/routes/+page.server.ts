@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import type { Product, Category } from '$lib/types';
 
 export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	const [{ data: categories }, { data: featuredProducts }] = await Promise.all([
@@ -13,8 +14,8 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	]);
 
 	return {
-		categories: categories ?? [],
-		featuredProducts: featuredProducts ?? []
+		categories: (categories ?? []) as unknown as Category[],
+		featuredProducts: (featuredProducts ?? []) as unknown as Product[]
 	};
 };
 
