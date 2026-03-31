@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@theme {
+	/* Brand colors */
+	--color-primary: #a7295a;
+	--color-primary-dim: #8a1f48;
+	--color-primary-container: #ff709f;
+	--color-on-primary: #ffffff;
+	--color-secondary: #00675d;
+	--color-secondary-container: #c8f0eb;
+	--color-on-secondary-container: #00332f;
+	--color-tertiary: #7f5200;
+	--color-tertiary-container: #ffddb3;
+	--color-on-tertiary-container: #4a2e00;
+
+	/* Surface / Background */
+	--color-surface: #dcfdf8;
+	--color-surface-low: #d3f8f2;
+	--color-surface-card: #ffffff;
+	--color-surface-high: #c8f5ee;
+
+	/* Text */
+	--color-on-surface: #153430;
+	--color-on-surface-muted: #6b5e52;
+	--color-outline: #153430;
+	--color-outline-variant: #153430;
+
+	/* Accent palette */
+	--color-sage: #a8b5a2;
+	--color-blush: #e8b4bc;
+	--color-mustard: #e8c39e;
+	--color-coral: #f4a8a8;
+
+	/* Typography */
+	--font-display: 'Newsreader', Georgia, serif;
+	--font-body: 'Manrope', system-ui, sans-serif;
+}
+
+/* Base styles */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	background-color: var(--color-surface);
+	color: var(--color-on-surface);
+	font-family: var(--font-body);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-display);
+}
+
+/* Organic mask shape for images */
+.mask-organic {
+	clip-path: polygon(
+		10% 0%,
+		90% 2%,
+		98% 10%,
+		100% 88%,
+		92% 98%,
+		8% 100%,
+		2% 92%,
+		0% 12%
+	);
+}
+
+.mask-organic-2 {
+	clip-path: polygon(
+		5% 3%,
+		95% 0%,
+		100% 5%,
+		98% 95%,
+		93% 100%,
+		5% 98%,
+		0% 93%,
+		2% 5%
+	);
+}
+
+/* Ambient shadow (tonal, not grey) */
+.shadow-ambient {
+	box-shadow: 0 8px 40px 0 rgba(21, 52, 48, 0.06);
+}
+
+.shadow-ambient-lg {
+	box-shadow: 0 16px 60px 0 rgba(21, 52, 48, 0.08);
+}
+
+/* Glassmorphism */
+.glass {
+	background: rgba(255, 255, 255, 0.7);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+}
+
+/* Organic pill chip */
+.chip {
+	border-radius: 1rem 0.5rem 1rem 0.5rem;
+}
+
+/* Bounce animation for decorative elements */
+@keyframes yarn-bounce {
+	0%,
+	100% {
+		transform: translateY(0) rotate(0deg);
+	}
+	50% {
+		transform: translateY(-12px) rotate(8deg);
+	}
+}
+
+.animate-yarn-bounce {
+	animation: yarn-bounce 3s ease-in-out infinite;
+}
+
+/* Wobble animation for hero images */
+@keyframes gentle-float {
+	0%,
+	100% {
+		transform: translateY(0px) rotate(var(--tw-rotate, 0deg));
+	}
+	50% {
+		transform: translateY(-8px) rotate(var(--tw-rotate, 0deg));
+	}
+}
+
+.animate-float {
+	animation: gentle-float 6s ease-in-out infinite;
+}
+
+/* Cart drawer slide-in */
+@keyframes slide-in-right {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+.animate-slide-in-right {
+	animation: slide-in-right 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}

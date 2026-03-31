@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Krafted Loops Studio | Artisanal Crochet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#5d002b",
+                        "outline": "#5e7d78",
+                        "surface-container-low": "#d3f8f2",
+                        "secondary-fixed-dim": "#76e7d7",
+                        "primary-dim": "#971b4e",
+                        "on-tertiary-fixed-variant": "#644000",
+                        "outline-variant": "#93b4ae",
+                        "on-error-container": "#510017",
+                        "surface-container": "#c8f0ea",
+                        "secondary-container": "#85f6e5",
+                        "tertiary-fixed-dim": "#eea840",
+                        "tertiary-dim": "#6f4700",
+                        "on-secondary-fixed-variant": "#00675d",
+                        "surface-dim": "#acded7",
+                        "on-primary-fixed": "#000000",
+                        "on-secondary": "#c0fff4",
+                        "tertiary-container": "#feb64c",
+                        "secondary-fixed": "#85f6e5",
+                        "primary": "#a7295a",
+                        "on-tertiary-fixed": "#3d2500",
+                        "inverse-primary": "#fd6c9c",
+                        "inverse-surface": "#00110f",
+                        "surface": "#dcfdf8",
+                        "background": "#dcfdf8",
+                        "primary-fixed-dim": "#f06292",
+                        "tertiary": "#7f5200",
+                        "error": "#b41340",
+                        "on-background": "#153430",
+                        "on-primary-container": "#4c0022",
+                        "on-tertiary-container": "#583700",
+                        "primary-fixed": "#ff709f",
+                        "secondary-dim": "#005a51",
+                        "on-secondary-fixed": "#004841",
+                        "surface-container-highest": "#b8e6df",
+                        "error-container": "#f74b6d",
+                        "surface-bright": "#dcfdf8",
+                        "surface-container-high": "#c0ebe4",
+                        "on-secondary-container": "#005c53",
+                        "surface-tint": "#a7295a",
+                        "error-dim": "#a70138",
+                        "inverse-on-surface": "#83a39e",
+                        "surface-variant": "#b8e6df",
+                        "secondary": "#00675d",
+                        "primary-container": "#ff709f",
+                        "on-surface": "#153430",
+                        "on-primary": "#ffeff1",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#fff0e2",
+                        "on-surface-variant": "#43615d",
+                        "on-error": "#ffefef",
+                        "tertiary-fixed": "#feb64c"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #dcfdf8; color: #153430; overflow-x: hidden; }
+        .font-serif { font-family: 'Newsreader', serif; }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .organic-shape-1 { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        .organic-shape-2 { border-radius: 30% 70% 70% 30% / 50% 60% 40% 50%; }
+        .wavy-line {
+            mask-image: url("data:image/svg+xml,%3Csvg width='200' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q 25 0 50 10 T 100 10 T 150 10 T 200 10' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+            mask-repeat: repeat-x;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface" data-mode="connect">
+<!-- Top Navigation Shell -->
+<nav class="fixed top-0 w-full z-50 bg-[#dcfdf8]/70 dark:bg-[#153430]/70 backdrop-blur-xl border-b border-primary/10">
+<div class="max-w-[1440px] mx-auto px-4 md:px-8 py-3 md:py-4 flex justify-between items-center gap-2">
+<!-- Left: Logo & Brand Name -->
+<div class="flex items-center gap-2 md:gap-3 flex-shrink-0 min-w-0">
+<span class="md:hidden material-symbols-outlined text-[#a7295a] cursor-pointer">menu</span>
+<div class="flex items-center gap-2 min-w-0">
+<img alt="Krafted Loops Studio Logo" class="h-7 md:h-10 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/ADBb0uhqYIvYtBEcJyZ_rhuC4pPkGy-ar-6f5bwU5ucYScXCfWkN7er9M01l6OLmqNjupBmQv6meuhIEsSoi7JA4hYEEk9rGRoczHvQevRm9QfVElze3mbtQfsrGtR_SOA-HQwl0eT5c1ZytNNQ68WOSWn16_IcfwnaJMFwGZIkKox98jZEQwp1YxZwVCM8QA39vdia-qkQer_PsWyKm2IleFY87aVV_wpCSKu-YVss1PQrX963wsdfvRX6ss_3cT3qAwK9D0fGTD3ky3uM"/>
+<span class="font-serif text-base md:text-xl font-bold text-[#153430] dark:text-[#dcfdf8] leading-tight truncate md:whitespace-nowrap flex flex-col md:flex-row md:gap-1">
+<span>Krafted Loops</span>
+<span class="text-sm md:text-xl font-medium md:font-bold opacity-80 md:opacity-100">Studio</span>
+</span>
+</div>
+</div>
+<!-- Center: Navigation (Desktop & Tablet) -->
+<div class="hidden md:flex gap-6 lg:gap-10 items-center justify-center flex-1">
+<a class="font-sans uppercase tracking-widest text-[10px] lg:text-xs text-[#a7295a] font-bold border-b-2 border-[#a7295a] pb-0.5" href="#">Shop</a>
+<a class="font-sans uppercase tracking-widest text-[10px] lg:text-xs text-[#153430] dark:text-[#dcfdf8] hover:text-[#a7295a] transition-colors" href="#">Collections</a>
+<a class="font-sans uppercase tracking-widest text-[10px] lg:text-xs text-[#153430] dark:text-[#dcfdf8] hover:text-[#a7295a] transition-colors" href="#">About</a>
+<a class="font-sans uppercase tracking-widest text-[10px] lg:text-xs text-[#153430] dark:text-[#dcfdf8] hover:text-[#a7295a] transition-colors" href="#">Journal</a>
+<a class="font-sans uppercase tracking-widest text-[10px] lg:text-xs text-[#153430] dark:text-[#dcfdf8] hover:text-[#a7295a] transition-colors" href="#">Contact</a>
+</div>
+<!-- Right: Icons -->
+<div class="flex items-center gap-3 md:gap-5 lg:gap-6 text-[#a7295a] dark:text-[#ff709f] flex-shrink-0">
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity text-xl md:text-2xl">search</span>
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity text-xl md:text-2xl">favorite</span>
+<div class="relative cursor-pointer group">
+<span class="material-symbols-outlined hover:opacity-80 transition-opacity text-xl md:text-2xl">shopping_bag</span>
+<span class="absolute -top-1.5 -right-1.5 bg-tertiary text-on-tertiary text-[9px] md:text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white">2</span>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-20 md:pt-24">
+<!-- Hero Section -->
+<section class="relative min-h-[800px] md:min-h-[921px] flex items-center px-6 md:px-20 overflow-hidden">
+<div class="absolute -top-20 -right-20 w-[600px] h-[600px] bg-primary-container/20 rounded-full blur-[100px] z-0"></div>
+<div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary-container/30 organic-shape-1 blur-[80px] z-0"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full z-10">
+<div class="space-y-8">
+<div class="space-y-2">
+<span class="font-body text-xs md:text-sm uppercase tracking-[0.3em] text-secondary font-bold">Artisanally Handcrafted</span>
+<h1 class="font-serif text-5xl md:text-8xl leading-[0.95] text-on-surface">Woven with <span class="italic text-primary">Soul &amp; Color</span></h1>
+</div>
+<p class="font-body text-base md:text-lg text-on-surface-variant max-w-md leading-relaxed">
+                        Discover a world where every stitch tells a story. From forever flowers to whimsical baby treasures, we create tactile joy for your everyday life.
+                    </p>
+<div class="flex flex-wrap gap-6 items-center">
+<button class="bg-gradient-to-r from-primary to-primary-dim text-on-primary px-8 md:px-10 py-4 md:py-5 rounded-lg font-bold tracking-tight shadow-xl hover:scale-105 transition-transform group flex items-center gap-3">
+                            Shop Now
+                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<div class="flex -space-x-4">
+<div class="w-10 md:w-12 h-10 md:h-12 rounded-full border-2 border-surface overflow-hidden bg-white">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBifo0ExFtyfigk97ytYXA48qQieUXeITLQxnDusWNwJqBehzb6yUk5sqWq7XKseIKOSC5WSTz21oUIs5Vbh4FQ6kcopiqZF5VGaQfOobMTCsD_kAtkxhff3AOxGuq9faqkYFbK5wkMO2ymhUmebRipEcjCHNVuFM0Uny3P5ftdFn9aWXBSAWeQu5LE4LErY5msDqEMtku99NIgMQk45gdc5NXGXSgPJBUUXdh_ihpsNOrxhyqTxoeOkse0pvQLzl_Hbj6nvoLsGyoO"/>
+</div>
+<div class="w-10 md:w-12 h-10 md:h-12 rounded-full border-2 border-surface overflow-hidden bg-white">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxSYgjABLE3YPV1qtPQGdBJonCt_8rMqCUuraO3_3xh63Pbr4QcFwPPlH8fTlziaSzitLDbFpbVKbaaZODPQgEVYH0hS3GaxIm-6dI_wkEdZKE053Tl3EFEnpvdq7jJAxqvV6O-nwbodbTOe6CkF8Iy51_URPBIDS3VoDG4P9cVHWte23qS7ZiXkhLcNaOPdRNOJiJlStKAY3kNmxYQ9QrXv-Oa5FHChjzlKU7OvVCNAhCPvSTCRyCUTdkMu-f_fkSeEawZdoW1iE7"/>
+</div>
+<div class="w-10 md:w-12 h-10 md:h-12 rounded-full border-2 border-surface overflow-hidden bg-white">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD81dkkp9y_-l_NXoEm3QJeSR2-4q63Up__jezsh6fhdBnVJ2AdDjOsOMQhHCgDrYCY3sH0e5WmPECHZisJI9LOHpP-showUhWXXmGyRZzzRDmD5hKGOILfjbWcGyErWdY5e8lsMsua_G4t-l4LFoAcQGaGMU_bB5htZBinRm0e-HUe65kie-SQmvaD4H1y4vCNRbW6flarXyd_U6j_Di04XLpsqJusCWrNVClnyfJytAlrBUv5TpYC0zdUAjNtJHPzV-1X_64WxSkx"/>
+</div>
+</div>
+<span class="text-sm font-bold text-on-surface-variant italic">+500 Happy Collectors</span>
+</div>
+</div>
+<div class="relative h-[400px] md:h-[700px]">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 md:w-48 h-32 md:h-48 z-40 bg-white p-3 md:p-4 rounded-lg shadow-2xl rotate-12 hover:rotate-0 transition-transform duration-500">
+<img class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHA6_RCxjKsqzNmEgkSRsXIhOFqf33JeFSoXLZqwr92_H2XqgLc3c5Doz6BTbO2GyQ07DeytaH4hgpXH2Xld6rKKXV2S9-bzbsVi4OiRAIPRMuxJ25W8bYAf3WNXmrA5j9G7hIg_bsDTYr1V7ouVfE3QHJ2CH2hyUIbs2yVXBeHlzKm1a2398zuTbjcBUqrXjo259eoT1fPdeR_UjaoLi0xPusNIpWG_PMq3jqOQDR9SywmKWS8058aN1wPNk_gUXno9kD0JspgtQV"/>
+</div>
+<div class="absolute top-0 right-4 md:right-10 w-48 md:w-64 h-64 md:h-80 rounded-xl overflow-hidden shadow-2xl z-20 rotate-6 transform hover:-translate-y-4 transition-all duration-700">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdoWfJZ9yjDnejXMOQakWlAPvMi1v9ZQiTpy3n6CkVeJF8ZjO_c6xIVd3gbXfdBKhHM7PQr3ommEIedwWcWYZ57Q78KplSFsono9x9HCWhvLEwwIGCgJlalceoSL-8PouO0NPFVL-xp-8og1bt5-xwNQGMF-Tk42TX88mh8RUPIXPVslmV8MkHsFRFxUnSnagomqHUO-2V7PpISW70GzZaT-W5BUomm-5svGdzQD_YE1AhjJScD_q9EiDL0Pn5Z8-lSb65X2iLJhZB"/>
+</div>
+<div class="absolute bottom-10 left-0 w-48 md:w-72 h-48 md:h-72 rounded-full overflow-hidden shadow-2xl z-30 -rotate-12 transform hover:scale-110 transition-all duration-700">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_WrC-7BV-ihFOs54701RuEYyi_PmrjX8A1e48cxfzSchoATPpOHy8PzTomGhBobO0p370x8mkZBk8PF_Ym6MjPUjzcvJ5fnzCcedGOHmUfqvQ8rL_oxbDjoblLdjX-zQdiNEfUgvMa-Tc2BjPMVxE0t6r1A5InI9ecEEqYGywczRI0pYlEoeDN_NJD_Ygauty2dtA7QvMXL0gLGs4ksEmTIs4P74f737EY64vxhh6wJizAboDuECBBN4Ruczu-2wTYxuUWopOjX4S"/>
+</div>
+<div class="absolute top-1/3 left-1/4 w-32 md:w-40 h-32 md:h-40 bg-tertiary rounded-lg z-10 blur-sm opacity-20 animate-pulse"></div>
+</div>
+</div>
+</section>
+<!-- Featured Collections -->
+<section class="py-24 px-6 md:px-20 bg-surface-container-low/50 relative">
+<div class="mb-12 md:mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+<div class="max-w-xl">
+<span class="text-xs uppercase tracking-widest text-primary font-bold">The Catalog</span>
+<h2 class="font-serif text-4xl md:text-5xl mt-2">Curated Collections</h2>
+</div>
+<button class="text-primary font-bold flex items-center gap-2 group">
+                    View Entire Shop <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_right_alt</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[900px]">
+<!-- Baby Items -->
+<div class="md:col-span-2 md:row-span-1 bg-surface-container-lowest rounded-lg p-8 flex flex-col justify-between overflow-hidden relative group hover:shadow-2xl transition-all duration-500">
+<div class="z-10">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1 rounded-full text-xs font-bold">Warmth</span>
+<h3 class="font-serif text-3xl mt-4">Baby Items</h3>
+</div>
+<img class="absolute bottom-0 right-0 w-2/3 h-2/3 object-cover organic-shape-1 group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-fVMFbaBovYm5TJ6WvOAQxxRNGmHSns5X4pDwziEqONuLsqeN8mhmgajSlbn3NdMbpWz8P9Rxio9zjvbJ7AOD0NEq3VMrVe7JshEgr7GlRmcjok25DWX2C1CvlgswlN8tdW-CDc96K_lupVMtbwfQEJmZFS5-phGJV-ihj04rj7NFw9UQtc3CLaCZOhdnMunt7SQ4K4SohPyfRSlOlZdFA-A2OQNHEkWsK8g6Sqy5SruGkvdbUn4-HstDgi2tdUhac1A4FHTe6Swj"/>
+</div>
+<!-- Forever Flowers -->
+<div class="md:col-span-1 md:row-span-2 bg-[#ffeff1] rounded-lg p-8 flex flex-col items-center justify-start group hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<h3 class="font-serif text-3xl mb-8">Forever Flowers</h3>
+<div class="h-full w-full overflow-hidden rounded-t-full">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpiP5M4cD3mG-c7y0GFoj0ryR7doJewwcKZVyCYaD53twti5R-F8VnsOIIhhr3Mpma0xk3e3v8aT5ktqj_UgRVybPV3M31qEOOlY6R1Uo1X-1hmdowO3_IFUrK3Gd3hTQvYbnBXIfOSgg3KEl4w8-FEDXOM8Rxf0XSvgSQuAxQJ_Lizf9JT-MbGSGbevqJ2fwW5Au3Pe6ibS606DaSi2Who9J5Z2qnQPWGfXIucZI0ffP7eQlKefNLlMxpljQTP9Ys4TydpFE-NR9R"/>
+</div>
+</div>
+<!-- Keychains & Charms -->
+<div class="md:col-span-1 md:row-span-1 bg-tertiary-container rounded-lg p-8 relative group hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<h3 class="font-serif text-2xl text-on-tertiary-container">Keychains &amp; Charms</h3>
+<img class="absolute -bottom-6 -right-6 w-32 h-32 object-cover rotate-12 group-hover:rotate-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4XNstwf-puzXRWP8ByC2sPFWapq5k1vBE7t3vTAQLVvi4ttIgUZ9CGG9RC0bBatf2Zw1HuxZuL_RACpmtZZ5qPvEhtSQWxBpeq5QsHXTj7wv5e90qhYIedGdo9pXQNDrSKj5UxAR_yFNddwZE4dWdfekQMG8Ow-0rVIDAT-Ks154KE1D6PcrU50lKkK1CWJbEJaSPk_Lh3o5ro5TBIseHp2QHxKJtkWGBAUtSJqlHW4UFLszDKn6Onb2aWpE3kIkJ9awFhv9IvnKb"/>
+</div>
+<!-- Purses & Cases -->
+<div class="md:col-span-2 md:row-span-1 bg-surface-container-highest rounded-lg p-8 flex flex-col md:flex-row gap-8 items-center group hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<div class="w-full md:w-1/2">
+<h3 class="font-serif text-3xl md:text-4xl leading-tight">Artisanal Bags &amp; Cases</h3>
+<p class="mt-4 text-on-surface-variant text-sm">Protective beauty for your daily essentials.</p>
+<button class="mt-6 font-bold underline decoration-primary underline-offset-4">Explore Series</button>
+</div>
+<div class="w-full md:w-1/2 h-48 md:h-full relative">
+<img class="w-full h-full object-cover organic-shape-2 shadow-lg group-hover:-rotate-3 transition-transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGvb92RKzcq3siNsxNosblZqlLkHBEaCLjPt7lFv1tEFsjVVZ6VpZR-raR5N3l99f6JOr1G002ndaEqDoYF49TpC5TIflpYhO7Q-jcipToD4_mNELBGMJveZkfZ060WCzFtuWV-KSblceYQZ9VdNmpiBrYoK0ZJUXngmKdJiWsMV_QCUCfcKfTTOq3yZq_JVjwvIESbkgh_0u7bLQvkmJZiZ4VVOJm2hpoMBSWpyPMCQm7Twc8R51p9ce3h8UGUQNHsemzPhGv6PhY"/>
+</div>
+</div>
+<!-- Wind Spinners -->
+<div class="md:col-span-1 md:row-span-1 bg-secondary rounded-lg p-8 flex flex-col justify-center items-center text-center group hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<div class="text-white space-y-2">
+<h3 class="font-serif text-2xl">Wind Spinners</h3>
+<p class="text-xs text-secondary-fixed opacity-80">Outdoor Whimsy</p>
+</div>
+<div class="mt-6 w-full h-32 bg-white/10 backdrop-blur rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-5xl animate-spin" style="animation-duration: 8s;">cyclone</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Meet the Maker -->
+<section class="py-24 md:py-32 px-6 md:px-20 overflow-hidden relative">
+<div class="absolute top-1/2 left-0 -translate-y-1/2 w-[800px] h-2 bg-gradient-to-r from-primary/5 to-transparent wavy-line"></div>
+<div class="flex flex-col md:flex-row items-center gap-12 md:gap-20">
+<div class="relative w-full md:w-1/2 flex justify-center">
+<div class="w-72 h-80 md:w-[450px] md:h-[550px] relative">
+<div class="absolute inset-0 bg-primary organic-shape-1 rotate-6 -z-10 opacity-10"></div>
+<div class="absolute inset-0 border-4 border-tertiary organic-shape-2 -rotate-3 -z-10"></div>
+<div class="w-full h-full overflow-hidden organic-shape-1 shadow-2xl">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB902ksHTbS-vW3rBBdfvLEwNUTMjml_gfi6-HSUCa7K2eMwzmFnMNn3MyCMPCozBhd7wBXR4wGNCgrmHy72QG76TREkltriaJBzE1qBxwRIAOrNhBfYsLTS8wL9ne7yZS1WpumxemeExqH8sKYcm7ScF4UCy1jDP-ZoImX0E4XtvnzyCFQlmb2nUS28zqFoija9rBajcHXzUJZdKeiSP8DYxuxv9CXJfYREByCkzDgvxRQe_Goz0KD_haB3S189Y5ySQ0Vga7alJSB"/>
+</div>
+</div>
+<div class="absolute -bottom-6 -left-6 md:-bottom-10 md:-left-10 w-32 md:w-40 h-32 md:h-40 z-20">
+<img class="w-full h-full object-contain drop-shadow-xl animate-bounce" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClrI3oZnIknOntxfka2yFmyy3jsX5bKN0ybOuih0Ox0VcoyQXr1RbxbPKn7dWzM4BWjs5tvdXjrvckE37bXPg4_bFMqXVn00xDwHMTuDAqOmQd_GrpM2TWfz1BxZZKa-ioKAY6EXYG667f7WudaKfV2dF1NZyFgn2ZGrmjeQpzoQEsSqqnq4MUhHJEUMZ-R1h6zUASBdg44opEdKhBYHjHXJ7HIGoSp8IWRFq_teWrkfr7cBPWznQ8XpsINShnRKOcX8UPnLKReOR6" style="animation-duration: 4s;"/>
+</div>
+</div>
+<div class="w-full md:w-1/2 space-y-8 md:space-y-10">
+<div class="space-y-4">
+<span class="text-xs uppercase tracking-widest text-primary font-bold">The Heart of the Studio</span>
+<h2 class="font-serif text-5xl md:text-6xl leading-tight">Meet <span class="italic">Kalyani Gaikwad</span></h2>
+</div>
+<div class="space-y-6 text-on-surface-variant text-base md:text-lg leading-relaxed max-w-lg">
+<p>"Krafted Loops started as a quiet conversation between my hands and the yarn. Each piece I create is an invitation to slow down and appreciate the intricate beauty of the handmade."</p>
+<p>Based in India, Kalyani blends traditional crochet techniques with a modern, vibrant aesthetic. Every loop is intentional, every color is chosen to spark delight.</p>
+</div>
+<div class="pt-4 flex items-center gap-8 md:gap-10">
+<div>
+<span class="block text-2xl md:text-3xl font-serif text-primary">12+</span>
+<span class="text-[10px] uppercase tracking-tighter opacity-70">Years of Craft</span>
+</div>
+<div class="h-10 w-[1px] bg-outline-variant"></div>
+<div>
+<span class="block text-2xl md:text-3xl font-serif text-primary">4k+</span>
+<span class="text-[10px] uppercase tracking-tighter opacity-70">Loops Daily</span>
+</div>
+</div>
+<button class="bg-surface-container-highest px-8 py-4 rounded-lg font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors">Read Her Story</button>
+</div>
+</div>
+</section>
+<!-- Newsletter -->
+<section class="mb-24 px-6 md:px-20">
+<div class="bg-primary rounded-lg p-10 md:p-24 text-center text-on-primary relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+<div class="absolute bottom-0 left-0 w-96 h-96 bg-tertiary/20 organic-shape-2 blur-3xl"></div>
+<div class="relative z-10 max-w-2xl mx-auto space-y-6 md:space-y-8">
+<span class="material-symbols-outlined text-5xl md:text-6xl">width_wide</span>
+<h2 class="font-serif text-4xl md:text-7xl leading-none">Join the Loop</h2>
+<p class="text-lg md:text-xl opacity-90 font-body">Get exclusive access to new collections and limited edition colors.</p>
+<form class="flex flex-col md:flex-row gap-4 mt-8 md:mt-12 bg-white/10 p-2 rounded-lg backdrop-blur-md">
+<input class="flex-grow bg-transparent border-none focus:ring-0 px-6 py-4 text-white placeholder:text-white/60 font-body outline-none" placeholder="Your creative soul's email" type="email"/>
+<button class="bg-white text-primary px-10 py-4 rounded-lg font-bold hover:scale-105 transition-transform">Subscribe</button>
+</form>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-[#d3f8f2] dark:bg-[#002b27] w-full py-12 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-serif text-lg font-bold text-[#00675d]">Krafted Loops Studio</span>
+<p class="font-sans text-xs tracking-tight text-[#153430]/70 dark:text-[#dcfdf8]/70">© 2024 Krafted Loops Studio. Made with love in India.</p>
+</div>
+<div class="flex gap-6 md:gap-8">
+<a class="font-sans text-xs uppercase tracking-widest text-[#153430]/70 dark:text-[#dcfdf8]/70 hover:text-[#a7295a] transition-all" href="#">Instagram</a>
+<a class="font-sans text-xs uppercase tracking-widest text-[#153430]/70 dark:text-[#dcfdf8]/70 hover:text-[#a7295a] transition-all" href="#">Pinterest</a>
+<a class="font-sans text-xs uppercase tracking-widest text-[#153430]/70 dark:text-[#dcfdf8]/70 hover:text-[#a7295a] transition-all" href="#">Facebook</a>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary cursor-pointer hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+</div>
+</footer>
+</body></html>
