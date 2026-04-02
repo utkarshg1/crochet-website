@@ -99,7 +99,7 @@
 	<title>Shop — Krafted Loops Studio</title>
 	<meta
 		name="description"
-		content="Browse our full collection of handmade crochet pieces — bags, home decor, plushies & more. Each piece is made to order with love."
+		content="Browse our full collection of handmade crochet — baby items, forever flowers, purses, keychains, charms, wind spinners & more. Each piece is made to order with love."
 	/>
 </svelte:head>
 

@@ -58,7 +58,7 @@
 			>
 				<div class="sm:col-span-2">
 					<label class="label-field">Title *</label>
-					<input name="title" type="text" required placeholder="Chunky Bunny Amigurumi" class="field" />
+					<input name="title" type="text" required placeholder="Crochet Forever Rose Bouquet" class="field" />
 				</div>
 				<div class="sm:col-span-2">
 					<label class="label-field">Description *</label>
@@ -91,7 +91,7 @@
 				</div>
 				<div>
 					<label class="label-field">Tags (comma-separated)</label>
-					<input name="tags" type="text" placeholder="bunny, amigurumi, gift" class="field" />
+					<input name="tags" type="text" placeholder="flowers, gift, handmade" class="field" />
 				</div>
 				<div>
 					<label class="label-field">Materials</label>

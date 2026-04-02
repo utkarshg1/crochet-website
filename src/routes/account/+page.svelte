@@ -1,22 +1,61 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { formatPrice } from '$lib/types';
-	import type { PageData, ActionData } from './$types';
+	import { createClient } from '$lib/supabase';
+	import type { PageData } from './$types';
 	import type { CartItem } from '$lib/types';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	let emailInput = $state('');
 	let otpInput = $state('');
-	let otpSent = $state((form as Record<string, unknown>)?.otpSent === true);
-	let sentToEmail = $state((form as Record<string, unknown>)?.email as string ?? '');
+	let otpSent = $state(false);
+	let sentToEmail = $state('');
 	let loading = $state(false);
+	let error = $state('');
 
-	$effect(() => {
-		if (!form) return;
-		const f = form as Record<string, unknown>;
-		if (f.otpSent) { otpSent = true; sentToEmail = f.email as string; }
-	});
+	// Create client only in browser (onMount) so cookie storage is available
+	let supabase: ReturnType<typeof createClient>;
+	onMount(() => { supabase = createClient(); });
+
+	async function sendMagicLink() {
+		error = '';
+		const email = emailInput.trim();
+		if (!email || !email.includes('@')) { error = 'Enter a valid email address'; return; }
+
+		loading = true;
+		const { error: err } = await supabase.auth.signInWithOtp({
+			email,
+			options: {
+				shouldCreateUser: true,
+				emailRedirectTo: `${window.location.origin}/auth/callback`
+			}
+		});
+		loading = false;
+
+		if (err) { error = err.message; return; }
+		sentToEmail = email;
+		otpSent = true;
+	}
+
+	async function verifyCode() {
+		error = '';
+		const token = otpInput.trim();
+		if (!token || token.length !== 6) { error = 'Enter the 6-digit code'; return; }
+
+		loading = true;
+		const { error: err } = await supabase.auth.verifyOtp({
+			email: sentToEmail,
+			token,
+			type: 'email'
+		});
+		loading = false;
+
+		if (err) { error = 'Invalid or expired code. Try again.'; return; }
+		await invalidateAll();
+	}
 
 	const statusColors: Record<string, string> = {
 		pending: 'bg-mustard/40 text-tertiary',
@@ -132,95 +171,80 @@
 	<!-- ── LOGGED OUT STATE ─────────────────────────────────────────────────── -->
 	{:else}
 		<div class="mx-auto max-w-md">
-			<!-- Error -->
-			{#if (form as Record<string, unknown>)?.error}
+			{#if error}
 				<div class="mb-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary">
-					{(form as Record<string, unknown>).error}
+					{error}
 				</div>
 			{/if}
 
 			{#if !otpSent}
-				<!-- Sign in form -->
+				<!-- Step 1: Enter email -->
 				<div class="rounded-3xl bg-surface-card p-8 shadow-ambient">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Sign In</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						We'll send a magic code to your email — no password needed.
+						We'll send a sign-in link to your email.
 					</p>
-					<form
-						method="POST"
-						action="?/signIn"
-						use:enhance={() => {
-							loading = true;
-							return async ({ update }) => { await update(); loading = false; };
-						}}
-						class="mt-6 space-y-4"
-					>
+					<div class="mt-6 space-y-4">
 						<div>
-							<label for="sign-email" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Email Address</label>
+							<label for="sign-email" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">
+								Email Address
+							</label>
 							<input
 								id="sign-email"
-								name="email"
 								type="email"
 								bind:value={emailInput}
 								required
 								autocomplete="email"
 								placeholder="you@example.com"
+								onkeydown={(e) => e.key === 'Enter' && sendMagicLink()}
 								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 							/>
 						</div>
 						<button
-							type="submit"
+							onclick={sendMagicLink}
 							disabled={loading}
 							class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
 						>
-							{loading ? 'Sending…' : 'Send Magic Code'}
+							{loading ? 'Sending…' : 'Send Sign-In Link'}
 						</button>
-					</form>
+					</div>
 					<p class="mt-4 text-center font-body text-xs text-on-surface-muted">
 						New here? An account will be created automatically.
 					</p>
 				</div>
 			{:else}
-				<!-- OTP form -->
+				<!-- Step 2: Check email (magic link sent) or enter code -->
 				<div class="rounded-3xl bg-surface-card p-8 shadow-ambient text-center">
 					<div class="text-5xl mb-4" aria-hidden="true">📧</div>
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Check Your Email</h2>
 					<p class="mt-2 font-body text-sm text-on-surface-muted">
-						Code sent to <strong class="text-on-surface">{sentToEmail}</strong>
+						We sent a sign-in link to <strong class="text-on-surface">{sentToEmail}</strong>.<br/>
+						Click the link in the email to sign in.
 					</p>
-					<form
-						method="POST"
-						action="?/verifyOtp"
-						use:enhance={() => {
-							loading = true;
-							return async ({ update }) => { await update(); loading = false; };
-						}}
-						class="mt-6 space-y-4"
-					>
-						<input type="hidden" name="email" value={sentToEmail} />
+					<div class="mt-6">
+						<p class="font-body text-xs text-on-surface-muted mb-3">Or enter the 6-digit code from the email:</p>
 						<input
-							name="token"
 							type="text"
 							bind:value={otpInput}
 							inputmode="numeric"
 							pattern="[0-9]{6}"
 							maxlength="6"
-							required
 							placeholder="000000"
 							autocomplete="one-time-code"
+							onkeydown={(e) => e.key === 'Enter' && verifyCode()}
 							class="mx-auto block w-48 rounded-2xl border border-on-surface/10 bg-surface-high p-4 text-center font-body text-3xl tracking-[0.5em] text-on-surface focus:border-primary/50 focus:outline-none"
 						/>
 						<button
-							type="submit"
+							onclick={verifyCode}
 							disabled={loading}
-							class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
+							class="mt-4 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
 						>
-							{loading ? 'Verifying…' : 'Sign In'}
+							{loading ? 'Verifying…' : 'Verify Code'}
 						</button>
-					</form>
+					</div>
 					<button
-						onclick={() => { otpSent = false; }}
-						class="mt-3 font-body text-sm text-on-surface-muted hover:text-primary"
+						onclick={() => { otpSent = false; error = ''; }}
+						class="mt-4 font-body text-sm text-on-surface-muted hover:text-primary"
 					>
 						← Use a different email
 					</button>

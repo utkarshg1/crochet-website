@@ -10,6 +10,7 @@
 
 	// Current pathname for active link detection
 	const currentPath = $derived($page.url.pathname);
+	const user = $derived($page.data.user);
 
 	const navLinks = [
 		{ label: 'Home', href: '/' },
@@ -180,6 +181,29 @@
 					</svg>
 				</a>
 
+				<!-- Account / Sign In -->
+				<a
+					href="/account"
+					class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150
+						{currentPath.startsWith('/account')
+							? 'bg-primary/10 text-primary'
+							: 'text-on-surface-muted hover:text-on-surface hover:bg-surface-high'}"
+					aria-label={user ? 'My account' : 'Sign in'}
+				>
+					{#if user}
+						<!-- Filled person icon when logged in -->
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+							<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+						</svg>
+					{:else}
+						<!-- Outline person icon when logged out -->
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+					{/if}
+				</a>
+
 				<!-- Cart button with item count badge -->
 				<button
 					onclick={() => (cartOpen = true)}
@@ -287,6 +311,15 @@
 						</li>
 					{/each}
 					<!-- Extra mobile links -->
+					<li>
+						<a
+							href="/account"
+							class="flex items-center px-3 py-3 rounded-xl font-body font-medium text-base transition-colors duration-150
+								{currentPath.startsWith('/account') ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-high hover:text-primary'}"
+						>
+							{user ? 'My Account' : 'Sign In'}
+						</a>
+					</li>
 					<li>
 						<a
 							href="/wishlist"

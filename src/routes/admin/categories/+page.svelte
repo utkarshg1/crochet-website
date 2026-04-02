@@ -39,7 +39,7 @@
 			}} class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				<div>
 					<label class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Name *</label>
-					<input name="name" type="text" required placeholder="Amigurumi" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
+					<input name="name" type="text" required placeholder="Forever Flowers" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
 				</div>
 				<div>
 					<label class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Display Order</label>

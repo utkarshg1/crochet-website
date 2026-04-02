@@ -16,11 +16,14 @@
 	// Map category slug → gradient classes for the placeholder colour block.
 	// These are static design decisions — no reactivity needed, plain const.
 	const categoryGradients: Record<string, string> = {
-		amigurumi: 'from-blush to-primary-container/50',
-		'home-decor': 'from-sage/40 to-secondary-container',
-		'baby-collection': 'from-mustard/40 to-tertiary-container/50',
-		accessories: 'from-coral/40 to-primary-container/30',
-		seasonal: 'from-secondary-container to-sage/30'
+		'baby-items': 'from-mustard/40 to-tertiary-container/50',
+		'forever-flowers': 'from-blush to-primary-container/50',
+		'crochet-purses': 'from-coral/40 to-primary-container/30',
+		'phone-earphone-cases': 'from-sage/40 to-secondary-container',
+		'wind-spinners': 'from-secondary-container to-sage/30',
+		keychains: 'from-blush/60 to-mustard/30',
+		charms: 'from-primary-container/40 to-blush/50',
+		'crochet-gifts': 'from-tertiary-container/50 to-secondary-container'
 	};
 
 	// Default gradient for any category without an explicit mapping
@@ -51,7 +54,7 @@
 
 <svelte:head>
 	<title>Krafted Loops Studio — Handmade Crochet from India</title>
-	<meta name="description" content="Every piece from Krafted Loops Studio is lovingly handmade by Kalyani Gaikwad. Shop amigurumi, home décor, baby collections, and accessories — all crocheted with care." />
+	<meta name="description" content="Every piece from Krafted Loops Studio is lovingly handmade by Kalyani Gaikwad. Shop baby crochet, forever flowers, purses, keychains, charms & more — all crocheted with care." />
 	<meta property="og:title" content="Krafted Loops Studio — Handmade Crochet from India" />
 	<meta property="og:description" content="Discover beautifully handcrafted crochet products by Kalyani Gaikwad. Each piece is made with love in India." />
 	<meta property="og:type" content="website" />
@@ -218,7 +221,7 @@
 
 				<div class="mt-2 px-1">
 					<p class="font-display text-sm text-on-surface font-semibold leading-tight">
-						Amigurumi Bear
+						Forever Flower Bouquet
 					</p>
 					<p class="font-body text-xs text-on-surface-muted mt-0.5">₹1,200</p>
 				</div>
