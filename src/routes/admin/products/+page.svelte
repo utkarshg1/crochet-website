@@ -100,6 +100,22 @@
 		editImageState[productId] = state;
 	}
 
+	function setPrimaryImage(productId: string, url: string) {
+		const state = getEditState(productId);
+		const rest = state.existingImages.filter((u) => u !== url);
+		state.existingImages = [url, ...rest];
+		editImageState[productId] = state;
+	}
+
+	// ── Image URL extractor ────────────────────────────────────────────────────
+	// product.images[0] can be a plain URL string OR a {url, alt} object
+	function getImageUrl(img: unknown): string {
+		if (!img) return '';
+		if (typeof img === 'string') return img;
+		if (typeof img === 'object' && img !== null && 'url' in img) return (img as { url: string }).url;
+		return '';
+	}
+
 	// ── Upload helper ──────────────────────────────────────────────────────────
 	async function uploadImages(files: FileList | null): Promise<string[]> {
 		if (!files || files.length === 0) return [];
@@ -316,7 +332,7 @@
 								<!-- Thumbnail from first image if present -->
 								{#if product.images?.[0]}
 									<img
-										src={product.images[0]}
+										src={getImageUrl(product.images[0])}
 										alt={product.title}
 										class="h-10 w-10 flex-none rounded-lg object-cover ring-1 ring-on-surface/10"
 									/>
@@ -488,13 +504,14 @@
 										<label class="label-field">Current Images</label>
 										{#if es.existingImages.length > 0}
 											<div class="flex flex-wrap gap-2">
-												{#each es.existingImages as url}
+												{#each es.existingImages as url, idx}
 													<div class="group relative">
 														<img
 															src={url}
 															alt="Product image"
 															class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
 														/>
+														<!-- Remove button -->
 														<button
 															type="button"
 															onclick={() => removeExistingImage(product.id, url)}
@@ -503,6 +520,21 @@
 														>
 															×
 														</button>
+														<!-- Primary indicator (index 0) or Set Primary button (index > 0) -->
+														{#if idx === 0}
+															<span class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary/90 px-2 py-0.5 font-body text-[10px] text-white shadow">
+																Primary
+															</span>
+														{:else}
+															<button
+																type="button"
+																onclick={() => setPrimaryImage(product.id, url)}
+																class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-secondary px-2 py-0.5 font-body text-[10px] text-white opacity-0 group-hover:opacity-100 shadow transition-opacity"
+																aria-label="Set as primary image"
+															>
+																★ Set Primary
+															</button>
+														{/if}
 													</div>
 												{/each}
 											</div>

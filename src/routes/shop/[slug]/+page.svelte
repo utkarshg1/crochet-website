@@ -38,9 +38,11 @@
 	const isOutOfStock = $derived(product.stock === 0);
 	// Normalize: admin stores plain URL strings; older data may be {url,alt} objects
 	const normImages = $derived<ProductImage[]>(
-		(product.images ?? []).map((img: unknown) =>
-			typeof img === 'string' ? { url: img, alt: product.title } : (img as ProductImage)
-		)
+		(product.images ?? [])
+			.map((img: unknown) =>
+				typeof img === 'string' ? { url: img, alt: product.title } : (img as ProductImage)
+			)
+			.filter((img) => Boolean(img.url))
 	);
 	const hasImages = $derived(normImages.length > 0);
 	const activeImage = $derived(hasImages ? normImages[activeImageIndex] : null);
