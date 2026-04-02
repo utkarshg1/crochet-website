@@ -36,8 +36,14 @@
 	);
 	const isLowStock = $derived(product.stock > 0 && product.stock <= 5);
 	const isOutOfStock = $derived(product.stock === 0);
-	const hasImages = $derived(product.images && product.images.length > 0);
-	const activeImage = $derived(hasImages ? product.images[activeImageIndex] : null);
+	// Normalize: admin stores plain URL strings; older data may be {url,alt} objects
+	const normImages = $derived<ProductImage[]>(
+		(product.images ?? []).map((img: unknown) =>
+			typeof img === 'string' ? { url: img, alt: product.title } : (img as ProductImage)
+		)
+	);
+	const hasImages = $derived(normImages.length > 0);
+	const activeImage = $derived(hasImages ? normImages[activeImageIndex] : null);
 
 	// Discount percentage — shown next to strikethrough price when on sale
 	const discountPercent = $derived(
@@ -154,7 +160,7 @@
 	<meta property="og:title" content="{product.title} — Krafted Loops Studio" />
 	<meta property="og:description" content={product.description.slice(0, 160)} />
 	{#if hasImages}
-		<meta property="og:image" content={product.images[0].url} />
+		<meta property="og:image" content={normImages[0].url} />
 	{/if}
 </svelte:head>
 
@@ -223,7 +229,7 @@
 			<!-- Thumbnail strip — only rendered when there are multiple images -->
 			{#if hasImages && product.images.length > 1}
 				<div class="flex gap-3 overflow-x-auto pb-1" role="list" aria-label="Product images">
-					{#each product.images as image, i (image.url)}
+					{#each normImages as image, i (image.url)}
 						<button
 							role="listitem"
 							onclick={() => (activeImageIndex = i)}

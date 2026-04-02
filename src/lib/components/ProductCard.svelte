@@ -12,7 +12,15 @@
 	let { product }: Props = $props();
 
 	// Derived helpers — keep template clean
-	const primaryImage = $derived(product.images[0]);
+	// Normalize: admin stores plain URL strings; older data may be {url,alt} objects
+	const rawImage = $derived(product.images?.[0]);
+	const primaryImage = $derived(
+		rawImage
+			? typeof rawImage === 'string'
+				? { url: rawImage, alt: product.title }
+				: rawImage
+			: null
+	);
 	const isSale = $derived(
 		product.compare_at_price_paise !== null && product.compare_at_price_paise > product.price_paise
 	);
