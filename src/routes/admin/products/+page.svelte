@@ -1,14 +1,58 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { formatPrice } from '$lib/types';
+	import { createClient } from '$lib/supabase';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	// ── Supabase browser client (must be created client-side) ──────────────────
+	let supabase: ReturnType<typeof createClient>;
+	onMount(() => {
+		supabase = createClient();
+	});
+
+	// ── UI state ───────────────────────────────────────────────────────────────
 	let showForm = $state(false);
 	let loading = $state(false);
 	let search = $state('');
+	let editingId = $state<string | null>(null);
 
+	// ── New-product form image state ───────────────────────────────────────────
+	let newFiles = $state<FileList | null>(null);
+	let newPreviews = $state<string[]>([]);
+
+	// ── Per-product edit image state ───────────────────────────────────────────
+	// Keyed by product.id; each entry holds selected files and a copy of
+	// existing images so the user can remove them before saving.
+	type EditImageState = {
+		files: FileList | null;
+		previews: string[];
+		existingImages: string[];
+	};
+	let editImageState = $state<Record<string, EditImageState>>({});
+
+	function getEditState(productId: string): EditImageState {
+		if (!editImageState[productId]) {
+			editImageState[productId] = { files: null, previews: [], existingImages: [] };
+		}
+		return editImageState[productId];
+	}
+
+	// Initialise edit state with the product's current images when expanding
+	function openEdit(productId: string, existingImages: string[] | null) {
+		editingId = editingId === productId ? null : productId;
+		if (editingId === productId) {
+			editImageState[productId] = {
+				files: null,
+				previews: [],
+				existingImages: existingImages ?? []
+			};
+		}
+	}
+
+	// ── Derived ────────────────────────────────────────────────────────────────
 	const filtered = $derived(
 		data.products.filter(
 			(p) =>
@@ -18,9 +62,60 @@
 		)
 	);
 
+	// ── Reset state after successful actions ──────────────────────────────────
 	$effect(() => {
-		if ((form as Record<string, unknown>)?.success) showForm = false;
+		if ((form as Record<string, unknown>)?.success) {
+			showForm = false;
+			newFiles = null;
+			newPreviews = [];
+		}
+		if ((form as Record<string, unknown>)?.updated) {
+			editingId = null;
+		}
 	});
+
+	// ── Image preview helpers ──────────────────────────────────────────────────
+	function buildPreviews(files: FileList | null): string[] {
+		if (!files) return [];
+		return Array.from(files).map((f) => URL.createObjectURL(f));
+	}
+
+	function onNewFilesChange(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		newFiles = input.files;
+		newPreviews = buildPreviews(newFiles);
+	}
+
+	function onEditFilesChange(e: Event, productId: string) {
+		const input = e.currentTarget as HTMLInputElement;
+		const state = getEditState(productId);
+		state.files = input.files;
+		state.previews = buildPreviews(state.files);
+		editImageState[productId] = state;
+	}
+
+	function removeExistingImage(productId: string, url: string) {
+		const state = getEditState(productId);
+		state.existingImages = state.existingImages.filter((u) => u !== url);
+		editImageState[productId] = state;
+	}
+
+	// ── Upload helper ──────────────────────────────────────────────────────────
+	async function uploadImages(files: FileList | null): Promise<string[]> {
+		if (!files || files.length === 0) return [];
+		const urls: string[] = [];
+		for (const file of Array.from(files)) {
+			const ext = file.name.split('.').pop();
+			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+			const { error } = await supabase.storage.from('product-images').upload(path, file);
+			if (!error) {
+				urls.push(
+					`https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
+				);
+			}
+		}
+		return urls;
+	}
 </script>
 
 <svelte:head><title>Products — Admin</title></svelte:head>
@@ -43,19 +138,47 @@
 		</div>
 	{/if}
 
-	<!-- New product form -->
+	<!-- ── New product form ────────────────────────────────────────────────── -->
 	{#if showForm}
 		<div class="mb-8 rounded-3xl bg-surface-card p-6 shadow-ambient">
 			<h2 class="mb-5 font-display text-xl font-semibold text-on-surface">New Product</h2>
 			<form
 				method="POST"
 				action="?/create"
-				use:enhance={() => {
+				use:enhance={({ formElement, cancel }) => {
 					loading = true;
-					return async ({ update }) => { await update(); loading = false; };
+					// Upload images first, then inject URLs as a hidden field and submit
+					cancel(); // prevent the default immediate submit
+					(async () => {
+						const uploaded = await uploadImages(newFiles);
+						const hiddenImages = formElement.querySelector<HTMLInputElement>(
+							'input[name="images"]'
+						)!;
+						hiddenImages.value = JSON.stringify(uploaded);
+						// Re-submit with SvelteKit's enhance by triggering a programmatic submit
+						// We bypass cancel by directly calling requestSubmit on a cloned approach —
+						// instead, we swap to a native fetch-based form submission here.
+						const fd = new FormData(formElement);
+						const res = await fetch(formElement.action, { method: 'POST', body: fd });
+						loading = false;
+						if (res.ok) {
+							showForm = false;
+							newFiles = null;
+							newPreviews = [];
+							// Reload to refresh the product list
+							window.location.reload();
+						}
+					})();
+					return async ({ update }) => {
+						await update();
+						loading = false;
+					};
 				}}
 				class="grid grid-cols-1 gap-4 sm:grid-cols-2"
 			>
+				<!-- Hidden field that will be populated with image URLs before submit -->
+				<input type="hidden" name="images" value="[]" />
+
 				<div class="sm:col-span-2">
 					<label class="label-field">Title *</label>
 					<input name="title" type="text" required placeholder="Crochet Forever Rose Bouquet" class="field" />
@@ -105,12 +228,46 @@
 					<label class="label-field">Care Instructions</label>
 					<input name="care_instructions" type="text" placeholder="Hand wash cold, lay flat to dry" class="field" />
 				</div>
+
+				<!-- Image upload -->
+				<div class="sm:col-span-2">
+					<label class="label-field">Product Images</label>
+					<label
+						class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface-low"
+					>
+						<span class="font-body text-sm text-on-surface-muted">
+							{newFiles && newFiles.length > 0
+								? `${newFiles.length} file${newFiles.length > 1 ? 's' : ''} selected`
+								: 'Click to select images…'}
+						</span>
+						<input
+							type="file"
+							accept="image/*"
+							multiple
+							class="sr-only"
+							onchange={onNewFilesChange}
+						/>
+					</label>
+					<!-- Previews -->
+					{#if newPreviews.length > 0}
+						<div class="mt-3 flex flex-wrap gap-2">
+							{#each newPreviews as src}
+								<img
+									{src}
+									alt="Preview"
+									class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
+								/>
+							{/each}
+						</div>
+					{/if}
+				</div>
+
 				<div class="flex items-center gap-6 sm:col-span-2">
-					<label class="flex items-center gap-2 font-body text-sm text-on-surface cursor-pointer">
+					<label class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface">
 						<input name="is_featured" type="checkbox" class="rounded" />
 						Featured product
 					</label>
-					<label class="flex items-center gap-2 font-body text-sm text-on-surface cursor-pointer">
+					<label class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface">
 						<input name="is_new" type="checkbox" class="rounded" />
 						Mark as New
 					</label>
@@ -121,7 +278,7 @@
 						disabled={loading}
 						class="rounded-full bg-gradient-to-r from-primary to-primary-dim px-8 py-3 font-body font-semibold text-white shadow-ambient hover:brightness-110 disabled:opacity-60 active:scale-95"
 					>
-						{loading ? 'Saving…' : 'Create Product'}
+						{loading ? 'Uploading & Saving…' : 'Create Product'}
 					</button>
 				</div>
 			</form>
@@ -138,8 +295,8 @@
 		/>
 	</div>
 
-	<!-- Products table -->
-	<div class="rounded-3xl bg-surface-card shadow-ambient overflow-hidden">
+	<!-- ── Products table ─────────────────────────────────────────────────── -->
+	<div class="overflow-hidden rounded-3xl bg-surface-card shadow-ambient">
 		<table class="w-full text-sm">
 			<thead class="bg-surface-low">
 				<tr>
@@ -153,11 +310,25 @@
 			</thead>
 			<tbody class="divide-y divide-surface-low">
 				{#each filtered as product}
-					<tr class="hover:bg-surface transition-colors">
+					<tr class="transition-colors hover:bg-surface">
 						<td class="px-5 py-4">
-							<div>
-								<p class="font-body font-medium text-on-surface">{product.title}</p>
-								<p class="font-body text-xs text-on-surface-muted mt-0.5">/{product.slug}</p>
+							<div class="flex items-center gap-3">
+								<!-- Thumbnail from first image if present -->
+								{#if product.images?.[0]}
+									<img
+										src={product.images[0]}
+										alt={product.title}
+										class="h-10 w-10 flex-none rounded-lg object-cover ring-1 ring-on-surface/10"
+									/>
+								{:else}
+									<div class="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-surface-low font-body text-lg text-on-surface-muted">
+										📷
+									</div>
+								{/if}
+								<div>
+									<p class="font-body font-medium text-on-surface">{product.title}</p>
+									<p class="mt-0.5 font-body text-xs text-on-surface-muted">/{product.slug}</p>
+								</div>
 							</div>
 						</td>
 						<td class="px-5 py-4 font-body text-xs text-on-surface-muted">
@@ -179,13 +350,13 @@
 									min="0"
 									class="w-16 rounded-xl border border-on-surface/10 bg-surface-high px-2 py-1 text-center font-body text-sm"
 								/>
-								<button type="submit" class="rounded-lg bg-secondary-container px-2 py-1 font-body text-xs text-secondary hover:bg-secondary hover:text-white transition-colors">
+								<button type="submit" class="rounded-lg bg-secondary-container px-2 py-1 font-body text-xs text-secondary transition-colors hover:bg-secondary hover:text-white">
 									Save
 								</button>
 							</form>
 						</td>
 						<td class="px-5 py-4 text-center">
-							<div class="flex justify-center gap-1 flex-wrap">
+							<div class="flex flex-wrap justify-center gap-1">
 								{#if product.is_featured}
 									<span class="chip bg-primary/10 px-2 py-0.5 font-body text-xs text-primary">Featured</span>
 								{/if}
@@ -204,12 +375,18 @@
 									target="_blank"
 									class="rounded-xl bg-surface-high px-3 py-1.5 font-body text-xs text-on-surface hover:bg-surface-low"
 								>View</a>
+								<button
+									onclick={() => openEdit(product.id, product.images ?? [])}
+									class="rounded-xl bg-secondary-container px-3 py-1.5 font-body text-xs text-secondary transition-colors hover:bg-secondary hover:text-white"
+								>
+									{editingId === product.id ? 'Cancel' : 'Edit'}
+								</button>
 								<form method="POST" action="?/delete" use:enhance class="inline">
 									<input type="hidden" name="id" value={product.id} />
 									<button
 										type="submit"
 										onclick={(e) => { if (!confirm('Delete this product?')) e.preventDefault(); }}
-										class="rounded-xl bg-primary/10 px-3 py-1.5 font-body text-xs text-primary hover:bg-primary hover:text-white transition-colors"
+										class="rounded-xl bg-primary/10 px-3 py-1.5 font-body text-xs text-primary transition-colors hover:bg-primary hover:text-white"
 									>
 										Delete
 									</button>
@@ -217,6 +394,176 @@
 							</div>
 						</td>
 					</tr>
+
+					<!-- ── Inline edit row ─────────────────────────────────────────────── -->
+					{#if editingId === product.id}
+						{@const es = getEditState(product.id)}
+						<tr class="bg-surface-low">
+							<td colspan="6" class="px-5 py-5">
+								<form
+									method="POST"
+									action="?/update"
+									use:enhance={({ formElement, cancel }) => {
+										loading = true;
+										cancel();
+										(async () => {
+											const state = getEditState(product.id);
+											const newUrls = await uploadImages(state.files);
+											const allImages = [...state.existingImages, ...newUrls];
+											const hiddenImages = formElement.querySelector<HTMLInputElement>(
+												'input[name="images"]'
+											)!;
+											hiddenImages.value = JSON.stringify(allImages);
+											const fd = new FormData(formElement);
+											const res = await fetch(formElement.action, { method: 'POST', body: fd });
+											loading = false;
+											if (res.ok) {
+												editingId = null;
+												window.location.reload();
+											}
+										})();
+										return async ({ update }) => {
+											await update();
+											loading = false;
+										};
+									}}
+									class="grid grid-cols-1 gap-3 sm:grid-cols-3"
+								>
+									<input type="hidden" name="id" value={product.id} />
+									<!-- Populated just before submit -->
+									<input type="hidden" name="images" value={JSON.stringify(product.images ?? [])} />
+
+									<div class="sm:col-span-3">
+										<label class="label-field">Title *</label>
+										<input name="title" type="text" required value={product.title} class="field" />
+									</div>
+									<div class="sm:col-span-3">
+										<label class="label-field">Description *</label>
+										<textarea name="description" required rows="2" class="field resize-none">{product.description}</textarea>
+									</div>
+									<div>
+										<label class="label-field">Price (₹) *</label>
+										<input name="price" type="number" step="0.01" min="0" required value={product.price_paise / 100} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Compare Price (₹)</label>
+										<input name="compare_price" type="number" step="0.01" min="0" value={product.compare_at_price_paise ? product.compare_at_price_paise / 100 : ''} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Stock *</label>
+										<input name="stock" type="number" min="0" required value={product.stock} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Category</label>
+										<select name="category_id" class="field">
+											<option value="">— None —</option>
+											{#each data.categories as cat}
+												<option value={cat.id} selected={product.category_id === cat.id}>{cat.name}</option>
+											{/each}
+										</select>
+									</div>
+									<div>
+										<label class="label-field">Colours</label>
+										<input name="colors" type="text" value={product.colors?.join(', ') ?? ''} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Tags</label>
+										<input name="tags" type="text" value={product.tags?.join(', ') ?? ''} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Materials</label>
+										<input name="materials" type="text" value={product.materials ?? ''} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Dimensions</label>
+										<input name="dimensions" type="text" value={product.dimensions ?? ''} class="field" />
+									</div>
+									<div>
+										<label class="label-field">Care Instructions</label>
+										<input name="care_instructions" type="text" value={product.care_instructions ?? ''} class="field" />
+									</div>
+
+									<!-- Existing images with remove buttons -->
+									<div class="sm:col-span-3">
+										<label class="label-field">Current Images</label>
+										{#if es.existingImages.length > 0}
+											<div class="flex flex-wrap gap-2">
+												{#each es.existingImages as url}
+													<div class="group relative">
+														<img
+															src={url}
+															alt="Product image"
+															class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
+														/>
+														<button
+															type="button"
+															onclick={() => removeExistingImage(product.id, url)}
+															class="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary font-body text-xs text-white opacity-0 shadow transition-opacity group-hover:opacity-100"
+															aria-label="Remove image"
+														>
+															×
+														</button>
+													</div>
+												{/each}
+											</div>
+										{:else}
+											<p class="font-body text-xs text-on-surface-muted">No images yet.</p>
+										{/if}
+									</div>
+
+									<!-- Add new images -->
+									<div class="sm:col-span-3">
+										<label class="label-field">Add More Images</label>
+										<label
+											class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface"
+										>
+											<span class="font-body text-sm text-on-surface-muted">
+												{es.files && es.files.length > 0
+													? `${es.files.length} file${es.files.length > 1 ? 's' : ''} selected`
+													: 'Click to add images…'}
+											</span>
+											<input
+												type="file"
+												accept="image/*"
+												multiple
+												class="sr-only"
+												onchange={(e) => onEditFilesChange(e, product.id)}
+											/>
+										</label>
+										{#if es.previews.length > 0}
+											<div class="mt-3 flex flex-wrap gap-2">
+												{#each es.previews as src}
+													<img
+														{src}
+														alt="New image preview"
+														class="h-20 w-20 rounded-xl object-cover ring-1 ring-primary/30"
+													/>
+												{/each}
+											</div>
+										{/if}
+									</div>
+
+									<div class="flex items-center gap-6 sm:col-span-3">
+										<label class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface">
+											<input name="is_featured" type="checkbox" checked={product.is_featured} />
+											Featured
+										</label>
+										<label class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface">
+											<input name="is_new" type="checkbox" checked={product.is_new} />
+											New
+										</label>
+										<button
+											type="submit"
+											disabled={loading}
+											class="ml-auto rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2 font-body text-sm font-semibold text-white shadow-ambient hover:brightness-110 disabled:opacity-60"
+										>
+											{loading ? 'Uploading & Saving…' : 'Save Changes'}
+										</button>
+									</div>
+								</form>
+							</td>
+						</tr>
+					{/if}
 				{:else}
 					<tr>
 						<td colspan="6" class="px-5 py-10 text-center font-body text-sm text-on-surface-muted">

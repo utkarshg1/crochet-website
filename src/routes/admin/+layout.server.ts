@@ -2,6 +2,11 @@ import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabase }, url }) => {
+	// Let the login page load without auth — it handles itself
+	if (url.pathname === '/admin/login') {
+		return { session: null, user: null };
+	}
+
 	const { session, user } = await safeGetSession();
 
 	if (!user) {

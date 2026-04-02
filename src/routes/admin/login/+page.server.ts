@@ -1,10 +1,9 @@
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
+import { redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase } }) => {
 	const { user } = await safeGetSession();
 	if (user) {
-		// Check if already admin — redirect straight to dashboard
 		const { data: profile } = await supabase
 			.from('profiles')
 			.select('is_admin')
@@ -16,35 +15,34 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals: { supabase } }) => {
-		const data = await request.formData();
-		const email = (data.get('email') as string)?.trim();
-		const password = data.get('password') as string;
+	sendOtp: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '').trim();
 
-		if (!email || !password) {
-			return fail(400, { error: 'Email and password required' });
-		}
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email', step: 'email' });
 
-		const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+		const { error } = await supabase.auth.signInWithOtp({
 			email,
-			password
+			options: { shouldCreateUser: true }
 		});
 
-		if (signInError || !authData.user) {
-			return fail(401, { error: 'Invalid email or password' });
-		}
+		if (error) return fail(400, { error: error.message, step: 'email' });
 
-		// Verify is_admin — even if credentials are correct, reject non-admins
-		const { data: profile } = await supabase
-			.from('profiles')
-			.select('is_admin')
-			.eq('id', authData.user.id)
-			.single();
+		return { sent: true, email };
+	},
 
-		if (!profile?.is_admin) {
-			await supabase.auth.signOut();
-			return fail(403, { error: 'Access denied' });
-		}
+	verifyOtp: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '').trim();
+		const token = String(formData.get('token') ?? '').trim();
+
+		const { error } = await supabase.auth.verifyOtp({
+			email,
+			token,
+			type: 'magiclink'
+		});
+
+		if (error) return fail(400, { error: `${error.message} (${error.status})`, step: 'otp', email });
 
 		throw redirect(303, '/admin');
 	}
