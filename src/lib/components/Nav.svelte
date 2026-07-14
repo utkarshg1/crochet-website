@@ -97,65 +97,116 @@
 				{/each}
 			</ul>
 
-			<!-- ── Right action icons ─────────────────────────────────────────── -->
+			<!-- ── Right action icons (desktop: labelled, mobile: compact) ────── -->
 			<div class="flex items-center gap-1">
+				<!-- ── Desktop: icon + label buttons ──────────────────────────── -->
 				<!-- Search -->
 				<a
 					href="/shop?q="
-					class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
+					class="hidden md:flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg
+						   text-on-surface-muted hover:text-on-surface hover:bg-surface-high
+						   transition-all duration-150"
 					aria-label="Search products"
 				>
-					<svg
-						viewBox="0 0 24 24"
-						class="w-5 h-5"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="11" cy="11" r="8" />
 						<line x1="21" y1="21" x2="16.65" y2="16.65" />
 					</svg>
+					<span class="text-[11px] font-body font-medium leading-none">Search</span>
 				</a>
 
 				<!-- Wishlist -->
 				<a
 					href="/wishlist"
-					class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
+					class="hidden md:flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg
+						   text-on-surface-muted hover:text-on-surface hover:bg-surface-high
+						   transition-all duration-150"
 					aria-label="Wishlist"
 				>
-					<svg
-						viewBox="0 0 24 24"
-						class="w-5 h-5"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path
-							d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
-						/>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+					</svg>
+					<span class="text-[11px] font-body font-medium leading-none">Wishlist</span>
+				</a>
+
+				<!-- Account / Login -->
+				<a
+					href="/account"
+					class="hidden md:flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all duration-150
+						{user
+							? 'text-on-surface-muted hover:text-on-surface hover:bg-surface-high'
+							: 'bg-gradient-to-r from-primary to-primary-dim text-on-primary shadow-[0_2px_12px_0_rgba(167,41,90,0.3)] hover:shadow-[0_4px_16px_0_rgba(167,41,90,0.4)] hover:-translate-y-0.5'}"
+					aria-label={user ? 'My account' : 'Sign in'}
+				>
+					{#if user}
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+							<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+						</svg>
+					{:else}
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+					{/if}
+					<span class="text-[11px] font-body font-medium leading-none">{user ? 'Account' : 'Login'}</span>
+				</a>
+
+				<!-- Bag (cart) -->
+				<button
+					onclick={() => (cartOpen = true)}
+					class="hidden md:flex relative flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg
+						   text-on-surface-muted hover:text-on-surface hover:bg-surface-high
+						   transition-all duration-150"
+					aria-label="Open bag — {cart.count} {cart.count === 1 ? 'item' : 'items'}"
+				>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+						<line x1="3" y1="6" x2="21" y2="6" />
+						<path d="M16 10a4 4 0 01-8 0" />
+					</svg>
+					<span class="text-[11px] font-body font-medium leading-none">Bag</span>
+					{#if cart.count > 0}
+						<span class="absolute top-0 right-1 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 pointer-events-none" aria-hidden="true">
+							{cart.count > 99 ? '99+' : cart.count}
+						</span>
+					{/if}
+				</button>
+
+				<!-- ── Mobile: compact icons (no labels) ──────────────────────── -->
+				<a
+					href="/shop?q="
+					class="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
+					aria-label="Search products"
+				>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="11" cy="11" r="8" />
+						<line x1="21" y1="21" x2="16.65" y2="16.65" />
 					</svg>
 				</a>
 
-				<!-- Account / Sign In -->
+				<a
+					href="/wishlist"
+					class="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
+					aria-label="Wishlist"
+				>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+					</svg>
+				</a>
+
 				<a
 					href="/account"
-					class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150
+					class="md:hidden w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150
 						{currentPath.startsWith('/account')
 							? 'bg-primary/10 text-primary'
 							: 'text-on-surface-muted hover:text-on-surface hover:bg-surface-high'}"
 					aria-label={user ? 'My account' : 'Sign in'}
 				>
 					{#if user}
-						<!-- Filled person icon when logged in -->
-						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
 							<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
 						</svg>
 					{:else}
-						<!-- Outline person icon when logged out -->
 						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
 							<circle cx="12" cy="7" r="4"/>
@@ -163,48 +214,24 @@
 					{/if}
 				</a>
 
-				<!-- Cart button with item count badge -->
 				<button
 					onclick={() => (cartOpen = true)}
-					class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
+					class="md:hidden relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150"
 					aria-label="Open bag — {cart.count} {cart.count === 1 ? 'item' : 'items'}"
 				>
-					<svg
-						viewBox="0 0 24 24"
-						class="w-5 h-5"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
+					<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
 						<line x1="3" y1="6" x2="21" y2="6" />
 						<path d="M16 10a4 4 0 01-8 0" />
 					</svg>
-
-					<!--
-            Count badge: only visible when there are items.
-            Positioned top-right of the icon button, small primary circle.
-            Using aria-hidden because the aria-label on the button already
-            announces the count to screen readers.
-          -->
 					{#if cart.count > 0}
-						<span
-							class="
-                absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px]
-                bg-primary text-white text-[10px] font-bold
-                rounded-full flex items-center justify-center px-1
-                pointer-events-none
-              "
-							aria-hidden="true"
-						>
+						<span class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 pointer-events-none" aria-hidden="true">
 							{cart.count > 99 ? '99+' : cart.count}
 						</span>
 					{/if}
 				</button>
 
-				<!-- Mobile hamburger — only visible below md breakpoint -->
+				<!-- Mobile hamburger -->
 				<button
 					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
 					class="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-muted hover:text-on-surface hover:bg-surface-high transition-all duration-150 ml-1"
@@ -212,26 +239,12 @@
 					aria-expanded={mobileMenuOpen}
 				>
 					{#if mobileMenuOpen}
-						<svg
-							viewBox="0 0 24 24"
-							class="w-5 h-5"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-						>
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
 							<line x1="18" y1="6" x2="6" y2="18" />
 							<line x1="6" y1="6" x2="18" y2="18" />
 						</svg>
 					{:else}
-						<svg
-							viewBox="0 0 24 24"
-							class="w-5 h-5"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-						>
+						<svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
 							<line x1="3" y1="6" x2="21" y2="6" />
 							<line x1="3" y1="12" x2="21" y2="12" />
 							<line x1="3" y1="18" x2="21" y2="18" />

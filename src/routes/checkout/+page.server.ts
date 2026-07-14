@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession } }) => {
 
 export const actions: Actions = {
 	// ── Step 1: Send OTP to email ───────────────────────────────────────────
-	sendOtp: async ({ request, locals: { supabase } }) => {
+	sendOtp: async ({ request, locals: { supabase }, url }) => {
 		const data = await request.formData();
 		const email = (data.get('email') as string)?.trim();
 
@@ -20,7 +20,8 @@ export const actions: Actions = {
 			email,
 			options: {
 				shouldCreateUser: true,
-				data: { full_name: data.get('full_name') as string }
+				data: { full_name: data.get('full_name') as string },
+				emailRedirectTo: `${url.origin}/auth/callback`
 			}
 		});
 

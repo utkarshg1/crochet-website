@@ -80,6 +80,14 @@ export interface Order {
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
+export interface WishlistItem {
+	id: string;
+	user_id: string;
+	product_id: string;
+	created_at: string;
+	product?: Product;
+}
+
 export interface Discount {
 	id: string;
 	code: string;

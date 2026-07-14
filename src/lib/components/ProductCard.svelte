@@ -2,14 +2,17 @@
 	import type { Product } from '$lib/types';
 	import { formatPrice } from '$lib/types';
 	import { cart } from '$lib/cart.svelte';
+	import { createClient } from '$lib/supabase';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		product: Product;
+		wishlisted?: boolean;
+		onToggleWishlist?: (productId: string, wishlisted: boolean) => void;
 	}
 
-	let { product }: Props = $props();
+	let { product, wishlisted = false, onToggleWishlist }: Props = $props();
 
 	// Derived helpers — keep template clean
 	// Normalize: admin stores plain URL strings; older data may be {url,alt} objects
@@ -28,6 +31,28 @@
 	const isOutOfStock = $derived(product.stock === 0);
 
 	let adding = $state(false);
+	let togglingWishlist = $state(false);
+
+	const supabase = createClient();
+
+	async function handleToggleWishlist() {
+		if (togglingWishlist) return;
+		togglingWishlist = true;
+
+		try {
+			if (wishlisted) {
+				await supabase.from('wishlists').delete().eq('product_id', product.id);
+				onToggleWishlist?.(product.id, false);
+			} else {
+				await supabase.from('wishlists').insert({ product_id: product.id });
+				onToggleWishlist?.(product.id, true);
+			}
+		} catch {
+			// silently fail — wishlist is non-critical
+		} finally {
+			togglingWishlist = false;
+		}
+	}
 
 	async function handleAddToCart() {
 		if (isOutOfStock || adding) return;
@@ -101,6 +126,21 @@
 				<Badge variant="low-stock">Sold out</Badge>
 			{/if}
 		</div>
+
+		<!-- Wishlist heart button — top-right -->
+		<button
+			onclick={handleToggleWishlist}
+			disabled={togglingWishlist}
+			class="absolute top-3 right-3 w-9 h-9 rounded-full bg-surface/80 backdrop-blur-sm
+				   flex items-center justify-center
+				   hover:bg-surface transition-colors duration-200
+				   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+			aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+		>
+			<svg class="w-5 h-5 transition-colors duration-200 {wishlisted ? 'text-primary fill-primary' : 'text-on-surface-muted'}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+			</svg>
+		</button>
 	</a>
 
 	<!-- Card body -->

@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import type { Product, Category } from '$lib/types';
 
-export const load: PageServerLoad = async ({ locals: { supabase }, url }) => {
+export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession }, url }) => {
 	const category = url.searchParams.get('category');
 	const sort = url.searchParams.get('sort') ?? 'newest';
 	const q = url.searchParams.get('q') ?? '';
@@ -38,14 +38,22 @@ export const load: PageServerLoad = async ({ locals: { supabase }, url }) => {
 			query = query.order('created_at', { ascending: false });
 	}
 
-	const [{ data: products }, { data: categories }] = await Promise.all([
+	const { user } = await safeGetSession();
+
+	const [{ data: products }, { data: categories }, { data: wishlistData }] = await Promise.all([
 		query,
-		supabase.from('categories').select('*').order('display_order')
+		supabase.from('categories').select('*').order('display_order'),
+		user
+			? supabase.from('wishlists').select('product_id').eq('user_id', user.id)
+			: Promise.resolve({ data: [] })
 	]);
+
+	const wishlistIds = new Set((wishlistData ?? []).map((w: { product_id: string }) => w.product_id));
 
 	return {
 		products: (products ?? []) as unknown as Product[],
 		categories: (categories ?? []) as unknown as Category[],
+		wishlistIds,
 		category,
 		sort,
 		q

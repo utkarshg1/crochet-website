@@ -18,6 +18,7 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - Product catalog with category filtering, search, and sort
 - Product detail pages with image gallery, color variants, and size selection
 - Shopping cart with persistent state
+- Wishlist — heart toggle on product cards, dedicated wishlist page for logged-in users
 - Checkout flow with Razorpay integration
 - Order tracking
 
@@ -31,6 +32,7 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - **Shop** — Full catalog with sidebar filters, search, mobile filter drawer
 - **About** — Owner story, Instagram QR code, creator credits
 - **Cart** — Item management, quantity updates
+- **Wishlist** — Saved pieces for logged-in users, empty state for guests
 - **Checkout** — Address form, Razorpay payment
 - **Account** — User profile, order history
 
@@ -38,7 +40,8 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - Custom brand palette (teal surfaces, primary rose, secondary teal, tertiary amber)
 - Organic mask shapes on images
 - Ambient tonal shadows
-- Glassmorphic navigation bar
+- Glassmorphic navigation bar with labelled icon buttons (Search, Wishlist, Login, Bag)
+- Login CTA as primary gradient button in nav
 - Logo hover animations (playful wobble + scale)
 - Lightbox zoom on product images and owner photo
 - Responsive mobile-first design
@@ -51,6 +54,7 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - `orders` — Order tracking with auto-generated order numbers (KL-XXXX)
 - `discounts` — Discount codes
 - `carts` — Persistent shopping carts
+- `wishlists` — Per-user product wishlists with unique constraint
 - `newsletter_subscribers` — Email newsletter signups
 
 ### Security

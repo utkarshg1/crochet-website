@@ -37,6 +37,17 @@
 	let minPrice = $state<string>('');
 	let maxPrice = $state<string>('');
 
+	// Wishlist state — Set of product IDs the user has wishlisted
+	let wishlistIds = $state(new Set(data.wishlistIds as Set<string>));
+
+	function handleToggleWishlist(productId: string, isWishlisted: boolean) {
+		wishlistIds = new Set(
+			isWishlisted
+				? [...wishlistIds, productId]
+				: [...wishlistIds].filter((id) => id !== productId)
+		);
+	}
+
 	// ─── Derived values ───────────────────────────────────────────────────────
 	// Whether any filter is currently active (used to show "Clear" button)
 	const hasActiveFilters = $derived(
@@ -358,7 +369,11 @@
 			{#if filteredProducts().length > 0}
 				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 					{#each filteredProducts() as product (product.id)}
-						<ProductCard {product} />
+						<ProductCard
+							{product}
+							wishlisted={wishlistIds.has(product.id)}
+							onToggleWishlist={handleToggleWishlist}
+						/>
 					{/each}
 				</div>
 			{:else}
