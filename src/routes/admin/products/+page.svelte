@@ -195,59 +195,59 @@
 				<!-- Hidden field that will be populated with image URLs before submit -->
 				<input type="hidden" name="images" value="[]" />
 
-				<div class="sm:col-span-2">
-					<label class="label-field">Title *</label>
-					<input name="title" type="text" required placeholder="Crochet Forever Rose Bouquet" class="field" />
-				</div>
-				<div class="sm:col-span-2">
-					<label class="label-field">Description *</label>
-					<textarea name="description" required rows="3" placeholder="Describe this handmade piece…" class="field resize-none"></textarea>
-				</div>
-				<div>
-					<label class="label-field">Price (₹) *</label>
-					<input name="price" type="number" step="0.01" min="0" required placeholder="1299" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Compare Price (₹)</label>
-					<input name="compare_price" type="number" step="0.01" min="0" placeholder="1599" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Stock *</label>
-					<input name="stock" type="number" min="0" required placeholder="10" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Category</label>
-					<select name="category_id" class="field">
-						<option value="">— None —</option>
-						{#each data.categories as cat}
-							<option value={cat.id}>{cat.name}</option>
-						{/each}
-					</select>
-				</div>
-				<div>
-					<label class="label-field">Colours (comma-separated)</label>
-					<input name="colors" type="text" placeholder="Cream, Blush Pink, Sage Green" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Tags (comma-separated)</label>
-					<input name="tags" type="text" placeholder="flowers, gift, handmade" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Materials</label>
-					<input name="materials" type="text" placeholder="100% cotton yarn" class="field" />
-				</div>
-				<div>
-					<label class="label-field">Dimensions</label>
-					<input name="dimensions" type="text" placeholder="20cm tall" class="field" />
-				</div>
-				<div class="sm:col-span-2">
-					<label class="label-field">Care Instructions</label>
-					<input name="care_instructions" type="text" placeholder="Hand wash cold, lay flat to dry" class="field" />
-				</div>
+			<div class="sm:col-span-2">
+				<label for="new-title" class="label-field">Title *</label>
+				<input id="new-title" name="title" type="text" required placeholder="Crochet Forever Rose Bouquet" class="field" />
+			</div>
+			<div class="sm:col-span-2">
+				<label for="new-description" class="label-field">Description *</label>
+				<textarea id="new-description" name="description" required rows="3" placeholder="Describe this handmade piece…" class="field resize-none"></textarea>
+			</div>
+			<div>
+				<label for="new-price" class="label-field">Price (₹) *</label>
+				<input id="new-price" name="price" type="number" step="0.01" min="0" required placeholder="1299" class="field" />
+			</div>
+			<div>
+				<label for="new-compare-price" class="label-field">Compare Price (₹)</label>
+				<input id="new-compare-price" name="compare_price" type="number" step="0.01" min="0" placeholder="1599" class="field" />
+			</div>
+			<div>
+				<label for="new-stock" class="label-field">Stock *</label>
+				<input id="new-stock" name="stock" type="number" min="0" required placeholder="10" class="field" />
+			</div>
+			<div>
+				<label for="new-category" class="label-field">Category</label>
+				<select id="new-category" name="category_id" class="field">
+					<option value="">— None —</option>
+					{#each data.categories as cat}
+						<option value={cat.id}>{cat.name}</option>
+					{/each}
+				</select>
+			</div>
+			<div>
+				<label for="new-colors" class="label-field">Colours (comma-separated)</label>
+				<input id="new-colors" name="colors" type="text" placeholder="Cream, Blush Pink, Sage Green" class="field" />
+			</div>
+			<div>
+				<label for="new-tags" class="label-field">Tags (comma-separated)</label>
+				<input id="new-tags" name="tags" type="text" placeholder="flowers, gift, handmade" class="field" />
+			</div>
+			<div>
+				<label for="new-materials" class="label-field">Materials</label>
+				<input id="new-materials" name="materials" type="text" placeholder="100% cotton yarn" class="field" />
+			</div>
+			<div>
+				<label for="new-dimensions" class="label-field">Dimensions</label>
+				<input id="new-dimensions" name="dimensions" type="text" placeholder="20cm tall" class="field" />
+			</div>
+			<div class="sm:col-span-2">
+				<label for="new-care" class="label-field">Care Instructions</label>
+				<input id="new-care" name="care_instructions" type="text" placeholder="Hand wash cold, lay flat to dry" class="field" />
+			</div>
 
 				<!-- Image upload -->
 				<div class="sm:col-span-2">
-					<label class="label-field">Product Images</label>
+					<span class="label-field">Product Images</span>
 					<label
 						class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface-low"
 					>
@@ -270,7 +270,7 @@
 							{#each newPreviews as src}
 								<img
 									{src}
-									alt="Preview"
+									alt=""
 									class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
 								/>
 							{/each}
@@ -450,28 +450,28 @@
 									<input type="hidden" name="images" value={JSON.stringify(product.images ?? [])} />
 
 									<div class="sm:col-span-3">
-										<label class="label-field">Title *</label>
-										<input name="title" type="text" required value={product.title} class="field" />
+										<label for="edit-title-{product.id}" class="label-field">Title *</label>
+										<input id="edit-title-{product.id}" name="title" type="text" required value={product.title} class="field" />
 									</div>
 									<div class="sm:col-span-3">
-										<label class="label-field">Description *</label>
-										<textarea name="description" required rows="2" class="field resize-none">{product.description}</textarea>
+										<label for="edit-description-{product.id}" class="label-field">Description *</label>
+										<textarea id="edit-description-{product.id}" name="description" required rows="2" class="field resize-none">{product.description}</textarea>
 									</div>
 									<div>
-										<label class="label-field">Price (₹) *</label>
-										<input name="price" type="number" step="0.01" min="0" required value={product.price_paise / 100} class="field" />
+										<label for="edit-price-{product.id}" class="label-field">Price (₹) *</label>
+										<input id="edit-price-{product.id}" name="price" type="number" step="0.01" min="0" required value={product.price_paise / 100} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Compare Price (₹)</label>
-										<input name="compare_price" type="number" step="0.01" min="0" value={product.compare_at_price_paise ? product.compare_at_price_paise / 100 : ''} class="field" />
+										<label for="edit-compare-price-{product.id}" class="label-field">Compare Price (₹)</label>
+										<input id="edit-compare-price-{product.id}" name="compare_price" type="number" step="0.01" min="0" value={product.compare_at_price_paise ? product.compare_at_price_paise / 100 : ''} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Stock *</label>
-										<input name="stock" type="number" min="0" required value={product.stock} class="field" />
+										<label for="edit-stock-{product.id}" class="label-field">Stock *</label>
+										<input id="edit-stock-{product.id}" name="stock" type="number" min="0" required value={product.stock} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Category</label>
-										<select name="category_id" class="field">
+										<label for="edit-category-{product.id}" class="label-field">Category</label>
+										<select id="edit-category-{product.id}" name="category_id" class="field">
 											<option value="">— None —</option>
 											{#each data.categories as cat}
 												<option value={cat.id} selected={product.category_id === cat.id}>{cat.name}</option>
@@ -479,36 +479,36 @@
 										</select>
 									</div>
 									<div>
-										<label class="label-field">Colours</label>
-										<input name="colors" type="text" value={product.colors?.join(', ') ?? ''} class="field" />
+										<label for="edit-colors-{product.id}" class="label-field">Colours</label>
+										<input id="edit-colors-{product.id}" name="colors" type="text" value={product.colors?.join(', ') ?? ''} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Tags</label>
-										<input name="tags" type="text" value={product.tags?.join(', ') ?? ''} class="field" />
+										<label for="edit-tags-{product.id}" class="label-field">Tags</label>
+										<input id="edit-tags-{product.id}" name="tags" type="text" value={product.tags?.join(', ') ?? ''} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Materials</label>
-										<input name="materials" type="text" value={product.materials ?? ''} class="field" />
+										<label for="edit-materials-{product.id}" class="label-field">Materials</label>
+										<input id="edit-materials-{product.id}" name="materials" type="text" value={product.materials ?? ''} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Dimensions</label>
-										<input name="dimensions" type="text" value={product.dimensions ?? ''} class="field" />
+										<label for="edit-dimensions-{product.id}" class="label-field">Dimensions</label>
+										<input id="edit-dimensions-{product.id}" name="dimensions" type="text" value={product.dimensions ?? ''} class="field" />
 									</div>
 									<div>
-										<label class="label-field">Care Instructions</label>
-										<input name="care_instructions" type="text" value={product.care_instructions ?? ''} class="field" />
+										<label for="edit-care-{product.id}" class="label-field">Care Instructions</label>
+										<input id="edit-care-{product.id}" name="care_instructions" type="text" value={product.care_instructions ?? ''} class="field" />
 									</div>
 
 									<!-- Existing images with remove buttons -->
 									<div class="sm:col-span-3">
-										<label class="label-field">Current Images</label>
+										<span class="label-field">Current Images</span>
 										{#if es.existingImages.length > 0}
 											<div class="flex flex-wrap gap-2">
 												{#each es.existingImages as url, idx}
 													<div class="group relative">
 														<img
 															src={url}
-															alt="Product image"
+															alt=""
 															class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
 														/>
 														<!-- Remove button -->
@@ -545,7 +545,7 @@
 
 									<!-- Add new images -->
 									<div class="sm:col-span-3">
-										<label class="label-field">Add More Images</label>
+										<span class="label-field">Add More Images</span>
 										<label
 											class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface"
 										>
@@ -567,7 +567,7 @@
 												{#each es.previews as src}
 													<img
 														{src}
-														alt="New image preview"
+														alt=""
 														class="h-20 w-20 rounded-xl object-cover ring-1 ring-primary/30"
 													/>
 												{/each}

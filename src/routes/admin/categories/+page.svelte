@@ -37,18 +37,18 @@
 				loading = true;
 				return async ({ update }) => { await update(); loading = false; };
 			}} class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-				<div>
-					<label class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Name *</label>
-					<input name="name" type="text" required placeholder="Forever Flowers" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
-				</div>
-				<div>
-					<label class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Display Order</label>
-					<input name="display_order" type="number" min="0" placeholder="1" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
-				</div>
-				<div class="sm:col-span-2">
-					<label class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Description</label>
-					<input name="description" type="text" placeholder="Brief description…" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
-				</div>
+			<div>
+				<label for="cat-name" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Name *</label>
+				<input id="cat-name" name="name" type="text" required placeholder="Forever Flowers" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
+			</div>
+			<div>
+				<label for="cat-display-order" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Display Order</label>
+				<input id="cat-display-order" name="display_order" type="number" min="0" placeholder="1" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
+			</div>
+			<div class="sm:col-span-2">
+				<label for="cat-description" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Description</label>
+				<input id="cat-description" name="description" type="text" placeholder="Brief description…" class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none" />
+			</div>
 				<div class="sm:col-span-2">
 					<button type="submit" disabled={loading} class="rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white shadow-ambient hover:brightness-110 disabled:opacity-60">
 						{loading ? 'Saving…' : 'Create Category'}

@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -18,7 +18,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          items: Json
+          items: Json | null
           session_id: string
           updated_at: string | null
           user_id: string | null
@@ -26,7 +26,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          items?: Json
+          items?: Json | null
           session_id: string
           updated_at?: string | null
           user_id?: string | null
@@ -34,7 +34,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          items?: Json
+          items?: Json | null
           session_id?: string
           updated_at?: string | null
           user_id?: string | null
@@ -89,7 +89,7 @@ export type Database = {
           is_active?: boolean | null
           max_uses?: number | null
           min_order_paise?: number | null
-          type: string
+          type?: string
           used_count?: number | null
           valid_until?: string | null
           value: number
@@ -150,15 +150,15 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
-          items: Json
+          items?: Json
           order_number: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
-          shipping_address: Json
+          shipping_address?: Json
           shipping_paise?: number
           status?: string
-          subtotal_paise: number
-          total_paise: number
+          subtotal_paise?: number
+          total_paise?: number
           updated_at?: string | null
           user_id?: string | null
         }
@@ -192,7 +192,7 @@ export type Database = {
           description: string
           dimensions: string | null
           id: string
-          images: Json
+          images: Json | null
           is_featured: boolean | null
           is_new: boolean | null
           materials: string | null
@@ -212,7 +212,7 @@ export type Database = {
           description: string
           dimensions?: string | null
           id?: string
-          images?: Json
+          images?: Json | null
           is_featured?: boolean | null
           is_new?: boolean | null
           materials?: string | null
@@ -232,7 +232,7 @@ export type Database = {
           description?: string
           dimensions?: string | null
           id?: string
-          images?: Json
+          images?: Json | null
           is_featured?: boolean | null
           is_new?: boolean | null
           materials?: string | null

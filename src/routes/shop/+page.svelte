@@ -26,6 +26,13 @@
 	let selectedSort = $state(data.sort ?? 'newest');
 	let searchQuery = $state(data.q ?? '');
 
+	// Sync local state when data prop changes (e.g. after navigation)
+	$effect(() => {
+		selectedCategory = data.category ?? '';
+		selectedSort = data.sort ?? 'newest';
+		searchQuery = data.q ?? '';
+	});
+
 	// Price range — purely client-side filter applied on derived list
 	let minPrice = $state<string>('');
 	let maxPrice = $state<string>('');

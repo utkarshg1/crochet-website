@@ -61,6 +61,11 @@
 	// ─── Color selector state ─────────────────────────────────────────────────
 	let selectedColor = $state<string>(product.colors[0] ?? '');
 
+	// Sync selectedColor when product changes
+	$effect(() => {
+		selectedColor = product.colors[0] ?? '';
+	});
+
 	// ─── Quantity stepper state ───────────────────────────────────────────────
 	let qty = $state(1);
 
@@ -230,30 +235,30 @@
 
 			<!-- Thumbnail strip — only rendered when there are multiple images -->
 			{#if hasImages && product.images.length > 1}
-				<div class="flex gap-3 overflow-x-auto pb-1" role="list" aria-label="Product images">
+				<ul class="flex gap-3 overflow-x-auto pb-1" aria-label="Product images">
 					{#each normImages as image, i (image.url)}
-						<button
-							role="listitem"
-							onclick={() => (activeImageIndex = i)}
-							class="
-								flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden
-								transition-all duration-200
-								{activeImageIndex === i
-									? 'ring-2 ring-primary ring-offset-2 ring-offset-surface'
-									: 'opacity-60 hover:opacity-100'}
-							"
-							aria-label="View image {i + 1}"
-							aria-pressed={activeImageIndex === i}
-						>
-							<img
-								src={image.url}
-								alt={image.alt}
-								class="w-full h-full object-cover"
-								loading="lazy"
-							/>
-						</button>
+						<li>
+							<button
+								onclick={() => (activeImageIndex = i)}
+								class="
+									flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden
+									transition-all duration-200
+									{activeImageIndex === i
+										? 'ring-2 ring-primary ring-offset-2 ring-offset-surface'
+										: 'opacity-60 hover:opacity-100'}
+								"
+								aria-label="View image {i + 1}"
+							>
+								<img
+									src={image.url}
+									alt={image.alt}
+									class="w-full h-full object-cover"
+									loading="lazy"
+								/>
+							</button>
+						</li>
 					{/each}
-				</div>
+				</ul>
 			{/if}
 		</div>
 

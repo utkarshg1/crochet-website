@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { cart } from '$lib/cart.svelte';
 	import CartDrawer from '$lib/components/CartDrawer.svelte';
+	import logoSvg from '$lib/assets/Krafted Loops Studio.svg';
 
 	// Local UI state
 	let cartOpen = $state(false);
@@ -47,54 +48,12 @@
 
 			<!-- ── Logo + Brand name ──────────────────────────────────────────── -->
 			<a href="/" class="flex items-center gap-3 shrink-0 group">
-				<!--
-          Inline SVG yarn ball — no external dep, no flash of missing icon.
-          The winding lines subtly rotate on hover to hint at motion.
-        -->
-				<svg
-					width="32"
-					height="32"
-					viewBox="0 0 48 48"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-					class="shrink-0 group-hover:rotate-12 transition-transform duration-300"
+				<img
+					src={logoSvg}
+					alt=""
+					class="w-9 h-9 rounded-full shrink-0 hover:rotate-[-8deg] hover:scale-105 transition-all duration-700"
 					aria-hidden="true"
-				>
-					<circle cx="24" cy="24" r="20" fill="#a7295a" opacity="0.15" />
-					<circle cx="24" cy="24" r="20" stroke="#a7295a" stroke-width="2.5" fill="none" />
-					<!-- Winding yarn strands -->
-					<path
-						d="M10 30 Q24 14 38 30"
-						stroke="#a7295a"
-						stroke-width="2"
-						fill="none"
-						stroke-linecap="round"
-					/>
-					<path
-						d="M8 22 Q24 8 40 22"
-						stroke="#a7295a"
-						stroke-width="1.5"
-						fill="none"
-						stroke-linecap="round"
-						opacity="0.6"
-					/>
-					<path
-						d="M12 36 Q24 28 36 36"
-						stroke="#a7295a"
-						stroke-width="1.5"
-						fill="none"
-						stroke-linecap="round"
-						opacity="0.5"
-					/>
-					<!-- Yarn tail -->
-					<path
-						d="M38 24 Q44 20 42 14"
-						stroke="#00675d"
-						stroke-width="2"
-						fill="none"
-						stroke-linecap="round"
-					/>
-				</svg>
+				/>
 				<span
 					class="font-display font-semibold text-on-surface text-lg leading-tight hidden sm:block"
 				>

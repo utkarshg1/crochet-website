@@ -1,42 +1,83 @@
-# sv
+# Krafted Loops Studio
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and Supabase.
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Framework:** SvelteKit 2 (Svelte 5.54)
+- **Styling:** Tailwind CSS v4 with custom brand theme
+- **Database:** Supabase (PostgreSQL + RLS)
+- **Auth:** Supabase Auth
+- **Storage:** Supabase Storage (product images)
+- **Payments:** Razorpay
+- **Deployment:** Vercel
+
+## Features
+
+### Storefront
+- Product catalog with category filtering, search, and sort
+- Product detail pages with image gallery, color variants, and size selection
+- Shopping cart with persistent state
+- Checkout flow with Razorpay integration
+- Order tracking
+
+### Admin Dashboard
+- Product management (CRUD with image uploads)
+- Category management
+- Order management with status updates
+
+### Pages
+- **Home** — Hero with logo + product images, collections grid, featured products, meet the maker, newsletter
+- **Shop** — Full catalog with sidebar filters, search, mobile filter drawer
+- **About** — Owner story, Instagram QR code, creator credits
+- **Cart** — Item management, quantity updates
+- **Checkout** — Address form, Razorpay payment
+- **Account** — User profile, order history
+
+### Design & UX
+- Custom brand palette (teal surfaces, primary rose, secondary teal, tertiary amber)
+- Organic mask shapes on images
+- Ambient tonal shadows
+- Glassmorphic navigation bar
+- Logo hover animations (playful wobble + scale)
+- Lightbox zoom on product images and owner photo
+- Responsive mobile-first design
+- ARIA-compliant accessible components
+
+### Database Schema
+- `profiles` — User profiles with admin flag
+- `categories` — Product categories with display order
+- `products` — Full product data (price, stock, images, colors, sizes)
+- `orders` — Order tracking with auto-generated order numbers (KL-XXXX)
+- `discounts` — Discount codes
+- `carts` — Persistent shopping carts
+- `newsletter_subscribers` — Email newsletter signups
+
+### Security
+- Row Level Security (RLS) on all tables
+- Role-based access (anon, authenticated, admin)
+- Secure function search paths
+- Storage bucket policies (public read, admin write)
+
+## Getting Started
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.13.0 create --template minimal --types ts --add prettier playwright tailwindcss="plugins:typography,forms" mcp="ide:claude-code+setup:remote" --install npm ./
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
-
-To create a production version of your app:
+## Build
 
 ```sh
 npm run build
+npm run preview
 ```
 
-You can preview the production build with `npm run preview`.
+## Environment Variables
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+See `.env.example` for required Supabase and Razorpay keys.
+
+## Credits
+
+- **Maker:** Kalyani Gaikwad — [Instagram](https://instagram.com/krafted_loops_studio)
+- **Website by:** Utkarsh Gaikwad

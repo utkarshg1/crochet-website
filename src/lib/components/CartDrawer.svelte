@@ -53,7 +53,7 @@
       (defined in layout.css as a cubic-bezier ease-out keyframe).
       max-w-md keeps it from being a full takeover on wide screens.
     -->
-		<aside
+		<div
 			class="
         absolute right-0 top-0 bottom-0 w-full max-w-md
         bg-surface-card animate-slide-in-right
@@ -266,6 +266,6 @@
 					</button>
 				</div>
 			{/if}
-		</aside>
+		</div>
 	</div>
 {/if}

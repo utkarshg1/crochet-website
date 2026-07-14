@@ -1,4 +1,5 @@
 <script lang="ts">
+	import logoSvg from '$lib/assets/Krafted Loops Studio.svg';
 	let showScrollTop = $state(false);
 
 	// Show scroll-to-top button once user has scrolled down enough
@@ -45,26 +46,20 @@
 			<div class="flex flex-col gap-5">
 				<!-- Logo mark + name -->
 				<a href="/" class="flex items-center gap-3 group w-fit">
-					<svg
-						width="36"
-						height="36"
-						viewBox="0 0 48 48"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-						class="shrink-0 group-hover:rotate-12 transition-transform duration-300"
+					<img
+						src={logoSvg}
+						alt=""
+						class="w-9 h-9 rounded-full shrink-0"
 						aria-hidden="true"
-					>
-						<circle cx="24" cy="24" r="20" fill="#a7295a" opacity="0.15" />
-						<circle cx="24" cy="24" r="20" stroke="#a7295a" stroke-width="2.5" fill="none" />
-						<path d="M10 30 Q24 14 38 30" stroke="#a7295a" stroke-width="2" fill="none" stroke-linecap="round" />
-						<path d="M8 22 Q24 8 40 22" stroke="#a7295a" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6" />
-						<path d="M12 36 Q24 28 36 36" stroke="#a7295a" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5" />
-						<path d="M38 24 Q44 20 42 14" stroke="#00675d" stroke-width="2" fill="none" stroke-linecap="round" />
-					</svg>
+					/>
 					<span class="font-display font-semibold text-on-surface text-xl">
 						Krafted Loops Studio
 					</span>
 				</a>
+
+				<p class="text-xs text-on-surface-muted font-body mt-0.5">
+					Website by <span class="text-on-surface-muted">Utkarsh Gaikwad</span>
+				</p>
 
 				<p class="text-on-surface-muted text-sm leading-relaxed">
 					Handmade with love in India 🧶<br />
@@ -130,7 +125,7 @@
 				<!-- Social links -->
 				<div class="flex flex-col gap-3">
 					<a
-						href="https://instagram.com/kraftedloopsstudio"
+						href="https://instagram.com/krafted_loops_studio"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="flex items-center gap-3 text-sm text-on-surface-muted hover:text-primary transition-colors duration-150 group"
@@ -143,7 +138,7 @@
 								<line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
 							</svg>
 						</span>
-						@kraftedloopsstudio
+						@krafted_loops_studio
 					</a>
 
 					<a

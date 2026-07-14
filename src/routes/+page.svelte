@@ -2,6 +2,10 @@
 	import type { PageData } from './$types';
 	import type { Category } from '$lib/types';
 	import ProductCard from '$lib/components/ProductCard.svelte';
+	import logoSvg from '$lib/assets/Krafted Loops Studio.svg';
+	import foreverFlowersImg from '$lib/assets/forever_flowers.png';
+	import crochetClothImg from '$lib/assets/crochet_cloth.png';
+	import ownerImg from '$lib/assets/owner.jpeg';
 
 	interface Props {
 		data: PageData;
@@ -12,6 +16,25 @@
 	// ── Newsletter form state ────────────────────────────────────────────────────
 	let newsletterEmail = $state('');
 	let newsletterSubmitted = $state(false);
+
+	// ── Lightbox state ─────────────────────────────────────────────────────────
+	let lightboxSrc = $state('');
+	let lightboxAlt = $state('');
+	let lightboxOpen = $state(false);
+
+	function openLightbox(src: string, alt: string) {
+		lightboxSrc = src;
+		lightboxAlt = alt;
+		lightboxOpen = true;
+	}
+
+	function closeLightbox() {
+		lightboxOpen = false;
+	}
+
+	function handleLightboxKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && lightboxOpen) closeLightbox();
+	}
 
 	// Map category slug → gradient classes for the placeholder colour block.
 	// These are static design decisions — no reactivity needed, plain const.
@@ -173,59 +196,57 @@
 			</div>
 		</div>
 
-		<!-- RIGHT · overlapping floating product image cards (40% = 2 of 5 cols) -->
-		<!--
-      Cards are absolutely positioned relative to the col container so they
-      can overlap. The outer div acts as a size anchor while the cards float
-      inside it. Using rotate utilities directly to set a CSS custom property
-      so the gentle-float animation respects the initial rotation.
-    -->
+		<!-- RIGHT · brand logo + product images ──────────────────────────── -->
 		<div
-			class="md:col-span-2 relative flex justify-center items-center"
+			class="md:col-span-2 flex justify-center items-center relative"
 			style="min-height: 420px;"
-			aria-hidden="true"
 		>
-			<!-- Card 1 — top, rotated slightly clockwise, floats up/down -->
-			<div
-				class="absolute top-0 right-0 w-52 md:w-64
-                       bg-surface-card rounded-3xl shadow-ambient-lg p-3
-                       rotate-3 hover:-rotate-1 transition-transform duration-500
-                       animate-float z-20"
-				style="--tw-rotate: 3deg;"
+			<!-- Logo center -->
+			<img
+				src={logoSvg}
+				alt="Krafted Loops Studio logo"
+				class="w-48 h-48 md:w-64 md:h-64 rounded-full shadow-ambient-lg relative z-10 hover:rotate-[-8deg] hover:scale-105 transition-all duration-700"
+			/>
+
+			<!-- Crochet Cloth — top right diagonal -->
+			<button
+				type="button"
+				onclick={() => openLightbox(crochetClothImg, 'Crochet Cloth — artisanal handmade crochet textile')}
+				class="absolute top-2 right-0 md:top-0 md:-right-4
+					   w-24 h-24 md:w-36 md:h-36
+					   rounded-2xl shadow-ambient-lg overflow-hidden
+					   -rotate-6 hover:rotate-0 hover:scale-105
+					   transition-all duration-500 ease-out z-20
+					   cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+				aria-label="View Crochet Cloth — click to enlarge"
 			>
-				<!-- Placeholder image block — replaced with real <img> in production -->
-				<div
-					class="bg-gradient-to-br from-primary-container/40 to-blush/60 rounded-2xl aspect-square"
-				></div>
+				<img
+					src={crochetClothImg}
+					alt="Crochet Cloth — artisanal handmade crochet textile"
+					class="w-full h-full object-cover"
+					loading="lazy"
+				/>
+			</button>
 
-				<!-- "New Arrival" badge overlaid on the card -->
-				<div class="mt-2 px-1 flex items-center justify-between">
-					<span
-						class="bg-primary text-on-primary rounded-full px-3 py-1 font-body font-semibold text-xs"
-					>
-						New Arrival
-					</span>
-				</div>
-			</div>
-
-			<!-- Card 2 — lower, rotated counter-clockwise, slight negative margin for overlap -->
-			<div
-				class="absolute bottom-0 left-0 w-48 md:w-60
-                       bg-surface-card rounded-3xl shadow-ambient p-3
-                       -rotate-2 hover:rotate-1 transition-transform duration-500 z-10"
-				style="margin-top: -40px;"
+			<!-- Forever Flowers — bottom left diagonal -->
+			<button
+				type="button"
+				onclick={() => openLightbox(foreverFlowersImg, 'Forever Flowers — handcrafted crochet bouquets')}
+				class="absolute bottom-4 left-2 md:bottom-0 md:-left-6
+					   w-24 h-24 md:w-36 md:h-36
+					   rounded-2xl shadow-ambient-lg overflow-hidden
+					   -rotate-8 hover:rotate-0 hover:scale-105
+					   transition-all duration-500 ease-out z-20
+					   cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+				aria-label="View Forever Flowers — click to enlarge"
 			>
-				<div
-					class="bg-gradient-to-br from-secondary-container/60 to-sage/40 rounded-2xl aspect-square"
-				></div>
-
-				<div class="mt-2 px-1">
-					<p class="font-display text-sm text-on-surface font-semibold leading-tight">
-						Forever Flower Bouquet
-					</p>
-					<p class="font-body text-xs text-on-surface-muted mt-0.5">₹1,200</p>
-				</div>
-			</div>
+				<img
+					src={foreverFlowersImg}
+					alt="Forever Flowers — handcrafted crochet bouquets"
+					class="w-full h-full object-cover"
+					loading="lazy"
+				/>
+			</button>
 		</div>
 	</div>
 </section>
@@ -425,6 +446,38 @@
 	</div>
 </section>
 
+<!-- Lightbox overlay -->
+{#if lightboxOpen}
+	<div
+		class="fixed inset-0 z-[100] flex items-center justify-center bg-on-surface/70 backdrop-blur-sm p-6"
+		onclick={closeLightbox}
+		onkeydown={handleLightboxKeydown}
+		role="dialog"
+		aria-modal="true"
+		aria-label="Image lightbox"
+		tabindex="-1"
+	>
+		<button
+			type="button"
+			onclick={closeLightbox}
+			class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm
+				   flex items-center justify-center text-white hover:bg-white/30 transition-colors z-10"
+			aria-label="Close lightbox"
+		>
+			<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M18 6 6 18M6 6l12 12" />
+			</svg>
+		</button>
+		<div role="presentation" onclick={(e) => e.stopPropagation()}>
+			<img
+				src={lightboxSrc}
+				alt={lightboxAlt}
+				class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain animate-zoom-in"
+			/>
+		</div>
+	</div>
+{/if}
+
 <!-- ═══════════════════════════════════════════════════════════════════════════
      SECTION 4 · MEET THE MAKER
      Two-column: organic image placeholder left, content right.
@@ -448,13 +501,21 @@
         badge that bleeds right doesn't get clipped.
       -->
 			<div class="relative w-full max-w-xs md:max-w-none pr-8">
-				<!-- Organic-shaped image placeholder -->
-				<div
-					class="bg-gradient-to-br from-primary-container/40 to-secondary-container
-                         rounded-3xl aspect-[3/4] mask-organic shadow-ambient-lg w-full"
-					role="img"
-					aria-label="Photo of Kalyani Gaikwad, the maker behind Krafted Loops Studio"
-				></div>
+				<!-- Owner photo — click to enlarge -->
+				<button
+					type="button"
+					onclick={() => openLightbox(ownerImg, 'Kalyani Gaikwad — the maker behind Krafted Loops Studio')}
+					class="w-full rounded-3xl aspect-[3/4] mask-organic shadow-ambient-lg overflow-hidden
+						   cursor-pointer hover:scale-[1.02] transition-transform duration-500 ease-out
+						   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+					aria-label="View photo of Kalyani Gaikwad — click to enlarge"
+				>
+					<img
+						src={ownerImg}
+						alt="Kalyani Gaikwad — the maker behind Krafted Loops Studio"
+						class="w-full h-full object-cover"
+					/>
+				</button>
 
 				<!--
           Yarn ball bounces on a slow, easing loop — purely decorative
