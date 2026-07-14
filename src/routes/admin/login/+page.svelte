@@ -64,7 +64,7 @@
 					<div class="text-4xl mb-3">📧</div>
 					<p class="font-display text-lg font-semibold text-on-surface">Check your email</p>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						Enter the code sent to <strong class="text-on-surface">{sentEmail}</strong>
+						Enter the 6-digit code sent to <strong class="text-on-surface">{sentEmail}</strong>
 					</p>
 					<form
 						method="POST"
@@ -75,12 +75,12 @@
 							name="token"
 							type="text"
 							inputmode="numeric"
-							maxlength="8"
-							pattern="[0-9]+"
+							maxlength="6"
+							pattern="[0-9]{6}"
 							autocomplete="one-time-code"
 							required
 							class="mx-auto mt-5 block w-52 rounded-2xl border border-on-surface/10 bg-surface-low p-4 text-center font-mono text-3xl tracking-[0.3em] text-on-surface outline-none focus:border-primary"
-							placeholder="••••••••"
+							placeholder="000000"
 						/>
 						<button
 							type="submit"

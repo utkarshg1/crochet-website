@@ -3,12 +3,21 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { createClient } from '$lib/supabase';
 
-	let status = $state<'loading' | 'error'>('loading');
+	let status = $state<'loading' | 'error' | 'expired'>('loading');
 	let errorMsg = $state('');
 
 	onMount(async () => {
 		const queryParams = new URLSearchParams(window.location.search);
+		const errorCode = queryParams.get('error_code');
+
 		if (queryParams.get('error')) {
+			// Distinguish expired links from other errors
+			if (errorCode === 'otp_expired') {
+				status = 'expired';
+				// Auto-redirect to account page after 3 seconds
+				setTimeout(() => goto('/account'), 3000);
+				return;
+			}
 			errorMsg = queryParams.get('error_description')?.replace(/\+/g, ' ') ?? 'Link invalid or expired';
 			status = 'error';
 			return;
@@ -55,6 +64,22 @@
 			<div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
 			<p class="font-body text-sm text-on-surface-muted">Signing you in…</p>
 		</div>
+	{:else if status === 'expired'}
+		<div class="rounded-3xl bg-surface-card p-10 text-center shadow-ambient max-w-md">
+			<div class="text-4xl mb-4">⏱️</div>
+			<p class="font-display text-xl text-on-surface">Sign-in link expired</p>
+			<p class="mt-2 font-body text-sm text-on-surface-muted">
+				This link is no longer valid. Redirecting you to request a new one…
+			</p>
+			<div class="mt-6">
+				<div class="mx-auto h-1 w-32 rounded-full bg-surface-high overflow-hidden">
+					<div class="h-full bg-primary rounded-full animate-shrink"></div>
+				</div>
+			</div>
+			<a href="/account" class="mt-6 inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white shadow-ambient hover:brightness-110">
+				Request a new link now
+			</a>
+		</div>
 	{:else}
 		<div class="rounded-3xl bg-surface-card p-10 text-center shadow-ambient max-w-md">
 			<div class="text-4xl mb-4">⏱️</div>
@@ -71,3 +96,13 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	@keyframes shrink {
+		from { width: 100%; }
+		to { width: 0%; }
+	}
+	.animate-shrink {
+		animation: shrink 3s linear forwards;
+	}
+</style>

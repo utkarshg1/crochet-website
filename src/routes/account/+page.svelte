@@ -182,7 +182,7 @@
 				<div class="rounded-3xl bg-surface-card p-8 shadow-ambient">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Sign In</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						We'll send a sign-in link to your email.
+						We'll send a 6-digit code to your email.
 					</p>
 					<div class="mt-6 space-y-4">
 						<div>
@@ -205,7 +205,7 @@
 							disabled={loading}
 							class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
 						>
-							{loading ? 'Sending…' : 'Send Sign-In Link'}
+							{loading ? 'Sending…' : 'Send Code'}
 						</button>
 					</div>
 					<p class="mt-4 text-center font-body text-xs text-on-surface-muted">
@@ -218,8 +218,8 @@
 					<div class="text-5xl mb-4" aria-hidden="true">📧</div>
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Check Your Email</h2>
 					<p class="mt-2 font-body text-sm text-on-surface-muted">
-						We sent a sign-in link to <strong class="text-on-surface">{sentToEmail}</strong>.<br/>
-						Click the link in the email to sign in.
+						We sent a 6-digit code to <strong class="text-on-surface">{sentToEmail}</strong>.<br/>
+						Click the link in the email or enter the code below.
 					</p>
 					<div class="mt-6">
 						<p class="font-body text-xs text-on-surface-muted mb-3">Or enter the 6-digit code from the email:</p>
