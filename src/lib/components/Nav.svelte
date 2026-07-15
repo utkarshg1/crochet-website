@@ -19,6 +19,11 @@
 		{ label: 'About', href: '/about' }
 	];
 
+	const infoLinks = [
+		{ label: 'FAQ', href: '/faq' },
+		{ label: 'Shipping & Returns', href: '/shipping' }
+	];
+
 	function isActive(href: string): boolean {
 		if (href === '/') return currentPath === '/';
 		return currentPath.startsWith(href);
@@ -67,7 +72,7 @@
 			</a>
 
 			<!-- ── Desktop centre nav ─────────────────────────────────────────── -->
-			<ul class="hidden items-center gap-8 md:flex" role="list">
+			<ul class="hidden items-center gap-6 md:flex lg:gap-8" role="list">
 				{#each navLinks as link}
 					<li>
 						<a
@@ -85,6 +90,27 @@
                 Keeps the active state visible without the link looking bolded
                 or differently sized (which would cause layout shift).
               -->
+							{#if isActive(link.href)}
+								<span
+									class="absolute right-0 -bottom-1 left-0 h-0.5 rounded-full bg-primary"
+									aria-hidden="true"
+								></span>
+							{/if}
+						</a>
+					</li>
+				{/each}
+				{#each infoLinks as link}
+					<li class="hidden lg:block">
+						<a
+							href={link.href}
+							class="
+                font-body text-base font-medium transition-colors duration-200
+                {isActive(link.href) ? 'text-primary' : 'text-on-surface hover:text-primary'}
+                relative
+              "
+							aria-current={isActive(link.href) ? 'page' : undefined}
+						>
+							{link.label}
 							{#if isActive(link.href)}
 								<span
 									class="absolute right-0 -bottom-1 left-0 h-0.5 rounded-full bg-primary"
@@ -393,6 +419,20 @@
 							Wishlist
 						</a>
 					</li>
+					{#each infoLinks as link}
+						<li>
+							<a
+								href={link.href}
+								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
+									{isActive(link.href)
+									? 'bg-primary/10 text-primary'
+									: 'text-on-surface hover:bg-surface-high hover:text-primary'}"
+								aria-current={isActive(link.href) ? 'page' : undefined}
+							>
+								{link.label}
+							</a>
+						</li>
+					{/each}
 				</ul>
 			</div>
 		{/if}
