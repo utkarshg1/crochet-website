@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/utkarshg1/crochet-website/main/src/lib/assets/Krafted%20Loops%20Studio.png" alt="Krafted Loops Studio Logo" width="120" />
+<img src="https://raw.githubusercontent.com/utkarshg1/crochet-website/main/src/lib/assets/Krafted%20Loops%20Studio.png" alt="Krafted Loops Studio Logo" width="120" style="border-radius: 50%;" />
 
 # Krafted Loops Studio
 
@@ -145,7 +145,7 @@ npm run preview
 
 <div align="center">
 
-**Maker** — [Kalyani Gaikwad](https://instagram.com/krafted_loops_studio) · Pune, Maharashtra
+**Maker** — [Kalyani Gaikwad](https://krafted-loops-studios.vercel.app/about) · Pune, Maharashtra
 
 **Website by** — Utkarsh Gaikwad
 
