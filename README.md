@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/utkarshg1/crochet-website/main/src/lib/assets/Krafted%20Loops%20Studio.png" alt="Krafted Loops Studio Logo" width="120" style="border-radius: 50%;" />
+<img src="https://raw.githubusercontent.com/utkarshg1/crochet-website/main/src/lib/assets/Krafted%20Loops%20Circle%20Sticker.png" alt="Krafted Loops Studio Logo" width="120" />
 
 # Krafted Loops Studio
 
