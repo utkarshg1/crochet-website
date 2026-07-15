@@ -1,6 +1,10 @@
 # Krafted Loops Studio
 
+🌐 https://krafted-loops-studios.vercel.app/
+
 Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and Supabase.
+
+![Krafted Loops Studio Logo](https://raw.githubusercontent.com/utkarshg1/crochet-website/main/src/lib/assets/Krafted%20Loops%20Studio.png)
 
 ## Tech Stack
 
@@ -31,6 +35,8 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - **Home** — Hero with logo + product images, collections grid, featured products, meet the maker, newsletter
 - **Shop** — Full catalog with sidebar filters, search, mobile filter drawer
 - **About** — Owner story, Instagram QR code, creator credits
+- **FAQ** — Accordion-style with common questions about products, shipping, care, custom orders
+- **Shipping & Returns** — Processing times, shipping charges, delivery estimates, return policy
 - **Cart** — Item management, quantity updates
 - **Wishlist** — Saved pieces for logged-in users, empty state for guests
 - **Checkout** — Address form, Razorpay payment
@@ -44,6 +50,7 @@ Handmade crochet e-commerce website built with SvelteKit 2, Tailwind CSS v4, and
 - Login CTA as primary gradient button in nav
 - Logo hover animations (playful wobble + scale)
 - Lightbox zoom on product images and owner photo
+- Footer with contact details (email, phone, WhatsApp), social links, and newsletter teaser
 - Responsive mobile-first design
 - ARIA-compliant accessible components
 
