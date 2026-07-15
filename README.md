@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.5.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.6.0-a7295a?style=flat-square)
 
 </div>
 
@@ -74,6 +74,7 @@
 - Custom brand palette (teal surfaces, rose primary, accent colors)
 - Glassmorphic navigation bar with ambient shadow
 - Organic mask shapes for images
+- Hydration-safe splash with SSR browser gate (no flash on Vercel)
 - Splash-to-hero FLIP animation — logo rolls like a tire & settles into position
 - 360° stationary spin on mobile with smooth overlay fade-out
 - Hardware-accelerated Web Animations API with Fast Out, Slow In easing
