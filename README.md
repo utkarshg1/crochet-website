@@ -6,8 +6,9 @@
 
 **Handmade crochet e-commerce website — where every stitch tells a story.**
 
-[![Live Site](https://img.shields.io/badge/Live%20Site-krafted--loops--studios.vercel.app-?style=for-the-badge&color=a7295a&labelColor=a7295a&link=https://krafted-loops-studios.vercel.app/)](https://krafted-loops-studios.vercel.app/)
-[![GitHub](https://img.shields.io/badge/GitHub-utkarshg1/crochet--website-?style=for-the-badge&color=333&labelColor=333&logo=github&logoColor=white&link=https://github.com/utkarshg1/crochet-website)](https://github.com/utkarshg1/crochet-website)
+🌐 <a href="https://krafted-loops-studios.vercel.app/"><strong>krafted-loops-studios.vercel.app</strong></a>
+&nbsp;&nbsp;·&nbsp;&nbsp;
+📸 <a href="https://www.instagram.com/krafted_loops_studio"><strong>@krafted_loops_studio</strong></a>
 
 <br />
 
