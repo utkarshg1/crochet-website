@@ -1,66 +1,119 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import logoSvg from '$lib/assets/Krafted Loops Studio.svg';
-	import { animationState } from '$lib/animationState.svelte';
+	import { logoState } from '$lib/logoState.svelte';
 
-	type Phase = 'idle' | 'rolling' | 'settled' | 'done';
+	type Phase = 'idle' | 'animating' | 'fading' | 'done';
 
 	let phase: Phase = $state('idle');
-	let tx: number = $state(0);
-	let ty: number = $state(0);
+	let splashLogoEl: HTMLImageElement | undefined = $state();
 
-	function handleAnimationEnd(e: AnimationEvent) {
-		if (e.target !== e.currentTarget) return;
-		animationState.hasSettled = true;
-		phase = 'settled';
+	function executeStationarySpin() {
+		if (!splashLogoEl) return;
+
+		const animation = splashLogoEl.animate(
+			[
+				{ transform: 'rotate(0deg)', opacity: 1 },
+				{ transform: 'rotate(360deg)', opacity: 1 }
+			],
+			{
+				duration: 3000,
+				easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+				fill: 'forwards'
+			}
+		);
+
+		animation.onfinish = () => {
+			logoState.hasSettled = true;
+			phase = 'fading';
+		};
 	}
 
-	function handleFadeEnd() {
-		if (phase !== 'settled') return;
-		phase = 'done';
+	function executeTireRollTransition() {
+		if (!splashLogoEl) return;
+
+		const target = document.querySelector<HTMLElement>('[data-splash-target]');
+		if (!target) {
+			logoState.hasSettled = true;
+			phase = 'done';
+			return;
+		}
+
+		const first = splashLogoEl.getBoundingClientRect();
+		const last = target.getBoundingClientRect();
+
+		const deltaX = last.left + last.width / 2 - (first.left + first.width / 2);
+		const deltaY = last.top + last.height / 2 - (first.top + first.height / 2);
+		const scale = last.width / first.width;
+
+		const animation = splashLogoEl.animate(
+			[
+				{
+					transform: 'translate(0px, 0px) rotate(-360deg) scale(1)',
+					opacity: 1
+				},
+				{
+					transform: `translate(${deltaX}px, ${deltaY}px) rotate(0deg) scale(${scale})`,
+					opacity: 1
+				}
+			],
+			{
+				duration: 3000,
+				easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+				fill: 'forwards'
+			}
+		);
+
+		animation.onfinish = () => {
+			target.style.opacity = '1';
+			logoState.hasSettled = true;
+			phase = 'fading';
+		};
 	}
 
 	$effect(() => {
-		return untrack(() => {
-			if (animationState.hasSettled) return;
+		if (logoState.hasSettled) return;
+		if (!splashLogoEl) return;
 
-			const t = setTimeout(() => {
-				const target = document.querySelector<HTMLElement>('[data-splash-target]');
-				if (target) {
-					const rect = target.getBoundingClientRect();
-					tx = ((rect.left + rect.width / 2 - window.innerWidth / 2) / window.innerWidth) * 100;
-					ty = ((rect.top + rect.height / 2 - window.innerHeight / 2) / window.innerHeight) * 100;
-				}
-				phase = 'rolling';
-			}, 400);
+		const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
 
-			return () => clearTimeout(t);
+		const targetImageLoaded = new Promise<void>((resolve) => {
+			const targetImg = document.querySelector<HTMLImageElement>('[data-splash-target] img');
+			if (!targetImg || targetImg.complete) {
+				resolve();
+			} else {
+				targetImg.onload = () => resolve();
+				targetImg.onerror = () => resolve();
+			}
 		});
+
+		const timer = setTimeout(() => {
+			Promise.all([fontsReady, targetImageLoaded]).then(() => {
+				phase = 'animating';
+				const isMobile = window.matchMedia('(max-width: 768px)').matches;
+				if (isMobile) {
+					executeStationarySpin();
+				} else {
+					executeTireRollTransition();
+				}
+			});
+		}, 400);
+
+		return () => {
+			clearTimeout(timer);
+		};
 	});
 </script>
 
 {#if phase !== 'done'}
 	<div
 		class="splash-overlay"
-		class:fading={phase === 'settled'}
-		ontransitionend={handleFadeEnd}
+		class:fading={phase === 'fading'}
+		ontransitionend={() => {
+			if (phase === 'fading') phase = 'done';
+		}}
 		role="presentation"
 	>
-		<div
-			class="splash-transformer"
-			class:rolling={phase === 'rolling' && !animationState.hasSettled}
-			style="--tx:{tx}vw; --ty:{ty}vh;"
-			onanimationend={handleAnimationEnd}
-			role="presentation"
-		>
-			<img
-				src={logoSvg}
-				alt=""
-				aria-hidden="true"
-				class="splash-logo"
-				class:rolling={phase === 'rolling' && !animationState.hasSettled}
-			/>
-		</div>
+		<img bind:this={splashLogoEl} src={logoSvg} alt="" aria-hidden="true" class="splash-logo" />
 	</div>
 {/if}
 
@@ -72,23 +125,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		overflow: hidden;
 		background: var(--color-surface, #dcfdf8);
-		transition: opacity 1s ease-in;
+		opacity: 1;
+		transition: opacity 0.5s ease-out;
 	}
 
 	.splash-overlay.fading {
 		opacity: 0;
-		pointer-events: none;
-	}
-
-	.splash-transformer {
-		will-change: transform;
-		transform-origin: center;
-	}
-
-	.splash-transformer.rolling {
-		animation: move 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-		animation-iteration-count: 1;
 	}
 
 	.splash-logo {
@@ -96,29 +140,12 @@
 		height: 40rem;
 		border-radius: 9999px;
 		will-change: transform;
-		transform-origin: center;
 	}
 
-	.splash-logo.rolling {
-		animation: roll 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-		animation-iteration-count: 1;
-	}
-
-	@keyframes move {
-		from {
-			transform: translate(0, 0) scale(1);
-		}
-		to {
-			transform: translate(var(--tx), var(--ty)) scale(0.4);
-		}
-	}
-
-	@keyframes roll {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
+	@media (max-width: 768px) {
+		.splash-logo {
+			width: 16rem;
+			height: 16rem;
 		}
 	}
 </style>

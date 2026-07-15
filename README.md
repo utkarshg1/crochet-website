@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.4.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.5.0-a7295a?style=flat-square)
 
 </div>
 
@@ -74,7 +74,11 @@
 - Custom brand palette (teal surfaces, rose primary, accent colors)
 - Glassmorphic navigation bar with ambient shadow
 - Organic mask shapes for images
-- Splash screen fly-in animation
+- Splash-to-hero FLIP animation — logo rolls like a tire & settles into position
+- 360° stationary spin on mobile with smooth overlay fade-out
+- Hardware-accelerated Web Animations API with Fast Out, Slow In easing
+- Font-aware layout guard preventing coordinate shift on reload
+- Staggered page content reveal after splash settles
 - Logo hover animations (wobble + scale)
 - Image lightbox with zoom
 - Staggered reveal animations on hero section
@@ -205,7 +209,7 @@ src/
 │   │   ├── Nav.svelte
 │   │   ├── ProductCard.svelte
 │   │   └── SplashScreen.svelte
-│   ├── animationState.svelte.ts   # Splash animation state
+│   ├── logoState.svelte.ts        # Splash animation settlement flag
 │   ├── cart.svelte.ts             # Cart store (localStorage)
 │   ├── database.types.ts          # Auto-generated Supabase types
 │   ├── supabase.ts                # Browser Supabase client
@@ -251,7 +255,7 @@ src/
 
 Custom utilities: `.glass` (glassmorphism), `.mask-organic` (clip-path shapes), `.shadow-ambient` (tonal shadows), `.chip` (organic pill shape).
 
-Keyframe animations: `yarn-bounce`, `gentle-float`, `slide-in-right`, `zoom-in`, `fade-in`.
+Keyframe animations: `yarn-bounce`, `gentle-float`, `slide-in-right`, `zoom-in`, `fade-in`, `logo-reveal` (hero logo scale-in after splash).
 
 ---
 

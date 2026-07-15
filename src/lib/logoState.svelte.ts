@@ -1,6 +1,6 @@
 let hasSettled = $state(false);
 
-export const animationState = {
+export const logoState = {
 	get hasSettled(): boolean {
 		return hasSettled;
 	},

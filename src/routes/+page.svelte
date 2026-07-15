@@ -6,7 +6,7 @@
 	import foreverFlowersImg from '$lib/assets/forever_flowers.png';
 	import crochetClothImg from '$lib/assets/crochet_cloth.png';
 	import ownerImg from '$lib/assets/owner.jpeg';
-	import { animationState } from '$lib/animationState.svelte';
+	import { logoState } from '$lib/logoState.svelte';
 
 	interface Props {
 		data: PageData;
@@ -19,7 +19,7 @@
 	let newsletterSubmitted = $state(false);
 
 	// ── Reveal state for hero product images ──────────────────────────────────────
-	let revealed = $derived(animationState.hasSettled);
+	let revealed = $derived(logoState.hasSettled);
 
 	// ── Lightbox state ─────────────────────────────────────────────────────────
 	let lightboxSrc = $state('');
@@ -208,13 +208,17 @@
 
 		<!-- RIGHT · brand logo + product images ──────────────────────────── -->
 		<div class="relative flex items-center justify-center md:col-span-2" style="min-height: 420px;">
-			<!-- Logo center -->
-			<img
-				src={logoSvg}
-				alt="Krafted Loops Studio logo"
-				data-splash-target
-				class="shadow-ambient-lg relative z-10 h-48 w-48 rounded-full transition-all duration-700 hover:scale-105 hover:rotate-[-8deg] md:h-64 md:w-64"
-			/>
+			<!-- Logo center — exclusive gate: only exists in DOM after splash is gone -->
+			{#if logoState.hasSettled}
+				<img
+					src={logoSvg}
+					alt="Krafted Loops Studio logo"
+					class="shadow-ambient-lg animate-logo-reveal relative z-10 h-48 w-48 rounded-full
+					   transition-all duration-700 hover:scale-105 hover:rotate-[-8deg] md:h-64 md:w-64"
+				/>
+			{:else}
+				<div data-splash-target class="h-48 w-48 md:h-64 md:w-64" aria-hidden="true"></div>
+			{/if}
 
 			<!-- Crochet Cloth — top right diagonal -->
 			<button
@@ -842,3 +846,20 @@
 		{/if}
 	</div>
 </section>
+
+<style>
+	@keyframes logo-reveal {
+		from {
+			opacity: 0;
+			transform: scale(0.92);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	.animate-logo-reveal {
+		animation: logo-reveal 0.6s ease-out forwards;
+	}
+</style>
