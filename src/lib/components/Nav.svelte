@@ -43,10 +43,10 @@
   add a bottom border, just the ambient shadow so it lifts off the page naturally.
 -->
 <header class="glass shadow-ambient fixed top-0 right-0 left-0 z-50">
-	<nav class="mx-auto max-w-7xl pr-6 pl-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-		<div class="flex h-16 items-center justify-between gap-4">
+	<nav class="mx-auto max-w-7xl px-3 xs:px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
+		<div class="flex h-16 items-center justify-between gap-2 xs:gap-3 sm:gap-4">
 			<!-- ── Logo + Brand name ──────────────────────────────────────────── -->
-			<a href="/" class="group flex shrink-0 items-center gap-3">
+			<a href="/" class="group flex shrink-0 items-center gap-2 sm:gap-3">
 				<img
 					src={logoSvg}
 					alt=""
@@ -54,12 +54,14 @@
 					aria-hidden="true"
 				/>
 				<span
-					class="hidden font-display text-lg leading-tight font-semibold text-on-surface sm:block"
+					class="hidden font-display text-lg leading-none font-semibold text-on-surface sm:block"
 				>
 					Krafted Loops Studio
 				</span>
 				<!-- Short name on small screens -->
-				<span class="font-display text-lg leading-tight font-semibold text-on-surface md:hidden">
+				<span
+					class="font-display text-base leading-none font-semibold text-on-surface sm:text-lg md:hidden"
+				>
 					Krafted Loops
 				</span>
 			</a>
@@ -95,7 +97,7 @@
 			</ul>
 
 			<!-- ── Right action icons (desktop: labelled, mobile: compact) ────── -->
-			<div class="flex items-center gap-0.5 md:gap-1.5">
+			<div class="flex items-center gap-0.5 sm:gap-1 md:gap-1.5">
 				<!-- ── Desktop: icon + label buttons ──────────────────────────── -->
 				<!-- Search -->
 				<a
@@ -213,7 +215,7 @@
 				<!-- ── Mobile: compact icons (no labels) ──────────────────────── -->
 				<a
 					href="/shop?q="
-					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface sm:h-9 sm:w-9 md:hidden"
 					aria-label="Search products"
 				>
 					<svg
@@ -232,7 +234,7 @@
 
 				<a
 					href="/wishlist"
-					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface sm:h-9 sm:w-9 md:hidden"
 					aria-label="Wishlist"
 				>
 					<svg
@@ -252,7 +254,7 @@
 
 				<a
 					href="/account"
-					class="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150 md:hidden
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-150 sm:h-9 sm:w-9 md:hidden
 						{currentPath.startsWith('/account')
 						? 'bg-primary/10 text-primary'
 						: 'bg-gradient-to-r from-primary to-primary-dim text-on-primary shadow-[0_2px_12px_0_rgba(167,41,90,0.3)]'}"
@@ -282,7 +284,7 @@
 
 				<button
 					onclick={() => (cartOpen = true)}
-					class="relative flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface sm:h-9 sm:w-9 md:hidden"
 					aria-label="Open bag — {cart.count} {cart.count === 1 ? 'item' : 'items'}"
 				>
 					<svg
@@ -311,7 +313,7 @@
 				<!-- Mobile hamburger -->
 				<button
 					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface sm:h-9 sm:w-9 md:hidden"
 					aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileMenuOpen}
 				>
@@ -336,9 +338,9 @@
 							stroke-width="2"
 							stroke-linecap="round"
 						>
-							<line x1="3" y1="6" x2="21" y2="6" />
-							<line x1="3" y1="12" x2="21" y2="12" />
-							<line x1="3" y1="18" x2="21" y2="18" />
+							<line x1="4" y1="6" x2="20" y2="6" />
+							<line x1="4" y1="12" x2="20" y2="12" />
+							<line x1="4" y1="18" x2="20" y2="18" />
 						</svg>
 					{/if}
 				</button>

@@ -3,6 +3,9 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
+	/* Narrow-mobile breakpoint (< 380 px) */
+	--breakpoint-xs: 380px;
+
 	/* Brand colors */
 	--color-primary: #a7295a;
 	--color-primary-dim: #8a1f48;
