@@ -59,7 +59,7 @@
 					Krafted Loops Studio
 				</span>
 				<!-- Short name on small screens -->
-				<span class="font-display text-lg leading-tight font-semibold text-on-surface sm:hidden">
+				<span class="font-display text-lg leading-tight font-semibold text-on-surface md:hidden">
 					Krafted Loops
 				</span>
 			</a>
@@ -95,7 +95,7 @@
 			</ul>
 
 			<!-- ── Right action icons (desktop: labelled, mobile: compact) ────── -->
-			<div class="flex items-center gap-1">
+			<div class="flex items-center gap-0.5">
 				<!-- ── Desktop: icon + label buttons ──────────────────────────── -->
 				<!-- Search -->
 				<a
@@ -213,7 +213,7 @@
 				<!-- ── Mobile: compact icons (no labels) ──────────────────────── -->
 				<a
 					href="/shop?q="
-					class="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
 					aria-label="Search products"
 				>
 					<svg
@@ -232,7 +232,7 @@
 
 				<a
 					href="/wishlist"
-					class="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
 					aria-label="Wishlist"
 				>
 					<svg
@@ -252,7 +252,7 @@
 
 				<a
 					href="/account"
-					class="flex h-10 w-10 items-center justify-center rounded-full transition-all duration-150 md:hidden
+					class="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-150 md:hidden
 						{currentPath.startsWith('/account')
 						? 'bg-primary/10 text-primary'
 						: 'bg-gradient-to-r from-primary to-primary-dim text-on-primary shadow-[0_2px_12px_0_rgba(167,41,90,0.3)]'}"
@@ -282,7 +282,7 @@
 
 				<button
 					onclick={() => (cartOpen = true)}
-					class="relative flex h-10 w-10 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="relative flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
 					aria-label="Open bag — {cart.count} {cart.count === 1 ? 'item' : 'items'}"
 				>
 					<svg
@@ -311,7 +311,7 @@
 				<!-- Mobile hamburger -->
 				<button
 					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-					class="ml-1 flex h-10 w-10 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
 					aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileMenuOpen}
 				>

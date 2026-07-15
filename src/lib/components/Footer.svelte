@@ -294,12 +294,12 @@
 	<button
 		onclick={scrollToTop}
 		class="
-      shadow-ambient-lg fixed right-6 bottom-6
-      z-40 flex items-center gap-2 rounded-full
-      bg-gradient-to-r from-primary to-primary-dim px-4
-      py-2.5 text-sm font-semibold text-white
-      transition-all duration-200
-      hover:brightness-110 active:brightness-95
+      shadow-ambient-lg fixed right-4 bottom-6 z-40
+      flex items-center gap-2 rounded-full bg-gradient-to-r
+      from-primary to-primary-dim px-4 py-2.5
+      text-sm font-semibold text-white transition-all
+      duration-200 hover:brightness-110
+      active:brightness-95 md:right-6
     "
 		aria-label="Scroll back to top"
 	>
@@ -315,6 +315,6 @@
 			<line x1="12" y1="19" x2="12" y2="5" />
 			<polyline points="5 12 12 5 19 12" />
 		</svg>
-		Back to top
+		<span class="hidden sm:inline">Back to top</span>
 	</button>
 {/if}
