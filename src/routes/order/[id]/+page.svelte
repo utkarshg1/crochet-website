@@ -27,18 +27,29 @@
 
 <svelte:head>
 	<title>Order Confirmed — Krafted Loops Studio</title>
-	<meta name="description" content="Your order has been placed successfully. Thank you for supporting handmade!" />
+	<meta
+		name="description"
+		content="Your order has been placed successfully. Thank you for supporting handmade!"
+	/>
 </svelte:head>
 
 <!-- ── Success hero ──────────────────────────────────────────────────────────── -->
 <section class="bg-surface-low py-16 text-center">
 	<div class="mx-auto max-w-xl px-4">
 		<!-- Animated checkmark -->
-		<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10">
+		<div
+			class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10"
+		>
 			<svg viewBox="0 0 52 52" class="h-10 w-10" fill="none">
-				<circle cx="26" cy="26" r="25" stroke="#00675d" stroke-width="2"/>
-				<path d="M14 27 L22 35 L38 19" stroke="#00675d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-					style="stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw-check 0.6s 0.3s ease forwards;" />
+				<circle cx="26" cy="26" r="25" stroke="#00675d" stroke-width="2" />
+				<path
+					d="M14 27 L22 35 L38 19"
+					stroke="#00675d"
+					stroke-width="3"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					style="stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw-check 0.6s 0.3s ease forwards;"
+				/>
 			</svg>
 		</div>
 		<h1 class="font-display text-4xl font-semibold text-primary">
@@ -47,7 +58,9 @@
 		<p class="mt-3 font-body text-base text-on-surface-muted">
 			Your order has been placed successfully. We're already getting the yarn ready!
 		</p>
-		<span class="chip mt-4 inline-block bg-secondary-container px-5 py-2 font-body text-sm font-semibold text-on-secondary-container">
+		<span
+			class="chip mt-4 inline-block bg-secondary-container px-5 py-2 font-body text-sm font-semibold text-on-secondary-container"
+		>
 			Order #{order.order_number}
 		</span>
 	</div>
@@ -57,32 +70,42 @@
 <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 	<div class="grid gap-6 md:grid-cols-2">
 		<!-- Order items -->
-		<div class="rounded-3xl bg-surface-card p-6 shadow-ambient md:col-span-2">
+		<div class="shadow-ambient rounded-3xl bg-surface-card p-6 md:col-span-2">
 			<div class="mb-4 flex items-center justify-between">
 				<h2 class="font-display text-xl font-semibold text-on-surface">Items Ordered</h2>
-				<span class="chip bg-{statusInfo.color.split(' ')[0]} px-3 py-1 font-body text-xs font-semibold {statusInfo.color}">
+				<span
+					class="chip bg-{statusInfo.color.split(
+						' '
+					)[0]} px-3 py-1 font-body text-xs font-semibold {statusInfo.color}"
+				>
 					{statusInfo.label}
 				</span>
 			</div>
 
-			<ul class="divide-y-0 space-y-4">
+			<ul class="space-y-4 divide-y-0">
 				{#each items as item (item.product_id + (item.color ?? ''))}
 					<li class="flex items-center gap-4 py-3">
-						<div class="h-16 w-16 flex-shrink-0 rounded-2xl bg-surface-high flex items-center justify-center overflow-hidden">
+						<div
+							class="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-surface-high"
+						>
 							{#if item.image_url && !item.image_url.startsWith('/placeholder')}
 								<img src={item.image_url} alt={item.image_alt} class="h-full w-full object-cover" />
 							{:else}
 								<span class="text-2xl" aria-hidden="true">🧶</span>
 							{/if}
 						</div>
-						<div class="flex-1 min-w-0">
+						<div class="min-w-0 flex-1">
 							<p class="font-body font-medium text-on-surface">{item.title}</p>
 							{#if item.color}
 								<p class="font-body text-xs text-on-surface-muted">Colour: {item.color}</p>
 							{/if}
-							<p class="font-body text-xs text-on-surface-muted">Qty: {item.qty} × {formatPrice(item.price_paise)}</p>
+							<p class="font-body text-xs text-on-surface-muted">
+								Qty: {item.qty} × {formatPrice(item.price_paise)}
+							</p>
 						</div>
-						<p class="font-body font-semibold text-primary">{formatPrice(item.price_paise * item.qty)}</p>
+						<p class="font-body font-semibold text-primary">
+							{formatPrice(item.price_paise * item.qty)}
+						</p>
 					</li>
 				{/each}
 			</ul>
@@ -94,22 +117,24 @@
 				</div>
 				<div class="flex justify-between font-body text-sm text-on-surface">
 					<span>Shipping</span>
-					<span class={order.shipping_paise === 0 ? 'text-secondary font-semibold' : ''}>
+					<span class={order.shipping_paise === 0 ? 'font-semibold text-secondary' : ''}>
 						{order.shipping_paise === 0 ? 'FREE' : formatPrice(order.shipping_paise)}
 					</span>
 				</div>
 				<hr class="border-surface-high" />
 				<div class="flex justify-between">
 					<span class="font-body font-semibold text-on-surface">Total</span>
-					<span class="font-display text-xl font-semibold text-on-surface">{formatPrice(order.total_paise)}</span>
+					<span class="font-display text-xl font-semibold text-on-surface"
+						>{formatPrice(order.total_paise)}</span
+					>
 				</div>
 			</div>
 		</div>
 
 		<!-- Shipping address -->
-		<div class="rounded-3xl bg-surface-card p-6 shadow-ambient">
+		<div class="shadow-ambient rounded-3xl bg-surface-card p-6">
 			<h2 class="mb-3 font-display text-lg font-semibold text-on-surface">Shipping To</h2>
-			<address class="not-italic font-body text-sm text-on-surface-muted leading-relaxed">
+			<address class="font-body text-sm leading-relaxed text-on-surface-muted not-italic">
 				<p class="font-semibold text-on-surface">{address.full_name}</p>
 				<p>{address.address_line1}</p>
 				{#if address.address_line2}<p>{address.address_line2}</p>{/if}
@@ -119,11 +144,14 @@
 		</div>
 
 		<!-- Dispatch note -->
-		<div class="rounded-3xl bg-secondary-container p-6 shadow-ambient">
-			<h2 class="mb-2 font-display text-lg font-semibold text-on-secondary-container">What's Next?</h2>
-			<p class="font-body text-sm text-on-secondary-container/80 leading-relaxed">
-				🧶 Your item is being handcrafted with love by Kalyani.<br/>
-				Allow <strong>3–5 business days</strong> for dispatch. You'll receive a shipping notification via email.
+		<div class="shadow-ambient rounded-3xl bg-secondary-container p-6">
+			<h2 class="mb-2 font-display text-lg font-semibold text-on-secondary-container">
+				What's Next?
+			</h2>
+			<p class="font-body text-sm leading-relaxed text-on-secondary-container/80">
+				🧶 Your item is being handcrafted with love by Kalyani.<br />
+				Allow <strong>3–5 business days</strong> for dispatch. You'll receive a shipping notification
+				via email.
 			</p>
 			{#if order.guest_email}
 				<p class="mt-3 font-body text-xs text-on-secondary-container/70">
@@ -137,7 +165,7 @@
 	<div class="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
 		<a
 			href="/shop"
-			class="rounded-full bg-gradient-to-r from-primary to-primary-dim px-8 py-3 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 active:scale-95"
+			class="shadow-ambient rounded-full bg-gradient-to-r from-primary to-primary-dim px-8 py-3 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95"
 		>
 			Continue Shopping
 		</a>
@@ -152,13 +180,15 @@
 	<!-- Share section -->
 	<div class="mt-10 rounded-3xl bg-surface-low p-6 text-center">
 		<p class="font-display text-lg text-on-surface">Loved your experience?</p>
-		<p class="font-body text-sm text-on-surface-muted mt-1">Share the love with friends who appreciate handmade!</p>
+		<p class="mt-1 font-body text-sm text-on-surface-muted">
+			Share the love with friends who appreciate handmade!
+		</p>
 		<div class="mt-4 flex justify-center gap-3">
 			<a
 				href="https://wa.me/?text=Just%20ordered%20from%20Krafted%20Loops%20Studio%20-%20beautiful%20handmade%20crochet!%20Check%20them%20out!"
 				target="_blank"
 				rel="noopener"
-				class="rounded-full bg-surface-card px-4 py-2 font-body text-sm font-medium text-on-surface shadow-ambient transition-all hover:shadow-ambient-lg"
+				class="shadow-ambient hover:shadow-ambient-lg rounded-full bg-surface-card px-4 py-2 font-body text-sm font-medium text-on-surface transition-all"
 			>
 				📲 WhatsApp
 			</a>
@@ -166,7 +196,7 @@
 				href="https://www.instagram.com/"
 				target="_blank"
 				rel="noopener"
-				class="rounded-full bg-surface-card px-4 py-2 font-body text-sm font-medium text-on-surface shadow-ambient transition-all hover:shadow-ambient-lg"
+				class="shadow-ambient hover:shadow-ambient-lg rounded-full bg-surface-card px-4 py-2 font-body text-sm font-medium text-on-surface transition-all"
 			>
 				📸 Instagram
 			</a>
@@ -176,6 +206,8 @@
 
 <style>
 	@keyframes draw-check {
-		to { stroke-dashoffset: 0; }
+		to {
+			stroke-dashoffset: 0;
+		}
 	}
 </style>

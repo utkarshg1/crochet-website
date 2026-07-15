@@ -23,53 +23,61 @@
 			<p class="mt-1 font-body text-sm text-on-surface-muted">Krafted Loops Studio</p>
 		</div>
 
-		<div class="rounded-3xl bg-surface-card p-8 shadow-ambient">
+		<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
 			{#if errorMsg}
-				<div class="mb-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary">{errorMsg}</div>
+				<div class="mb-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary">
+					{errorMsg}
+				</div>
 			{/if}
 
 			{#if step === 'email'}
-				<p class="mb-5 font-body text-sm text-on-surface-muted">Enter your admin email to receive a sign-in code.</p>
+				<p class="mb-5 font-body text-sm text-on-surface-muted">
+					Enter your admin email to receive a sign-in code.
+				</p>
 				<form
 					method="POST"
 					action="?/sendOtp"
 					use:enhance={() => {
 						loading = true;
-						return async ({ update }) => { await update(); loading = false; };
+						return async ({ update }) => {
+							await update();
+							loading = false;
+						};
 					}}
 					class="space-y-4"
 				>
 					<div>
-						<label for="adm-email" class="mb-1.5 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Email</label>
+						<label
+							for="adm-email"
+							class="mb-1.5 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>Email</label
+						>
 						<input
 							id="adm-email"
 							name="email"
 							type="email"
 							required
 							autocomplete="email"
-							class="w-full rounded-2xl bg-surface-low px-4 py-3 font-body text-sm text-on-surface outline-none ring-1 ring-transparent transition focus:ring-primary"
+							class="w-full rounded-2xl bg-surface-low px-4 py-3 font-body text-sm text-on-surface ring-1 ring-transparent transition outline-none focus:ring-primary"
 							placeholder="admin@example.com"
 						/>
 					</div>
 					<button
 						type="submit"
 						disabled={loading}
-						class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white shadow-ambient transition hover:brightness-110 disabled:opacity-60"
+						class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
 					>
 						{loading ? 'Sending…' : 'Send Code'}
 					</button>
 				</form>
 			{:else}
 				<div class="text-center">
-					<div class="text-4xl mb-3">📧</div>
+					<div class="mb-3 text-4xl">📧</div>
 					<p class="font-display text-lg font-semibold text-on-surface">Check your email</p>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
 						Enter the 6-digit code sent to <strong class="text-on-surface">{sentEmail}</strong>
 					</p>
-					<form
-						method="POST"
-						action="?/verifyOtp"
-					>
+					<form method="POST" action="?/verifyOtp">
 						<input type="hidden" name="email" value={sentEmail} />
 						<input
 							name="token"
@@ -84,12 +92,15 @@
 						/>
 						<button
 							type="submit"
-							class="mt-4 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white shadow-ambient transition hover:brightness-110"
+							class="shadow-ambient mt-4 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white transition hover:brightness-110"
 						>
 							Sign In
 						</button>
 					</form>
-					<a href="/admin/login" class="mt-3 inline-block font-body text-xs text-on-surface-muted hover:text-primary">
+					<a
+						href="/admin/login"
+						class="mt-3 inline-block font-body text-xs text-on-surface-muted hover:text-primary"
+					>
 						← Different email
 					</a>
 				</div>

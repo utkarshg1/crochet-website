@@ -45,7 +45,8 @@ export const actions: Actions = {
 			type: 'magiclink'
 		});
 
-		if (error) return fail(400, { error: `${error.message} (${error.status})`, step: 'otp', email });
+		if (error)
+			return fail(400, { error: `${error.message} (${error.status})`, step: 'otp', email });
 
 		throw redirect(303, '/admin');
 	}

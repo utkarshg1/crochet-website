@@ -35,7 +35,7 @@
     -->
 		<label
 			for={inputId}
-			class="text-xs font-semibold uppercase tracking-widest text-on-surface-muted"
+			class="text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
 			style="font-variant: small-caps;"
 		>
 			{label}{#if required}<span class="ml-0.5 text-primary" aria-hidden="true">*</span>{/if}
@@ -53,9 +53,9 @@
 		aria-describedby={error && inputId ? `${inputId}-error` : undefined}
 		class="
       w-full rounded-xl border bg-surface-high px-4 py-3
-      font-body text-base text-on-surface placeholder:text-on-surface-muted/60
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40
+      font-body text-base text-on-surface transition-all
+      duration-200 placeholder:text-on-surface-muted/60
+      focus:border-primary/40 focus:ring-2 focus:ring-primary/40 focus:outline-none
       {error
 			? 'border-primary/50 bg-primary-container/10'
 			: 'border-on-surface/10 hover:border-on-surface/20'}
@@ -67,7 +67,10 @@
       Error sits below the field in primary (warm pink) — matches the brand
       palette instead of a jarring red that would clash with the minty surface
     -->
-		<p id={inputId ? `${inputId}-error` : undefined} class="text-xs text-primary font-medium mt-0.5">
+		<p
+			id={inputId ? `${inputId}-error` : undefined}
+			class="mt-0.5 text-xs font-medium text-primary"
+		>
 			{error}
 		</p>
 	{/if}

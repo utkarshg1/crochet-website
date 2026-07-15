@@ -31,8 +31,7 @@
 
 	// ─── Derived product flags ────────────────────────────────────────────────
 	const isSale = $derived(
-		product.compare_at_price_paise !== null &&
-			product.compare_at_price_paise > product.price_paise
+		product.compare_at_price_paise !== null && product.compare_at_price_paise > product.price_paise
 	);
 	const isLowStock = $derived(product.stock > 0 && product.stock <= 5);
 	const isOutOfStock = $derived(product.stock === 0);
@@ -59,7 +58,7 @@
 	);
 
 	// ─── Color selector state ─────────────────────────────────────────────────
-	let selectedColor = $state<string>(product.colors[0] ?? '');
+	let selectedColor = $state('');
 
 	// Sync selectedColor when product changes
 	$effect(() => {
@@ -139,9 +138,9 @@
 		{
 			key: 'materials',
 			title: 'Materials & Care',
-			content: [product.materials, product.care_instructions]
-				.filter(Boolean)
-				.join('\n\n') || 'Details coming soon.'
+			content:
+				[product.materials, product.care_instructions].filter(Boolean).join('\n\n') ||
+				'Details coming soon.'
 		},
 		{
 			key: 'dimensions',
@@ -159,10 +158,7 @@
 
 <svelte:head>
 	<title>{product.title} — Krafted Loops Studio</title>
-	<meta
-		name="description"
-		content={product.description.slice(0, 160)}
-	/>
+	<meta name="description" content={product.description.slice(0, 160)} />
 	<!-- Open Graph -->
 	<meta property="og:title" content="{product.title} — Krafted Loops Studio" />
 	<meta property="og:description" content={product.description.slice(0, 160)} />
@@ -172,20 +168,20 @@
 </svelte:head>
 
 <!-- ─── Breadcrumb ──────────────────────────────────────────────────────────── -->
-<div class="bg-surface-low border-b border-on-surface/5">
-	<div class="max-w-7xl mx-auto px-4 py-4">
+<div class="border-b border-on-surface/5 bg-surface-low">
+	<div class="mx-auto max-w-7xl px-4 py-4">
 		<nav aria-label="Breadcrumb">
-			<ol class="flex items-center gap-2 text-sm font-body text-on-surface-muted flex-wrap">
+			<ol class="flex flex-wrap items-center gap-2 font-body text-sm text-on-surface-muted">
 				<li>
-					<a href="/" class="hover:text-primary transition-colors duration-200">Home</a>
+					<a href="/" class="transition-colors duration-200 hover:text-primary">Home</a>
 				</li>
 				<li aria-hidden="true" class="text-on-surface-muted/40">/</li>
 				<li>
-					<a href="/shop" class="hover:text-primary transition-colors duration-200">Shop</a>
+					<a href="/shop" class="transition-colors duration-200 hover:text-primary">Shop</a>
 				</li>
 				<li aria-hidden="true" class="text-on-surface-muted/40">/</li>
 				<li>
-					<span class="text-on-surface font-medium line-clamp-1" aria-current="page">
+					<span class="line-clamp-1 font-medium text-on-surface" aria-current="page">
 						{product.title}
 					</span>
 				</li>
@@ -195,18 +191,17 @@
 </div>
 
 <!-- ─── Main Product Section ──────────────────────────────────────────────────── -->
-<section class="max-w-7xl mx-auto px-4 py-10 lg:py-16">
-	<div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-
+<section class="mx-auto max-w-7xl px-4 py-10 lg:py-16">
+	<div class="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16">
 		<!-- ─── Left: Image Gallery ──────────────────────────────────────────── -->
 		<div class="flex flex-col gap-4">
 			<!-- Main image -->
-			<div class="relative rounded-3xl overflow-hidden bg-surface-low aspect-square shadow-ambient">
+			<div class="shadow-ambient relative aspect-square overflow-hidden rounded-3xl bg-surface-low">
 				{#if hasImages && activeImage}
 					<img
 						src={activeImage.url}
 						alt={activeImage.alt}
-						class="w-full h-full object-cover mask-organic transition-opacity duration-300"
+						class="mask-organic h-full w-full object-cover transition-opacity duration-300"
 						loading="eager"
 					/>
 				{:else}
@@ -215,7 +210,7 @@
 						the page feels intentional and on-brand rather than broken.
 					-->
 					<div
-						class="w-full h-full bg-gradient-to-br from-primary-container/40 to-secondary-container rounded-3xl flex items-center justify-center"
+						class="flex h-full w-full items-center justify-center rounded-3xl bg-gradient-to-br from-primary-container/40 to-secondary-container"
 						aria-label="Product image coming soon"
 					>
 						<span class="text-8xl opacity-60" role="img" aria-label="Yarn ball">🧶</span>
@@ -241,18 +236,18 @@
 							<button
 								onclick={() => (activeImageIndex = i)}
 								class="
-									flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden
+									h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl
 									transition-all duration-200
 									{activeImageIndex === i
-										? 'ring-2 ring-primary ring-offset-2 ring-offset-surface'
-										: 'opacity-60 hover:opacity-100'}
+									? 'ring-2 ring-primary ring-offset-2 ring-offset-surface'
+									: 'opacity-60 hover:opacity-100'}
 								"
 								aria-label="View image {i + 1}"
 							>
 								<img
 									src={image.url}
 									alt={image.alt}
-									class="w-full h-full object-cover"
+									class="h-full w-full object-cover"
 									loading="lazy"
 								/>
 							</button>
@@ -264,9 +259,8 @@
 
 		<!-- ─── Right: Product Details ───────────────────────────────────────── -->
 		<div class="flex flex-col gap-5">
-
 			<!-- Category + new badge row -->
-			<div class="flex items-center gap-2 flex-wrap">
+			<div class="flex flex-wrap items-center gap-2">
 				{#if product.category}
 					<CategoryChip category={product.category} />
 				{/if}
@@ -276,17 +270,17 @@
 			</div>
 
 			<!-- Product title -->
-			<h1 class="font-display text-4xl sm:text-5xl text-on-surface leading-tight">
+			<h1 class="font-display text-4xl leading-tight text-on-surface sm:text-5xl">
 				{product.title}
 			</h1>
 
 			<!-- Price row -->
-			<div class="flex items-baseline gap-3 flex-wrap">
-				<span class="font-body font-bold text-primary text-3xl">
+			<div class="flex flex-wrap items-baseline gap-3">
+				<span class="font-body text-3xl font-bold text-primary">
 					{formatPrice(product.price_paise)}
 				</span>
 				{#if isSale && product.compare_at_price_paise}
-					<span class="font-body text-on-surface-muted line-through text-lg">
+					<span class="font-body text-lg text-on-surface-muted line-through">
 						{formatPrice(product.compare_at_price_paise)}
 					</span>
 					<Badge variant="sale">SALE</Badge>
@@ -304,15 +298,17 @@
 					-->
 					<Badge variant="low-stock">Only {product.stock} left!</Badge>
 				{:else}
-					<span class="inline-flex items-center gap-1.5 font-body text-sm text-secondary font-medium">
-						<span class="w-2 h-2 rounded-full bg-secondary inline-block"></span>
+					<span
+						class="inline-flex items-center gap-1.5 font-body text-sm font-medium text-secondary"
+					>
+						<span class="inline-block h-2 w-2 rounded-full bg-secondary"></span>
 						In Stock
 					</span>
 				{/if}
 			</div>
 
 			<!-- Description -->
-			<p class="font-body text-on-surface-muted leading-relaxed">
+			<p class="font-body leading-relaxed text-on-surface-muted">
 				{product.description}
 			</p>
 
@@ -327,11 +323,11 @@
 							<button
 								onclick={() => (selectedColor = color)}
 								class="
-									rounded-full px-4 py-1.5 border text-sm font-body cursor-pointer
+									cursor-pointer rounded-full border px-4 py-1.5 font-body text-sm
 									transition-all duration-200
 									{selectedColor === color
-										? 'bg-primary text-white border-primary shadow-ambient'
-										: 'bg-surface-high border-on-surface/20 text-on-surface hover:border-primary/50 hover:bg-surface-card'}
+									? 'shadow-ambient border-primary bg-primary text-white'
+									: 'border-on-surface/20 bg-surface-high text-on-surface hover:border-primary/50 hover:bg-surface-card'}
 								"
 								aria-pressed={selectedColor === color}
 							>
@@ -352,7 +348,7 @@
 						makes them feel physically pressable.
 					-->
 					<div
-						class="bg-surface-high rounded-full flex items-center shadow-ambient"
+						class="shadow-ambient flex items-center rounded-full bg-surface-high"
 						role="group"
 						aria-label="Quantity"
 					>
@@ -360,15 +356,23 @@
 							onclick={decrementQty}
 							disabled={qty <= 1}
 							class="
-								w-9 h-9 rounded-full bg-surface-card shadow-ambient
-								flex items-center justify-center text-on-surface
-								hover:bg-surface-low transition-colors duration-150
-								disabled:opacity-40 disabled:cursor-not-allowed
-								focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1
+								shadow-ambient flex h-9 w-9 items-center
+								justify-center rounded-full bg-surface-card text-on-surface
+								transition-colors duration-150 hover:bg-surface-low
+								focus-visible:outline-2 focus-visible:outline-offset-1
+								focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40
 							"
 							aria-label="Decrease quantity"
 						>
-							<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+							<svg
+								class="h-3.5 w-3.5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								aria-hidden="true"
+							>
 								<path d="M5 12h14" />
 							</svg>
 						</button>
@@ -385,15 +389,23 @@
 							onclick={incrementQty}
 							disabled={qty >= product.stock}
 							class="
-								w-9 h-9 rounded-full bg-surface-card shadow-ambient
-								flex items-center justify-center text-on-surface
-								hover:bg-surface-low transition-colors duration-150
-								disabled:opacity-40 disabled:cursor-not-allowed
-								focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1
+								shadow-ambient flex h-9 w-9 items-center
+								justify-center rounded-full bg-surface-card text-on-surface
+								transition-colors duration-150 hover:bg-surface-low
+								focus-visible:outline-2 focus-visible:outline-offset-1
+								focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40
 							"
 							aria-label="Increase quantity"
 						>
-							<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+							<svg
+								class="h-3.5 w-3.5"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								aria-hidden="true"
+							>
 								<path d="M12 5v14M5 12h14" />
 							</svg>
 						</button>
@@ -411,35 +423,37 @@
 				onclick={handleAddToCart}
 				disabled={isOutOfStock || addState !== 'idle'}
 				class="
-					w-full flex items-center justify-center gap-2.5
-					bg-gradient-to-r from-primary to-primary-dim text-white
-					rounded-full font-body font-semibold text-lg
-					px-8 py-4
-					shadow-ambient hover:shadow-ambient-lg
-					hover:brightness-110 active:scale-[0.98]
+					shadow-ambient hover:shadow-ambient-lg flex w-full items-center
+					justify-center gap-2.5 rounded-full bg-gradient-to-r
+					from-primary to-primary-dim px-8 py-4
+					font-body text-lg
+					font-semibold text-white
 					transition-all duration-200
-					disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
-					focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
+					hover:brightness-110 focus-visible:outline-2
+					focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]
+					disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100
 				"
 				aria-live="polite"
 			>
 				{#if addState === 'adding'}
 					<!-- Spinner -->
 					<svg
-						class="w-5 h-5 animate-spin"
+						class="h-5 w-5 animate-spin"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
 						stroke-width="2.5"
 						aria-hidden="true"
 					>
-						<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+						<path
+							d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+						/>
 					</svg>
 					Adding…
 				{:else if addState === 'added'}
 					<!-- Checkmark -->
 					<svg
-						class="w-5 h-5"
+						class="h-5 w-5"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -456,7 +470,7 @@
 				{:else}
 					<!-- Shopping bag icon -->
 					<svg
-						class="w-5 h-5"
+						class="h-5 w-5"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -474,12 +488,12 @@
 			</button>
 
 			<!-- Shipping note -->
-			<p class="font-body text-sm text-on-surface-muted text-center leading-relaxed">
+			<p class="text-center font-body text-sm leading-relaxed text-on-surface-muted">
 				Free shipping on orders above ₹500 &nbsp;•&nbsp; Made to order in 3–5 days
 			</p>
 
 			<!-- ─── Accordion: Product Details ───────────────────────────────── -->
-			<div class="border-t border-on-surface/10 mt-2" role="list">
+			<div class="mt-2 border-t border-on-surface/10" role="list">
 				{#each accordionSections as section (section.key)}
 					<div class="border-b border-on-surface/10" role="listitem">
 						<!--
@@ -490,11 +504,11 @@
 						<button
 							onclick={() => toggleSection(section.key)}
 							class="
-								w-full flex items-center justify-between
+								flex w-full items-center justify-between
 								py-4 text-left
-								font-body font-semibold text-on-surface text-base
-								hover:text-primary transition-colors duration-200
-								focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus-visible:rounded
+								font-body text-base font-semibold text-on-surface
+								transition-colors duration-200 hover:text-primary
+								focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
 							"
 							aria-expanded={openSection === section.key}
 							aria-controls="accordion-{section.key}"
@@ -503,7 +517,7 @@
 							<!-- Chevron arrow, rotates when open -->
 							<svg
 								class="
-									w-4 h-4 text-on-surface-muted flex-shrink-0
+									h-4 w-4 flex-shrink-0 text-on-surface-muted
 									transition-transform duration-300
 									{openSection === section.key ? 'rotate-180' : ''}
 								"
@@ -532,7 +546,9 @@
 								{openSection === section.key ? 'max-h-96 pb-4' : 'max-h-0'}
 							"
 						>
-							<p class="font-body text-on-surface-muted text-sm leading-relaxed whitespace-pre-line">
+							<p
+								class="font-body text-sm leading-relaxed whitespace-pre-line text-on-surface-muted"
+							>
 								{section.content}
 							</p>
 						</div>
@@ -544,7 +560,9 @@
 			{#if product.tags && product.tags.length > 0}
 				<div class="flex flex-wrap gap-2 pt-2">
 					{#each product.tags as tag (tag)}
-						<span class="font-body text-xs bg-surface-high text-on-surface-muted rounded-full px-3 py-1">
+						<span
+							class="rounded-full bg-surface-high px-3 py-1 font-body text-xs text-on-surface-muted"
+						>
 							#{tag}
 						</span>
 					{/each}
@@ -556,22 +574,20 @@
 
 <!-- ─── Related Products ──────────────────────────────────────────────────────── -->
 {#if related.length > 0}
-	<section class="bg-surface-low py-16 px-4" aria-labelledby="related-heading">
-		<div class="max-w-7xl mx-auto">
-			<div class="flex items-end justify-between mb-8 gap-4">
+	<section class="bg-surface-low px-4 py-16" aria-labelledby="related-heading">
+		<div class="mx-auto max-w-7xl">
+			<div class="mb-8 flex items-end justify-between gap-4">
 				<h2 id="related-heading" class="font-display text-4xl text-on-surface">
 					You might also love
 				</h2>
-				<Button variant="ghost" href="/shop" class="flex-shrink-0 text-sm">
-					View all
-				</Button>
+				<Button variant="ghost" href="/shop" class="flex-shrink-0 text-sm">View all</Button>
 			</div>
 
 			<!--
 				2-col on mobile, 4-col on desktop — matching the homepage feature grid.
 				Gap-6 gives each card breathing room without wasting horizontal space.
 			-->
-			<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+			<div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
 				{#each related as relatedProduct (relatedProduct.id)}
 					<ProductCard product={relatedProduct} />
 				{/each}

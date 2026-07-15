@@ -177,15 +177,12 @@
 </section>
 
 <!-- ── Progress steps ──────────────────────────────────────────────────────── -->
-<div class="bg-surface-card border-b border-surface-high">
+<div class="border-b border-surface-high bg-surface-card">
 	<div class="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
 		<ol class="flex items-center gap-0" aria-label="Checkout progress">
-			{#each [
-				{ id: 'form', label: 'Details', num: 1 },
-				{ id: 'otp', label: 'Verify', num: 2 },
-				{ id: 'payment', label: 'Payment', num: 3 }
-			] as s, i}
-				{@const isComplete = (step === 'otp' && s.id === 'form') || (step === 'payment' && s.id !== 'payment')}
+			{#each [{ id: 'form', label: 'Details', num: 1 }, { id: 'otp', label: 'Verify', num: 2 }, { id: 'payment', label: 'Payment', num: 3 }] as s, i}
+				{@const isComplete =
+					(step === 'otp' && s.id === 'form') || (step === 'payment' && s.id !== 'payment')}
 				{@const isActive = step === s.id}
 				<li class="flex items-center">
 					<div class="flex items-center gap-2">
@@ -227,7 +224,7 @@
 
 			<!-- ── STEP 1: Guest Details Form ─────────────────────────────────── -->
 			{#if step === 'form'}
-				<div class="rounded-3xl bg-surface-card p-6 shadow-ambient sm:p-8">
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-6 sm:p-8">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Continue as Guest</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
 						No account required. We'll verify your email before payment.
@@ -247,7 +244,11 @@
 						class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
 					>
 						<div class="sm:col-span-2">
-							<label for="full_name" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Full Name *</label>
+							<label
+								for="full_name"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>Full Name *</label
+							>
 							<input
 								id="full_name"
 								name="full_name"
@@ -261,9 +262,16 @@
 						</div>
 
 						<div>
-							<label for="phone" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Phone *</label>
+							<label
+								for="phone"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>Phone *</label
+							>
 							<div class="flex gap-2">
-								<span class="flex items-center rounded-xl border border-on-surface/10 bg-surface-high px-3 font-body text-sm text-on-surface-muted">+91</span>
+								<span
+									class="flex items-center rounded-xl border border-on-surface/10 bg-surface-high px-3 font-body text-sm text-on-surface-muted"
+									>+91</span
+								>
 								<input
 									id="phone"
 									name="phone"
@@ -279,7 +287,11 @@
 						</div>
 
 						<div>
-							<label for="email" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Email *</label>
+							<label
+								for="email"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>Email *</label
+							>
 							<input
 								id="email"
 								name="email"
@@ -293,7 +305,11 @@
 						</div>
 
 						<div class="sm:col-span-2">
-							<label for="address_line1" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Address *</label>
+							<label
+								for="address_line1"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>Address *</label
+							>
 							<input
 								id="address_line1"
 								name="address_line1"
@@ -319,7 +335,11 @@
 						</div>
 
 						<div>
-							<label for="city" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">City *</label>
+							<label
+								for="city"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>City *</label
+							>
 							<input
 								id="city"
 								name="city"
@@ -333,7 +353,11 @@
 						</div>
 
 						<div>
-							<label for="state_name" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">State *</label>
+							<label
+								for="state_name"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>State *</label
+							>
 							<select
 								id="state_name"
 								name="state_name"
@@ -342,14 +366,18 @@
 								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none"
 							>
 								<option value="" disabled selected>Select state</option>
-								{#each ['Andhra Pradesh','Assam','Bihar','Delhi','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal'] as st}
+								{#each ['Andhra Pradesh', 'Assam', 'Bihar', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'] as st}
 									<option value={st}>{st}</option>
 								{/each}
 							</select>
 						</div>
 
 						<div>
-							<label for="pincode" class="mb-1 block font-body text-xs font-semibold uppercase tracking-wider text-on-surface-muted">Pincode *</label>
+							<label
+								for="pincode"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>Pincode *</label
+							>
 							<input
 								id="pincode"
 								name="pincode"
@@ -364,11 +392,11 @@
 							/>
 						</div>
 
-						<div class="sm:col-span-2 mt-2">
+						<div class="mt-2 sm:col-span-2">
 							<button
 								type="submit"
 								disabled={loading}
-								class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white shadow-ambient transition-all duration-200 hover:brightness-110 disabled:opacity-60 active:scale-95"
+								class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white transition-all duration-200 hover:brightness-110 active:scale-95 disabled:opacity-60"
 							>
 								{loading ? 'Sending code…' : 'Send Verification Code'}
 							</button>
@@ -380,10 +408,10 @@
 					</form>
 				</div>
 
-			<!-- ── STEP 2: OTP Verification ───────────────────────────────────── -->
+				<!-- ── STEP 2: OTP Verification ───────────────────────────────────── -->
 			{:else if step === 'otp'}
-				<div class="rounded-3xl bg-surface-card p-8 shadow-ambient text-center">
-					<div class="text-6xl mb-4" aria-hidden="true">📧</div>
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-8 text-center">
+					<div class="mb-4 text-6xl" aria-hidden="true">📧</div>
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Check your email</h2>
 					<p class="mt-2 font-body text-sm text-on-surface-muted">
 						We've sent a 6-digit code to <strong class="text-on-surface">{guestEmail}</strong>
@@ -418,7 +446,7 @@
 						<button
 							type="submit"
 							disabled={loading}
-							class="w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
+							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 						>
 							{loading ? 'Verifying…' : 'Verify & Continue'}
 						</button>
@@ -430,18 +458,31 @@
 								Resend code in <span class="font-semibold text-secondary">{resendCooldown}s</span>
 							</p>
 						{:else}
-							<form method="POST" action="?/sendOtp" use:enhance={() => {
-								return async ({ update }) => { await update(); startResendCooldown(); };
-							}}>
+							<form
+								method="POST"
+								action="?/sendOtp"
+								use:enhance={() => {
+									return async ({ update }) => {
+										await update();
+										startResendCooldown();
+									};
+								}}
+							>
 								<input type="hidden" name="email" value={guestEmail} />
 								<input type="hidden" name="full_name" value={formValues.full_name} />
-								<button type="submit" class="font-body text-sm text-secondary underline hover:no-underline">
+								<button
+									type="submit"
+									class="font-body text-sm text-secondary underline hover:no-underline"
+								>
 									Didn't get the code? Resend
 								</button>
 							</form>
 						{/if}
 						<button
-							onclick={() => { step = 'form'; pageError = null; }}
+							onclick={() => {
+								step = 'form';
+								pageError = null;
+							}}
 							class="block w-full font-body text-sm text-on-surface-muted hover:text-primary"
 						>
 							← Change email
@@ -449,32 +490,45 @@
 					</div>
 				</div>
 
-			<!-- ── STEP 3: Payment ─────────────────────────────────────────────── -->
+				<!-- ── STEP 3: Payment ─────────────────────────────────────────────── -->
 			{:else if step === 'payment'}
-				<div class="rounded-3xl bg-surface-card p-8 shadow-ambient">
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Complete Payment</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
 						Your email <strong class="text-secondary">{guestEmail}</strong> is verified ✓
 					</p>
 
 					<div class="mt-6 rounded-2xl bg-surface-low p-4">
-						<p class="font-body text-sm text-on-surface-muted mb-2">Order total</p>
+						<p class="mb-2 font-body text-sm text-on-surface-muted">Order total</p>
 						<p class="font-display text-3xl font-semibold text-on-surface">{formatPrice(total)}</p>
 						{#if calculateShipping(subtotal) === 0}
-							<p class="mt-1 font-body text-xs text-secondary font-semibold">Free shipping included 🎉</p>
+							<p class="mt-1 font-body text-xs font-semibold text-secondary">
+								Free shipping included 🎉
+							</p>
 						{/if}
 					</div>
 
 					<button
 						onclick={initiatePayment}
 						disabled={loading}
-						class="mt-6 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white shadow-ambient transition-all hover:brightness-110 disabled:opacity-60 active:scale-95"
+						class="shadow-ambient mt-6 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 					>
 						{#if loading}
 							<span class="inline-flex items-center gap-2">
 								<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									/>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+									/>
 								</svg>
 								Processing…
 							</span>
@@ -485,7 +539,8 @@
 
 					<div class="mt-4 flex items-center justify-center gap-4">
 						<span class="font-body text-xs text-on-surface-muted">🔒 256-bit SSL</span>
-						<span class="font-body text-xs text-on-surface-muted">💳 UPI · Cards · Net Banking</span>
+						<span class="font-body text-xs text-on-surface-muted">💳 UPI · Cards · Net Banking</span
+						>
 					</div>
 				</div>
 			{/if}
@@ -493,24 +548,36 @@
 
 		<!-- ═══ Right: Order summary ══════════════════════════════════════════ -->
 		<aside class="lg:w-80">
-			<div class="rounded-3xl bg-surface-card p-6 shadow-ambient lg:sticky lg:top-24">
+			<div class="shadow-ambient rounded-3xl bg-surface-card p-6 lg:sticky lg:top-24">
 				<h2 class="font-display text-xl font-semibold text-on-surface">Your Order</h2>
 				<ul class="mt-4 space-y-3">
 					{#each cart.items as item (item.product_id + (item.color ?? ''))}
 						<li class="flex items-center gap-3">
-							<div class="h-12 w-12 flex-shrink-0 rounded-xl bg-surface-high flex items-center justify-center overflow-hidden">
+							<div
+								class="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-high"
+							>
 								{#if item.image_url && !item.image_url.startsWith('/placeholder')}
-									<img src={item.image_url} alt={item.image_alt} class="h-full w-full object-cover" />
+									<img
+										src={item.image_url}
+										alt={item.image_alt}
+										class="h-full w-full object-cover"
+									/>
 								{:else}
 									<span class="text-xl" aria-hidden="true">🧶</span>
 								{/if}
 							</div>
 							<div class="min-w-0 flex-1">
-								<p class="font-body text-sm font-medium text-on-surface line-clamp-1">{item.title}</p>
-								{#if item.color}<p class="font-body text-xs text-on-surface-muted">{item.color}</p>{/if}
+								<p class="line-clamp-1 font-body text-sm font-medium text-on-surface">
+									{item.title}
+								</p>
+								{#if item.color}<p class="font-body text-xs text-on-surface-muted">
+										{item.color}
+									</p>{/if}
 							</div>
 							<div class="text-right">
-								<p class="font-body text-sm font-semibold text-on-surface">{formatPrice(item.price_paise * item.qty)}</p>
+								<p class="font-body text-sm font-semibold text-on-surface">
+									{formatPrice(item.price_paise * item.qty)}
+								</p>
 								<p class="font-body text-xs text-on-surface-muted">×{item.qty}</p>
 							</div>
 						</li>
@@ -531,7 +598,9 @@
 				<hr class="my-4 border-surface-high" />
 				<div class="flex justify-between">
 					<span class="font-body font-semibold text-on-surface">Total</span>
-					<span class="font-display text-xl font-semibold text-on-surface">{formatPrice(total)}</span>
+					<span class="font-display text-xl font-semibold text-on-surface"
+						>{formatPrice(total)}</span
+					>
 				</div>
 			</div>
 		</aside>
@@ -545,22 +614,29 @@
 	action="?/createOrder"
 	use:enhance={() => {
 		loading = true;
-		return async ({ update }) => { await update(); loading = false; };
+		return async ({ update }) => {
+			await update();
+			loading = false;
+		};
 	}}
 	class="hidden"
 	aria-hidden="true"
 >
 	<input type="hidden" name="email" value={guestEmail} />
 	<input type="hidden" name="items" value={JSON.stringify(cart.items)} />
-	<input type="hidden" name="shipping_address" value={JSON.stringify({
-		full_name: formValues.full_name,
-		phone: formValues.phone,
-		address_line1: formValues.address_line1,
-		address_line2: formValues.address_line2,
-		city: formValues.city,
-		state: formValues.state_name,
-		pincode: formValues.pincode
-	})} />
+	<input
+		type="hidden"
+		name="shipping_address"
+		value={JSON.stringify({
+			full_name: formValues.full_name,
+			phone: formValues.phone,
+			address_line1: formValues.address_line1,
+			address_line2: formValues.address_line2,
+			city: formValues.city,
+			state: formValues.state_name,
+			pincode: formValues.pincode
+		})}
+	/>
 	<input type="hidden" name="subtotal_paise" value={subtotal} />
 	<input type="hidden" name="shipping_paise" value={shipping} />
 	<input type="hidden" name="razorpay_order_id" value={hiddenRzpOrderId} />

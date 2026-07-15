@@ -6,6 +6,7 @@
 	import foreverFlowersImg from '$lib/assets/forever_flowers.png';
 	import crochetClothImg from '$lib/assets/crochet_cloth.png';
 	import ownerImg from '$lib/assets/owner.jpeg';
+	import { animationState } from '$lib/animationState.svelte';
 
 	interface Props {
 		data: PageData;
@@ -16,6 +17,9 @@
 	// ── Newsletter form state ────────────────────────────────────────────────────
 	let newsletterEmail = $state('');
 	let newsletterSubmitted = $state(false);
+
+	// ── Reveal state for hero product images ──────────────────────────────────────
+	let revealed = $derived(animationState.hasSettled);
 
 	// ── Lightbox state ─────────────────────────────────────────────────────────
 	let lightboxSrc = $state('');
@@ -208,6 +212,7 @@
 			<img
 				src={logoSvg}
 				alt="Krafted Loops Studio logo"
+				data-splash-target
 				class="shadow-ambient-lg relative z-10 h-48 w-48 rounded-full transition-all duration-700 hover:scale-105 hover:rotate-[-8deg] md:h-64 md:w-64"
 			/>
 
@@ -219,9 +224,10 @@
 				class="shadow-ambient-lg absolute top-2 right-0 z-20
 					   h-24 w-24 -rotate-6 cursor-pointer
 					   overflow-hidden rounded-2xl transition-all
-					   duration-500 ease-out hover:scale-105
+					   duration-700 ease-out hover:scale-105
 					   hover:rotate-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none
-					   md:top-0 md:-right-4 md:h-36 md:w-36"
+					   md:top-0 md:-right-4 md:h-36 md:w-36
+					   {revealed ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-4 scale-95 opacity-0'}"
 				aria-label="View Crochet Cloth — click to enlarge"
 			>
 				<img
@@ -237,12 +243,14 @@
 				type="button"
 				onclick={() =>
 					openLightbox(foreverFlowersImg, 'Forever Flowers — handcrafted crochet bouquets')}
-				class="shadow-ambient-lg absolute bottom-4 left-2 z-20
-					   h-24 w-24 -rotate-8 cursor-pointer
-					   overflow-hidden rounded-2xl transition-all
-					   duration-500 ease-out hover:scale-105
-					   hover:rotate-0 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:outline-none
-					   md:bottom-0 md:-left-6 md:h-36 md:w-36"
+				class="shadow-ambient-lg transition-delay-200 absolute bottom-4 left-2
+					   z-20 h-24 w-24 -rotate-8
+					   cursor-pointer overflow-hidden rounded-2xl
+					   transition-all duration-700 ease-out
+					   hover:scale-105 hover:rotate-0 focus-visible:ring-2 focus-visible:ring-secondary
+					   focus-visible:outline-none md:bottom-0 md:-left-6 md:h-36
+					   md:w-36
+					   {revealed ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-4 scale-95 opacity-0'}"
 				aria-label="View Forever Flowers — click to enlarge"
 			>
 				<img
@@ -305,16 +313,29 @@
 								category.slug
 							)} overflow-hidden"
 						>
-							<div
-								class="h-full w-full transition-transform duration-500 ease-out group-hover:scale-105"
-							></div>
+							{#if category.image_url}
+								<img
+									src={category.image_url}
+									alt={category.name}
+									class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+									loading="lazy"
+								/>
+							{:else}
+								<div
+									class="h-full w-full transition-transform duration-500 ease-out group-hover:scale-105"
+								></div>
+							{/if}
 						</div>
 
 						<h3 class="mb-1.5 font-display text-xl leading-snug font-semibold text-on-surface">
 							{category.name}
 						</h3>
 
-						{#if category.description}
+						{#if category.tagline}
+							<p class="mb-4 line-clamp-2 font-body text-sm leading-relaxed text-on-surface-muted">
+								{category.tagline}
+							</p>
+						{:else if category.description}
 							<p class="mb-4 line-clamp-2 font-body text-sm leading-relaxed text-on-surface-muted">
 								{category.description}
 							</p>
@@ -640,7 +661,78 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     SECTION 5 · NEWSLETTER
+     SECTION 5 · TESTIMONIALS
+     Three-column card grid with zoom-on-hover. Each card carries a star
+     rating, quote, customer name, location, and a product tag.
+     ─────────────────────────────────────────────────────────────────────── -->
+<section class="bg-surface py-24" aria-labelledby="testimonials-heading">
+	<div class="mx-auto max-w-7xl px-6 md:px-10 lg:px-16">
+		<!-- Section header -->
+		<div class="mb-12 text-center">
+			<p class="mb-3 font-body text-sm font-semibold tracking-widest text-secondary uppercase">
+				What Our Customers Say
+			</p>
+			<h2
+				id="testimonials-heading"
+				class="font-display text-4xl leading-tight font-bold text-on-surface md:text-5xl"
+			>
+				Loved Across India
+			</h2>
+		</div>
+
+		<!-- Testimonial cards -->
+		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+			{#each [{ stars: 5, quote: 'I ordered the Forever Flowers bouquet for my mom\u2019s birthday and she was in tears. The craftsmanship is unreal \u2014 every petal feels like a real flower made of love.', name: 'Priya Sharma', location: 'Mumbai', product: 'Forever Flowers' }, { stars: 5, quote: 'The crochet purse I got is my everyday companion. Everyone asks where I got it from. Kalyani\u2019s work is next level \u2014 you can feel the love in every stitch.', name: 'Ananya Reddy', location: 'Hyderabad', product: 'Crochet Purse' }, { stars: 5, quote: 'Bought a keychain and a charm set for my sister\u2019s wedding. The attention to detail is insane. She absolutely loved them \u2014 best handmade gift ever!', name: 'Meera Iyer', location: 'Bengaluru', product: 'Charms & Keychains' }] as testimonial}
+				<div
+					class="group shadow-ambient hover:shadow-ambient-lg flex flex-col rounded-3xl bg-surface-card p-8 transition-all
+						   duration-300 hover:-translate-y-1 hover:scale-[1.02]"
+				>
+					<!-- Star rating -->
+					<div class="mb-5 flex gap-1" aria-label="{testimonial.stars} out of 5 stars">
+						{#each Array(testimonial.stars) as _}
+							<span class="text-lg text-mustard" aria-hidden="true">&#9733;</span>
+						{/each}
+					</div>
+
+					<!-- Quote -->
+					<blockquote class="mb-6 flex-1 font-body text-base leading-relaxed text-on-surface-muted">
+						&ldquo;{testimonial.quote}&rdquo;
+					</blockquote>
+
+					<!-- Customer info -->
+					<div class="flex items-center gap-3">
+						<!-- Avatar circle with initials -->
+						<div
+							class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full
+								   bg-gradient-to-br from-primary/15 to-secondary-container font-display text-sm font-bold text-primary"
+						>
+							{testimonial.name
+								.split(' ')
+								.map((n: string) => n[0])
+								.join('')}
+						</div>
+						<div>
+							<p class="font-display text-sm font-semibold text-on-surface">
+								{testimonial.name}
+							</p>
+							<p class="font-body text-xs text-on-surface-muted">{testimonial.location}</p>
+						</div>
+						<!-- Product tag -->
+						<span
+							class="ml-auto rounded-full bg-secondary-container/50 px-3 py-1 font-body text-[11px]
+								   font-semibold text-secondary"
+						>
+							{testimonial.product}
+						</span>
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 6 · NEWSLETTER
      Solid primary background — the only section that inverts the palette.
      The glassmorphic form container reads as a "floating" input within the
      deep-coloured background, giving it dimension without breaking the brand.

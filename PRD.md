@@ -5,7 +5,7 @@
 **Version:** 1.7 (Claude-Ready – Handmade Crochet Only)  
 **Date:** 30 March 2026  
 **Prepared for:** Claude Code AI Agent (with Supabase MCP Server Access)  
-**Owner:** Kalyani Gaikwad  
+**Owner:** Kalyani Gaikwad
 
 ---
 
@@ -16,6 +16,7 @@ Build a beautiful, single-owner e-commerce website that sells **only handmade cr
 The website must feel warm, artisanal, and personal — highlighting the handmade nature of every item (yarn texture, craftsmanship, love put into each piece).
 
 **Core Technical Stack:**
+
 - **Frontend:** SvelteKit 2.x with smooth yarn-inspired animations
 - **Backend:** Supabase (Auth, PostgreSQL, Storage, Realtime, Edge Functions)
 - **Design:** Light theme only (no dark mode – per wife’s preference)
@@ -48,6 +49,7 @@ The website must feel warm, artisanal, and personal — highlighting the handmad
 ## 3. Product Focus – Handmade Crochet Only
 
 All products on the website must be **handmade crochet items** created by Kalyani Gaikwad. Examples include:
+
 - Amigurumi (stuffed toys, animals, dolls)
 - Home décor (coasters, wall hangings, baskets, table runners)
 - Accessories (bags, scrunchies, keychains, earrings)
@@ -55,7 +57,8 @@ All products on the website must be **handmade crochet items** created by Kalyan
 - Wearables (shawls, scarves, cardigans – if handmade crochet)
 - Seasonal & festival items (ornaments, gift sets)
 
-**Database & UI Note:**  
+**Database & UI Note:**
+
 - Categories should reflect crochet-specific groupings (e.g., Amigurumi, Home Décor, Baby Collection, Accessories, Seasonal).
 - Every product description must emphasize the handmade crochet aspect, materials (cotton yarn, acrylic, etc.), and time invested.
 - No support for non-crochet products.
@@ -79,6 +82,7 @@ All products on the website must be **handmade crochet items** created by Kalyan
 ## 5. Functional Requirements
 
 ### 5.1 Public Pages (No Auth Required)
+
 - **Homepage**: Hero section with provided video + logo, featured handmade crochet products, category cards (crochet-specific), “Our Story” about Kalyani’s crochet journey.
 - **Shop Page**: Responsive grid of handmade crochet items, filters (Category, Price, Color, New, On Sale), search by product name or tags.
 - **Product Detail Page (PDP)**: High-quality images showing crochet details, description highlighting handmade process, care instructions, dimensions, materials (yarn type).
@@ -86,6 +90,7 @@ All products on the website must be **handmade crochet items** created by Kalyan
 - Static pages: About Us (Kalyani’s handmade crochet story), Shipping & Returns, Privacy Policy.
 
 ### 5.2 Admin Panel (Integrated at `/admin` – Protected)
+
 - Dashboard: Recent orders, low stock handmade items, total sales
 - **Products Management**: Full CRUD for handmade crochet products
   - Fields: Title, slug, description (rich text emphasizing handmade), price (INR/paise), stock, category, multiple images (Supabase Storage), colors, dimensions, materials, care instructions, tags, is_featured, is_new
@@ -201,3 +206,4 @@ Please build the complete SvelteKit + Supabase project with:
 8. Beautiful, subtle yarn/crochet-inspired animations
 
 **Start by executing the Supabase schema**, then proceed with SvelteKit development.
+```

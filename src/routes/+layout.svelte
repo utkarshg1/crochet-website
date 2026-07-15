@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Nav from '$lib/components/Nav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import SplashScreen from '$lib/components/SplashScreen.svelte';
 	import type { LayoutData } from './$types';
 
 	interface Props {
@@ -35,7 +36,8 @@
   We use min-h-screen + flex-col on the wrapper so the footer is always pushed
   to the bottom even on short pages — no empty space between content and footer.
 -->
-<div class="flex flex-col min-h-screen">
+<div class="flex min-h-screen flex-col">
+	<SplashScreen />
 	<Nav />
 
 	<!--

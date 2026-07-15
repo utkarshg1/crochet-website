@@ -44,7 +44,7 @@
 				await supabase.from('wishlists').delete().eq('product_id', product.id);
 				onToggleWishlist?.(product.id, false);
 			} else {
-				await supabase.from('wishlists').insert({ product_id: product.id });
+				await supabase.from('wishlists').insert({ product_id: product.id } as never);
 				onToggleWishlist?.(product.id, true);
 			}
 		} catch {
@@ -86,26 +86,26 @@
 -->
 <article
 	class="
-  group relative flex flex-col bg-surface-card rounded-3xl shadow-ambient
-  hover:shadow-ambient-lg transition-shadow duration-300 overflow-hidden
+  group shadow-ambient hover:shadow-ambient-lg relative flex flex-col overflow-hidden
+  rounded-3xl bg-surface-card transition-shadow duration-300
 "
 >
 	<!-- Image link wrapper -->
-	<a href="/shop/{product.slug}" class="block relative overflow-hidden rounded-2xl m-3 mb-0">
+	<a href="/shop/{product.slug}" class="relative m-3 mb-0 block overflow-hidden rounded-2xl">
 		{#if primaryImage}
 			<img
 				src={primaryImage.url}
 				alt={primaryImage.alt}
 				class="
-          w-full aspect-square object-cover mask-organic
-          group-hover:scale-105 transition-transform duration-500 ease-out
+          mask-organic aspect-square w-full object-cover
+          transition-transform duration-500 ease-out group-hover:scale-105
         "
 				loading="lazy"
 			/>
 		{:else}
 			<!-- Graceful fallback when no image is attached to the product -->
 			<div
-				class="w-full aspect-square bg-surface-high flex items-center justify-center text-5xl mask-organic"
+				class="mask-organic flex aspect-square w-full items-center justify-center bg-surface-high text-5xl"
 			>
 				🧶
 			</div>
@@ -131,20 +131,32 @@
 		<button
 			onclick={handleToggleWishlist}
 			disabled={togglingWishlist}
-			class="absolute top-3 right-3 w-9 h-9 rounded-full bg-surface/80 backdrop-blur-sm
-				   flex items-center justify-center
-				   hover:bg-surface transition-colors duration-200
-				   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+			class="absolute top-3 right-3 flex h-9 w-9 items-center justify-center
+				   rounded-full bg-surface/80 backdrop-blur-sm
+				   transition-colors duration-200 hover:bg-surface
+				   focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
 			aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
 		>
-			<svg class="w-5 h-5 transition-colors duration-200 {wishlisted ? 'text-primary fill-primary' : 'text-on-surface-muted'}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+			<svg
+				class="h-5 w-5 transition-colors duration-200 {wishlisted
+					? 'fill-primary text-primary'
+					: 'text-on-surface-muted'}"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path
+					d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+				/>
 			</svg>
 		</button>
 	</a>
 
 	<!-- Card body -->
-	<div class="flex flex-col flex-1 gap-3 p-4 pt-3">
+	<div class="flex flex-1 flex-col gap-3 p-4 pt-3">
 		<!-- Category chip — only shown when category data is present -->
 		{#if product.category}
 			<Badge variant="category">{product.category.name}</Badge>
@@ -154,9 +166,9 @@
 		<a href="/shop/{product.slug}" class="group/title">
 			<h3
 				class="
-          font-display text-lg leading-snug text-on-surface
-          group-hover/title:text-primary transition-colors duration-200
-          line-clamp-2
+          line-clamp-2 font-display text-lg leading-snug
+          text-on-surface transition-colors duration-200
+          group-hover/title:text-primary
         "
 			>
 				{product.title}
@@ -164,8 +176,8 @@
 		</a>
 
 		<!-- Price row — grows to push button to bottom -->
-		<div class="flex items-baseline gap-2 mt-auto">
-			<span class="font-body font-bold text-primary text-lg">
+		<div class="mt-auto flex items-baseline gap-2">
+			<span class="font-body text-lg font-bold text-primary">
 				{formatPrice(product.price_paise)}
 			</span>
 			{#if isSale && product.compare_at_price_paise}
@@ -185,12 +197,12 @@
 			size="sm"
 			disabled={isOutOfStock || adding}
 			onclick={handleAddToCart}
-			class="w-full mt-1"
+			class="mt-1 w-full"
 		>
 			{#if adding}
 				<!-- Simple inline check rather than a heavy animation library import -->
 				<svg
-					class="w-4 h-4 animate-spin"
+					class="h-4 w-4 animate-spin"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"
@@ -203,7 +215,7 @@
 				Sold Out
 			{:else}
 				<svg
-					class="w-4 h-4"
+					class="h-4 w-4"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"

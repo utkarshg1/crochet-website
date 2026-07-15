@@ -9,7 +9,9 @@ export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession 
 	// Build base query — always include category relation for chips/filters
 	let query = supabase
 		.from('products')
-		.select('*, category:categories(id, name, slug, description, image_url, display_order, created_at)');
+		.select(
+			'*, category:categories(id, name, slug, description, image_url, display_order, created_at)'
+		);
 
 	// Category filter: filter by the slug of the joined category row
 	// Using .eq on the foreign table column requires PostgREST dot-notation
@@ -48,7 +50,9 @@ export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession 
 			: Promise.resolve({ data: [] })
 	]);
 
-	const wishlistIds = new Set((wishlistData ?? []).map((w: { product_id: string }) => w.product_id));
+	const wishlistIds = new Set(
+		(wishlistData ?? []).map((w: { product_id: string }) => w.product_id)
+	);
 
 	return {
 		products: (products ?? []) as unknown as Product[],

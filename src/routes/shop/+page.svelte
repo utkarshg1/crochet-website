@@ -22,9 +22,9 @@
 	let filtersOpen = $state(false);
 
 	// Local copies of filter values so controls are reactive before navigation
-	let selectedCategory = $state(data.category ?? '');
-	let selectedSort = $state(data.sort ?? 'newest');
-	let searchQuery = $state(data.q ?? '');
+	let selectedCategory = $state('');
+	let selectedSort = $state('newest');
+	let searchQuery = $state('');
 
 	// Sync local state when data prop changes (e.g. after navigation)
 	$effect(() => {
@@ -38,20 +38,26 @@
 	let maxPrice = $state<string>('');
 
 	// Wishlist state — Set of product IDs the user has wishlisted
-	let wishlistIds = $state(new Set(data.wishlistIds as Set<string>));
+	let wishlistIds = $state(new Set<string>());
+
+	$effect(() => {
+		wishlistIds = new Set(data.wishlistIds as Set<string>);
+	});
 
 	function handleToggleWishlist(productId: string, isWishlisted: boolean) {
 		wishlistIds = new Set(
-			isWishlisted
-				? [...wishlistIds, productId]
-				: [...wishlistIds].filter((id) => id !== productId)
+			isWishlisted ? [...wishlistIds, productId] : [...wishlistIds].filter((id) => id !== productId)
 		);
 	}
 
 	// ─── Derived values ───────────────────────────────────────────────────────
 	// Whether any filter is currently active (used to show "Clear" button)
 	const hasActiveFilters = $derived(
-		selectedCategory !== '' || selectedSort !== 'newest' || searchQuery !== '' || minPrice !== '' || maxPrice !== ''
+		selectedCategory !== '' ||
+			selectedSort !== 'newest' ||
+			searchQuery !== '' ||
+			minPrice !== '' ||
+			maxPrice !== ''
 	);
 
 	// Apply client-side price range filter on top of server-filtered list.
@@ -124,34 +130,34 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <!-- ─── Page Header ─────────────────────────────────────────────────────────── -->
-<section class="bg-surface-low py-16 px-4">
-	<div class="max-w-7xl mx-auto">
+<section class="bg-surface-low px-4 py-16">
+	<div class="mx-auto max-w-7xl">
 		<!-- Breadcrumb -->
 		<nav aria-label="Breadcrumb" class="mb-6">
-			<ol class="flex items-center gap-2 text-sm font-body text-on-surface-muted">
+			<ol class="flex items-center gap-2 font-body text-sm text-on-surface-muted">
 				<li>
-					<a href="/" class="hover:text-primary transition-colors duration-200">Home</a>
+					<a href="/" class="transition-colors duration-200 hover:text-primary">Home</a>
 				</li>
 				<li aria-hidden="true" class="text-on-surface-muted/50">/</li>
 				<li>
-					<span class="text-on-surface font-semibold" aria-current="page">Shop</span>
+					<span class="font-semibold text-on-surface" aria-current="page">Shop</span>
 				</li>
 			</ol>
 		</nav>
 
-		<div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>
-				<h1 class="font-display text-5xl sm:text-6xl text-on-surface leading-tight">
+				<h1 class="font-display text-5xl leading-tight text-on-surface sm:text-6xl">
 					The Collection
 				</h1>
-				<p class="mt-2 font-body text-on-surface-muted text-lg">
+				<p class="mt-2 font-body text-lg text-on-surface-muted">
 					Handmade with care, one loop at a time.
 				</p>
 			</div>
 
 			<!-- Product count — visible on desktop header, hidden on mobile (shown near grid) -->
-			<p class="hidden sm:block font-body text-sm text-on-surface-muted">
-				Showing <span class="text-on-surface font-semibold">{filteredProducts().length}</span>
+			<p class="hidden font-body text-sm text-on-surface-muted sm:block">
+				Showing <span class="font-semibold text-on-surface">{filteredProducts().length}</span>
 				{filteredProducts().length === 1 ? 'piece' : 'pieces'}
 			</p>
 		</div>
@@ -159,26 +165,25 @@
 </section>
 
 <!-- ─── Main Layout: Sidebar + Grid ──────────────────────────────────────────── -->
-<div class="max-w-7xl mx-auto px-4 py-10">
-	<div class="flex gap-8 items-start">
-
+<div class="mx-auto max-w-7xl px-4 py-10">
+	<div class="flex items-start gap-8">
 		<!-- ─── Desktop Sidebar ─────────────────────────────────────────────────── -->
 		<!--
 			Width is fixed at 280px on desktop; on mobile it's hidden behind a drawer.
 			Using sticky so it stays in view while the user scrolls the product grid.
 		-->
 		<aside
-			class="hidden lg:block w-[280px] flex-shrink-0 sticky top-24"
+			class="sticky top-24 hidden w-[280px] flex-shrink-0 lg:block"
 			aria-label="Product filters"
 		>
-			<div class="bg-surface-card rounded-3xl shadow-ambient p-6 flex flex-col gap-7">
+			<div class="shadow-ambient flex flex-col gap-7 rounded-3xl bg-surface-card p-6">
 				<!-- Sidebar heading -->
 				<div class="flex items-center justify-between">
 					<h2 class="font-display text-2xl text-on-surface">Filter</h2>
 					{#if hasActiveFilters}
 						<button
 							onclick={clearFilters}
-							class="font-body text-xs text-primary hover:text-primary-dim underline underline-offset-2 transition-colors duration-200"
+							class="font-body text-xs text-primary underline underline-offset-2 transition-colors duration-200 hover:text-primary-dim"
 						>
 							Clear all
 						</button>
@@ -187,7 +192,9 @@
 
 				<!-- Category filter -->
 				<div>
-					<h3 class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted mb-3">
+					<h3
+						class="mb-3 font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
+					>
 						Category
 					</h3>
 					<div class="flex flex-col gap-2">
@@ -195,20 +202,17 @@
 						<button
 							onclick={() => applyCategory('')}
 							class="
-								chip inline-flex items-center px-4 py-2 text-sm font-semibold text-left
+								chip inline-flex items-center px-4 py-2 text-left text-sm font-semibold
 								transition-all duration-200
 								{selectedCategory === ''
-									? 'bg-secondary text-white shadow-ambient'
-									: 'bg-secondary-container text-on-secondary-container hover:bg-secondary/20'}
+								? 'shadow-ambient bg-secondary text-white'
+								: 'bg-secondary-container text-on-secondary-container hover:bg-secondary/20'}
 							"
 						>
 							All Products
 						</button>
 						{#each categories as cat (cat.id)}
-							<CategoryChip
-								category={cat}
-								active={selectedCategory === cat.slug}
-							/>
+							<CategoryChip category={cat} active={selectedCategory === cat.slug} />
 						{/each}
 					</div>
 				</div>
@@ -217,7 +221,7 @@
 				<div>
 					<label
 						for="sort-select"
-						class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted block mb-3"
+						class="mb-3 block font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
 					>
 						Sort by
 					</label>
@@ -226,10 +230,10 @@
 						value={selectedSort}
 						onchange={(e) => applySort((e.currentTarget as HTMLSelectElement).value)}
 						class="
-							w-full bg-surface-high rounded-xl border border-on-surface/10
-							font-body text-sm text-on-surface px-3 py-2.5
-							focus:outline-none focus:ring-2 focus:ring-primary/40
-							transition-colors duration-200 cursor-pointer
+							w-full cursor-pointer rounded-xl border border-on-surface/10
+							bg-surface-high px-3 py-2.5 font-body text-sm
+							text-on-surface transition-colors duration-200
+							focus:ring-2 focus:ring-primary/40 focus:outline-none
 						"
 					>
 						<option value="newest">Newest</option>
@@ -241,7 +245,9 @@
 
 				<!-- Price range -->
 				<div>
-					<h3 class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted mb-3">
+					<h3
+						class="mb-3 font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
+					>
 						Price Range (₹)
 					</h3>
 					<div class="flex items-center gap-2">
@@ -251,25 +257,25 @@
 							bind:value={minPrice}
 							min="0"
 							class="
-								w-full bg-surface-high rounded-xl border border-on-surface/10
-								font-body text-sm text-on-surface px-3 py-2.5
-								focus:outline-none focus:ring-2 focus:ring-primary/40
-								placeholder:text-on-surface-muted/60
-								transition-colors duration-200
+								w-full rounded-xl border border-on-surface/10 bg-surface-high
+								px-3 py-2.5 font-body text-sm text-on-surface
+								transition-colors duration-200 placeholder:text-on-surface-muted/60
+								focus:ring-2
+								focus:ring-primary/40 focus:outline-none
 							"
 						/>
-						<span class="text-on-surface-muted font-body text-sm flex-shrink-0">to</span>
+						<span class="flex-shrink-0 font-body text-sm text-on-surface-muted">to</span>
 						<input
 							type="number"
 							placeholder="Max"
 							bind:value={maxPrice}
 							min="0"
 							class="
-								w-full bg-surface-high rounded-xl border border-on-surface/10
-								font-body text-sm text-on-surface px-3 py-2.5
-								focus:outline-none focus:ring-2 focus:ring-primary/40
-								placeholder:text-on-surface-muted/60
-								transition-colors duration-200
+								w-full rounded-xl border border-on-surface/10 bg-surface-high
+								px-3 py-2.5 font-body text-sm text-on-surface
+								transition-colors duration-200 placeholder:text-on-surface-muted/60
+								focus:ring-2
+								focus:ring-primary/40 focus:outline-none
 							"
 						/>
 					</div>
@@ -285,10 +291,9 @@
 		</aside>
 
 		<!-- ─── Product Grid Column ──────────────────────────────────────────────── -->
-		<div class="flex-1 min-w-0">
-
+		<div class="min-w-0 flex-1">
 			<!-- Search + mobile filter row -->
-			<div class="flex items-center gap-3 mb-6">
+			<div class="mb-6 flex items-center gap-3">
 				<!-- Search bar — GET form so it works without JS too -->
 				<form
 					method="GET"
@@ -300,7 +305,7 @@
 					<div class="relative">
 						<!-- Magnifying glass icon -->
 						<svg
-							class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-muted pointer-events-none"
+							class="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-on-surface-muted"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -318,12 +323,12 @@
 							placeholder="Search pieces…"
 							bind:value={searchQuery}
 							class="
-								w-full bg-surface-high rounded-full pl-10 pr-4 py-2.5
-								font-body text-sm text-on-surface
-								border border-on-surface/10
-								focus:outline-none focus:ring-2 focus:ring-primary/40
-								placeholder:text-on-surface-muted/60
-								transition-all duration-200
+								w-full rounded-full border border-on-surface/10 bg-surface-high py-2.5
+								pr-4 pl-10 font-body
+								text-sm text-on-surface
+								transition-all duration-200 placeholder:text-on-surface-muted/60
+								focus:ring-2
+								focus:ring-primary/40 focus:outline-none
 							"
 							aria-label="Search products"
 						/>
@@ -334,16 +339,25 @@
 				<button
 					onclick={() => (filtersOpen = true)}
 					class="
-						lg:hidden flex items-center gap-2 bg-surface-card rounded-full px-4 py-2.5
-						shadow-ambient font-body text-sm font-semibold text-on-surface
-						hover:shadow-ambient-lg transition-shadow duration-200
-						border border-on-surface/10
+						shadow-ambient hover:shadow-ambient-lg flex items-center gap-2 rounded-full border border-on-surface/10
+						bg-surface-card px-4 py-2.5 font-body text-sm
+						font-semibold text-on-surface transition-shadow
+						duration-200 lg:hidden
 					"
 					aria-expanded={filtersOpen}
 					aria-controls="mobile-filter-panel"
 				>
 					<!-- Filter icon -->
-					<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<svg
+						class="h-4 w-4"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"
+					>
 						<line x1="4" y1="6" x2="20" y2="6" />
 						<line x1="8" y1="12" x2="16" y2="12" />
 						<line x1="11" y1="18" x2="13" y2="18" />
@@ -354,20 +368,21 @@
 							Small dot indicator when filters are active — tells the user
 							something is narrowing the results without needing a number badge.
 						-->
-						<span class="w-2 h-2 rounded-full bg-primary flex-shrink-0" aria-label="Filters active"></span>
+						<span class="h-2 w-2 flex-shrink-0 rounded-full bg-primary" aria-label="Filters active"
+						></span>
 					{/if}
 				</button>
 			</div>
 
 			<!-- Product count — mobile only (desktop is in the header) -->
-			<p class="sm:hidden font-body text-sm text-on-surface-muted mb-5">
-				Showing <span class="text-on-surface font-semibold">{filteredProducts().length}</span>
+			<p class="mb-5 font-body text-sm text-on-surface-muted sm:hidden">
+				Showing <span class="font-semibold text-on-surface">{filteredProducts().length}</span>
 				{filteredProducts().length === 1 ? 'piece' : 'pieces'}
 			</p>
 
 			<!-- ─── Product Grid ────────────────────────────────────────────────── -->
 			{#if filteredProducts().length > 0}
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{#each filteredProducts() as product (product.id)}
 						<ProductCard
 							{product}
@@ -381,12 +396,13 @@
 					Empty state: warm, brand-consistent — never a cold "No results found".
 					The crochet hook emoji ties it back to the craft context.
 				-->
-				<div class="flex flex-col items-center justify-center py-24 gap-6 text-center">
+				<div class="flex flex-col items-center justify-center gap-6 py-24 text-center">
 					<span class="text-6xl" role="img" aria-label="Crochet hook">🪝</span>
 					<div>
-						<p class="font-display text-2xl text-on-surface mb-2">No pieces found</p>
-						<p class="font-body text-on-surface-muted text-sm max-w-xs">
-							We couldn't find anything matching your search. Try adjusting your filters or browse everything.
+						<p class="mb-2 font-display text-2xl text-on-surface">No pieces found</p>
+						<p class="max-w-xs font-body text-sm text-on-surface-muted">
+							We couldn't find anything matching your search. Try adjusting your filters or browse
+							everything.
 						</p>
 					</div>
 					<Button variant="primary" href="/shop" onclick={clearFilters}>Browse All</Button>
@@ -415,26 +431,35 @@
 		aria-modal="true"
 		aria-label="Product filters"
 		class="
-			fixed bottom-0 left-0 right-0 z-50 lg:hidden
-			bg-surface-card rounded-t-3xl shadow-ambient-lg
-			p-6 pb-safe-bottom
-			max-h-[85vh] overflow-y-auto
-			animate-slide-up
+			shadow-ambient-lg pb-safe-bottom animate-slide-up fixed right-0 bottom-0
+			left-0 z-50 max-h-[85vh]
+			overflow-y-auto rounded-t-3xl
+			bg-surface-card p-6
+			lg:hidden
 		"
 	>
 		<!-- Drag handle -->
-		<div class="flex justify-center mb-6">
-			<div class="w-10 h-1 rounded-full bg-on-surface/20"></div>
+		<div class="mb-6 flex justify-center">
+			<div class="h-1 w-10 rounded-full bg-on-surface/20"></div>
 		</div>
 
-		<div class="flex items-center justify-between mb-6">
+		<div class="mb-6 flex items-center justify-between">
 			<h2 class="font-display text-2xl text-on-surface">Filters</h2>
 			<button
 				onclick={() => (filtersOpen = false)}
-				class="w-8 h-8 rounded-full bg-surface-high flex items-center justify-center text-on-surface-muted hover:text-on-surface transition-colors"
+				class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-high text-on-surface-muted transition-colors hover:text-on-surface"
 				aria-label="Close filters"
 			>
-				<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<svg
+					class="h-4 w-4"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
 					<path d="M18 6 6 18M6 6l12 12" />
 				</svg>
 			</button>
@@ -443,7 +468,9 @@
 		<div class="flex flex-col gap-7">
 			<!-- Category -->
 			<div>
-				<h3 class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted mb-3">
+				<h3
+					class="mb-3 font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
+				>
 					Category
 				</h3>
 				<div class="flex flex-wrap gap-2">
@@ -453,17 +480,14 @@
 							chip inline-flex items-center px-4 py-2 text-sm font-semibold
 							transition-all duration-200
 							{selectedCategory === ''
-								? 'bg-secondary text-white shadow-ambient'
-								: 'bg-secondary-container text-on-secondary-container hover:bg-secondary/20'}
+							? 'shadow-ambient bg-secondary text-white'
+							: 'bg-secondary-container text-on-secondary-container hover:bg-secondary/20'}
 						"
 					>
 						All Products
 					</button>
 					{#each categories as cat (cat.id)}
-						<CategoryChip
-							category={cat}
-							active={selectedCategory === cat.slug}
-						/>
+						<CategoryChip category={cat} active={selectedCategory === cat.slug} />
 					{/each}
 				</div>
 			</div>
@@ -472,7 +496,7 @@
 			<div>
 				<label
 					for="mobile-sort-select"
-					class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted block mb-3"
+					class="mb-3 block font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
 				>
 					Sort by
 				</label>
@@ -481,10 +505,10 @@
 					value={selectedSort}
 					onchange={(e) => applySort((e.currentTarget as HTMLSelectElement).value)}
 					class="
-						w-full bg-surface-high rounded-xl border border-on-surface/10
-						font-body text-sm text-on-surface px-3 py-2.5
-						focus:outline-none focus:ring-2 focus:ring-primary/40
-						transition-colors duration-200 cursor-pointer
+						w-full cursor-pointer rounded-xl border border-on-surface/10
+						bg-surface-high px-3 py-2.5 font-body text-sm
+						text-on-surface transition-colors duration-200
+						focus:ring-2 focus:ring-primary/40 focus:outline-none
 					"
 				>
 					<option value="newest">Newest</option>
@@ -496,7 +520,9 @@
 
 			<!-- Price range -->
 			<div>
-				<h3 class="font-body text-xs font-semibold uppercase tracking-widest text-on-surface-muted mb-3">
+				<h3
+					class="mb-3 font-body text-xs font-semibold tracking-widest text-on-surface-muted uppercase"
+				>
 					Price Range (₹)
 				</h3>
 				<div class="flex items-center gap-2">
@@ -506,23 +532,23 @@
 						bind:value={minPrice}
 						min="0"
 						class="
-							w-full bg-surface-high rounded-xl border border-on-surface/10
-							font-body text-sm text-on-surface px-3 py-2.5
-							focus:outline-none focus:ring-2 focus:ring-primary/40
-							placeholder:text-on-surface-muted/60
+							w-full rounded-xl border border-on-surface/10 bg-surface-high
+							px-3 py-2.5 font-body text-sm text-on-surface
+							placeholder:text-on-surface-muted/60 focus:ring-2 focus:ring-primary/40
+							focus:outline-none
 						"
 					/>
-					<span class="text-on-surface-muted font-body text-sm flex-shrink-0">to</span>
+					<span class="flex-shrink-0 font-body text-sm text-on-surface-muted">to</span>
 					<input
 						type="number"
 						placeholder="Max"
 						bind:value={maxPrice}
 						min="0"
 						class="
-							w-full bg-surface-high rounded-xl border border-on-surface/10
-							font-body text-sm text-on-surface px-3 py-2.5
-							focus:outline-none focus:ring-2 focus:ring-primary/40
-							placeholder:text-on-surface-muted/60
+							w-full rounded-xl border border-on-surface/10 bg-surface-high
+							px-3 py-2.5 font-body text-sm text-on-surface
+							placeholder:text-on-surface-muted/60 focus:ring-2 focus:ring-primary/40
+							focus:outline-none
 						"
 					/>
 				</div>
@@ -535,7 +561,11 @@
 						Clear All
 					</Button>
 				{/if}
-				<Button variant="primary" onclick={() => (filtersOpen = false)} class="flex-1 justify-center">
+				<Button
+					variant="primary"
+					onclick={() => (filtersOpen = false)}
+					class="flex-1 justify-center"
+				>
 					View Results
 				</Button>
 			</div>

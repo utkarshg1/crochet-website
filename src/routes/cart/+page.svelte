@@ -18,9 +18,7 @@
 	const shipping = $derived(calculateShipping(subtotal));
 	const total = $derived(subtotal + shipping);
 	const isFreeShipping = $derived(subtotal >= FREE_SHIPPING_THRESHOLD_PAISE);
-	const remaining = $derived(
-		isFreeShipping ? 0 : FREE_SHIPPING_THRESHOLD_PAISE - subtotal
-	);
+	const remaining = $derived(isFreeShipping ? 0 : FREE_SHIPPING_THRESHOLD_PAISE - subtotal);
 	// Progress toward free shipping (0–100)
 	const freeShippingPercent = $derived(
 		Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD_PAISE) * 100))
@@ -73,14 +71,15 @@
 <!-- ── Main layout ───────────────────────────────────────────────────────────── -->
 <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
 	<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-
 		<!-- ═══ Cart items column (60%) ═══════════════════════════════════════ -->
 		<div class="flex-1 lg:basis-[60%]">
-			<div class="bg-surface-card rounded-3xl shadow-ambient p-6">
+			<div class="shadow-ambient rounded-3xl bg-surface-card p-6">
 				<h2 class="mb-6 font-body text-lg font-semibold text-on-surface">
 					Your Bag
 					{#if cart.count > 0}
-						<span class="text-on-surface-muted">({cart.count} {cart.count === 1 ? 'item' : 'items'})</span>
+						<span class="text-on-surface-muted"
+							>({cart.count} {cart.count === 1 ? 'item' : 'items'})</span
+						>
 					{/if}
 				</h2>
 
@@ -94,27 +93,29 @@
 						</p>
 						<a
 							href="/shop"
-							class="mt-6 inline-block rounded-full bg-primary px-8 py-3 font-body font-semibold text-white shadow-ambient transition-all duration-200 hover:bg-primary-dim active:scale-95"
+							class="shadow-ambient mt-6 inline-block rounded-full bg-primary px-8 py-3 font-body font-semibold text-white transition-all duration-200 hover:bg-primary-dim active:scale-95"
 						>
 							Start Shopping
 						</a>
 					</div>
 				{:else}
 					<!-- ── Item list ─────────────────────────────────────────────────────── -->
-					<ul class="divide-y-0 space-y-0" aria-label="Cart items">
+					<ul class="space-y-0 divide-y-0" aria-label="Cart items">
 						{#each cart.items as item, i (item.product_id + (item.color ?? ''))}
-							<li class="flex items-start gap-4 py-6 {i !== 0 ? 'border-t border-surface-high' : ''}">
+							<li
+								class="flex items-start gap-4 py-6 {i !== 0 ? 'border-t border-surface-high' : ''}"
+							>
 								<!-- Thumbnail -->
 								{#if item.image_url}
 									<img
 										src={item.image_url}
 										alt={item.image_alt || item.title}
-										class="h-20 w-20 flex-shrink-0 rounded-2xl object-cover bg-surface-high"
+										class="h-20 w-20 flex-shrink-0 rounded-2xl bg-surface-high object-cover"
 									/>
 								{:else}
 									<!-- Colored placeholder when no image -->
 									<div
-										class="h-20 w-20 flex-shrink-0 rounded-2xl bg-surface-high flex items-center justify-center"
+										class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-surface-high"
 										aria-hidden="true"
 									>
 										<span class="text-2xl">🧶</span>
@@ -125,7 +126,7 @@
 								<div class="flex min-w-0 flex-1 flex-col gap-1">
 									<a
 										href="/shop/{item.slug}"
-										class="font-display text-base font-medium text-on-surface leading-snug hover:text-primary transition-colors line-clamp-2"
+										class="line-clamp-2 font-display text-base leading-snug font-medium text-on-surface transition-colors hover:text-primary"
 									>
 										{item.title}
 									</a>
@@ -133,7 +134,7 @@
 									<!-- Color chip -->
 									{#if item.color}
 										<span
-											class="chip inline-flex w-fit items-center bg-secondary-container text-on-secondary-container px-2 py-0.5 text-xs font-body font-medium"
+											class="chip inline-flex w-fit items-center bg-secondary-container px-2 py-0.5 font-body text-xs font-medium text-on-secondary-container"
 										>
 											{item.color}
 										</span>
@@ -211,7 +212,10 @@
 
 					<!-- ── Coupon code row ──────────────────────────────────────────────── -->
 					<div class="mt-6 border-t border-surface-high pt-6">
-						<label for="coupon-input" class="mb-2 block font-body text-sm font-medium text-on-surface">
+						<label
+							for="coupon-input"
+							class="mb-2 block font-body text-sm font-medium text-on-surface"
+						>
 							Have a coupon?
 						</label>
 						<div class="flex gap-2">
@@ -250,7 +254,7 @@
 		<!-- ═══ Order summary column (40%) ════════════════════════════════════ -->
 		{#if cart.items.length > 0}
 			<aside class="lg:basis-[40%]">
-				<div class="bg-surface-card rounded-3xl shadow-ambient p-6 lg:sticky lg:top-24">
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-6 lg:sticky lg:top-24">
 					<h2 class="font-display text-xl font-semibold text-on-surface">Order Summary</h2>
 
 					<div class="mt-5 space-y-3">
@@ -305,14 +309,12 @@
 						</span>
 					</div>
 
-					<p class="mt-1 font-body text-xs text-on-surface-muted">
-						Inclusive of all taxes
-					</p>
+					<p class="mt-1 font-body text-xs text-on-surface-muted">Inclusive of all taxes</p>
 
 					<!-- CTA -->
 					<a
 						href="/checkout"
-						class="mt-6 block w-full rounded-full bg-primary py-3.5 text-center font-body font-semibold text-white shadow-ambient transition-all duration-200 hover:bg-primary-dim active:scale-95"
+						class="shadow-ambient mt-6 block w-full rounded-full bg-primary py-3.5 text-center font-body font-semibold text-white transition-all duration-200 hover:bg-primary-dim active:scale-95"
 					>
 						Proceed to Checkout
 					</a>
@@ -335,6 +337,5 @@
 				</div>
 			</aside>
 		{/if}
-
 	</div>
 </div>

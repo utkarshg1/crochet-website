@@ -19,7 +19,7 @@
     chip inline-flex items-center px-4 py-2 text-sm font-semibold
     transition-all duration-200
     {active
-		? 'bg-secondary text-white shadow-ambient'
+		? 'shadow-ambient bg-secondary text-white'
 		: 'bg-secondary-container text-on-secondary-container hover:bg-secondary/20'}
   "
 >

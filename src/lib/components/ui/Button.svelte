@@ -49,7 +49,8 @@
 			'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200'
 	};
 
-	const baseClasses = 'inline-flex items-center justify-center gap-2 leading-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+	const baseClasses =
+		'inline-flex items-center justify-center gap-2 leading-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 </script>
 
 <!--

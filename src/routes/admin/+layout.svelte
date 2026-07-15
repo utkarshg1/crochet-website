@@ -13,13 +13,16 @@
 
 <div class="flex min-h-screen">
 	<!-- Sidebar -->
-	<aside class="w-60 flex-shrink-0 bg-on-surface text-surface-card flex flex-col" style="background: #153430;">
-		<div class="px-6 py-6 border-b border-white/10">
+	<aside
+		class="flex w-60 flex-shrink-0 flex-col bg-on-surface text-surface-card"
+		style="background: #153430;"
+	>
+		<div class="border-b border-white/10 px-6 py-6">
 			<p class="font-display text-lg font-semibold text-white">Krafted Loops</p>
-			<p class="font-body text-xs text-white/50 mt-0.5">Studio Admin</p>
+			<p class="mt-0.5 font-body text-xs text-white/50">Studio Admin</p>
 		</div>
 
-		<nav class="flex-1 px-3 py-4 space-y-1" aria-label="Admin navigation">
+		<nav class="flex-1 space-y-1 px-3 py-4" aria-label="Admin navigation">
 			{#each navLinks as link}
 				<a
 					href={link.href}
@@ -31,14 +34,14 @@
 			{/each}
 		</nav>
 
-		<div class="px-6 py-4 border-t border-white/10">
+		<div class="border-t border-white/10 px-6 py-4">
 			<a href="/" class="font-body text-xs text-white/40 hover:text-white/70">← Back to Shop</a>
 			<p class="mt-1 font-body text-xs text-white/30">{data.user?.email}</p>
 		</div>
 	</aside>
 
 	<!-- Main content -->
-	<main class="flex-1 bg-surface overflow-auto">
+	<main class="flex-1 overflow-auto bg-surface">
 		{@render children()}
 	</main>
 </div>

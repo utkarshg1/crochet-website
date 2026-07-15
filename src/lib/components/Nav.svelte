@@ -43,7 +43,7 @@
   add a bottom border, just the ambient shadow so it lifts off the page naturally.
 -->
 <header class="glass shadow-ambient fixed top-0 right-0 left-0 z-50">
-	<nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
+	<nav class="mx-auto max-w-7xl pr-6 pl-4 sm:px-6 lg:px-8" aria-label="Main navigation">
 		<div class="flex h-16 items-center justify-between gap-4">
 			<!-- ── Logo + Brand name ──────────────────────────────────────────── -->
 			<a href="/" class="group flex shrink-0 items-center gap-3">
@@ -95,12 +95,12 @@
 			</ul>
 
 			<!-- ── Right action icons (desktop: labelled, mobile: compact) ────── -->
-			<div class="flex items-center gap-0.5">
+			<div class="flex items-center gap-0.5 md:gap-1.5">
 				<!-- ── Desktop: icon + label buttons ──────────────────────────── -->
 				<!-- Search -->
 				<a
 					href="/shop?q="
-					class="hidden flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-on-surface-muted
+					class="hidden min-w-[5.5rem] flex-col items-center gap-0.5 rounded-lg px-4 py-1.5 text-on-surface-muted
 						   transition-all duration-150 hover:bg-surface-high
 						   hover:text-on-surface md:flex"
 					aria-label="Search products"
@@ -123,7 +123,7 @@
 				<!-- Wishlist -->
 				<a
 					href="/wishlist"
-					class="hidden flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-on-surface-muted
+					class="hidden min-w-[5.5rem] flex-col items-center gap-0.5 rounded-lg px-4 py-1.5 text-on-surface-muted
 						   transition-all duration-150 hover:bg-surface-high
 						   hover:text-on-surface md:flex"
 					aria-label="Wishlist"
@@ -147,7 +147,7 @@
 				<!-- Account / Login -->
 				<a
 					href="/account"
-					class="hidden flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 transition-all duration-150 md:flex
+					class="hidden min-w-[5.5rem] flex-col items-center gap-0.5 rounded-lg px-4 py-1.5 transition-all duration-150 md:flex
 						{user
 						? 'text-on-surface-muted hover:bg-surface-high hover:text-on-surface'
 						: 'bg-gradient-to-r from-primary to-primary-dim text-on-primary shadow-[0_2px_12px_0_rgba(167,41,90,0.3)] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_0_rgba(167,41,90,0.4)]'}"
@@ -181,7 +181,7 @@
 				<!-- Bag (cart) -->
 				<button
 					onclick={() => (cartOpen = true)}
-					class="relative hidden flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-on-surface-muted
+					class="relative hidden min-w-[5.5rem] flex-col items-center gap-0.5 rounded-lg px-4 py-1.5 text-on-surface-muted
 						   transition-all duration-150 hover:bg-surface-high
 						   hover:text-on-surface md:flex"
 					aria-label="Open bag — {cart.count} {cart.count === 1 ? 'item' : 'items'}"
@@ -311,7 +311,7 @@
 				<!-- Mobile hamburger -->
 				<button
 					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-					class="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
+					class="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-muted transition-all duration-150 hover:bg-surface-high hover:text-on-surface md:hidden"
 					aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
 					aria-expanded={mobileMenuOpen}
 				>
