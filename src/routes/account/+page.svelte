@@ -29,8 +29,8 @@
 	// Which flow sent the OTP: 'login' | 'register'
 	let activeFlow = $state<'login' | 'register'>('login');
 
-	// Register section ref for scrolling
-	let registerSection = $state<HTMLElement | null>(null);
+	// Tab state for logged-out view
+	let activeTab = $state<'login' | 'register'>('login');
 
 	// No-account modal
 	let showNoAccountModal = $state(false);
@@ -69,7 +69,7 @@
 			showNoAccountModal = true;
 			setTimeout(() => {
 				showNoAccountModal = false;
-				registerSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				activeTab = 'register';
 			}, 1000);
 			return;
 		}
@@ -342,119 +342,138 @@
 					</button>
 				</div>
 			{:else}
-				<!-- ── Login ───────────────────────────────────────────────────── -->
-				<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
-					<h2 class="font-display text-2xl font-semibold text-on-surface">Welcome Back</h2>
-					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						Sign in to view your order history.
-					</p>
-					<div class="mt-6 space-y-4">
-						<div>
-							<label
-								for="login-email"
-								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-							>
-								Email Address
-							</label>
-							<input
-								id="login-email"
-								type="email"
-								bind:value={loginEmail}
-								required
-								autocomplete="email"
-								placeholder="you@example.com"
-								onkeydown={(e) => e.key === 'Enter' && sendLoginOtp()}
-								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-							/>
-						</div>
-						<button
-							onclick={sendLoginOtp}
-							disabled={loading}
-							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-						>
-							{loading ? 'Sending…' : 'Send Code'}
-						</button>
-					</div>
+				<!-- ── Tab Bar ─────────────────────────────────────────────────── -->
+				<div class="mb-6 flex rounded-2xl bg-surface-high p-1">
+					<button
+						onclick={() => {
+							activeTab = 'login';
+							error = '';
+						}}
+						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
+						'login'
+							? 'bg-primary text-white shadow-md'
+							: 'text-on-surface-muted hover:text-on-surface'}"
+					>
+						Sign In
+					</button>
+					<button
+						onclick={() => {
+							activeTab = 'register';
+							error = '';
+						}}
+						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
+						'register'
+							? 'bg-primary text-white shadow-md'
+							: 'text-on-surface-muted hover:text-on-surface'}"
+					>
+						Create Account
+					</button>
 				</div>
 
-				<!-- ── Divider ───────────────────────────────────────────────────── -->
-				<div class="my-6 flex items-center gap-4">
-					<div class="h-px flex-1 bg-on-surface/10"></div>
-					<span class="font-body text-xs text-on-surface-muted uppercase">New here?</span>
-					<div class="h-px flex-1 bg-on-surface/10"></div>
-				</div>
-
-				<!-- ── Register ─────────────────────────────────────────────────── -->
-				<div
-					bind:this={registerSection}
-					id="register-section"
-					class="shadow-ambient rounded-3xl bg-surface-card p-8"
-				>
-					<h2 class="font-display text-2xl font-semibold text-on-surface">Create Account</h2>
-					<p class="mt-1 font-body text-sm text-on-surface-muted">All fields are required.</p>
-					<div class="mt-6 space-y-4">
-						<div>
-							<label
-								for="reg-name"
-								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+				{#if activeTab === 'login'}
+					<!-- ── Login ───────────────────────────────────────────────────── -->
+					<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
+						<h2 class="font-display text-2xl font-semibold text-on-surface">Welcome Back</h2>
+						<p class="mt-1 font-body text-sm text-on-surface-muted">
+							Sign in to view your order history.
+						</p>
+						<div class="mt-6 space-y-4">
+							<div>
+								<label
+									for="login-email"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Email Address
+								</label>
+								<input
+									id="login-email"
+									type="email"
+									bind:value={loginEmail}
+									required
+									autocomplete="email"
+									placeholder="you@example.com"
+									onkeydown={(e) => e.key === 'Enter' && sendLoginOtp()}
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<button
+								onclick={sendLoginOtp}
+								disabled={loading}
+								class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 							>
-								Full Name
-							</label>
-							<input
-								id="reg-name"
-								type="text"
-								bind:value={registerName}
-								required
-								autocomplete="name"
-								placeholder="John Doe"
-								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-							/>
+								{loading ? 'Sending…' : 'Send Code'}
+							</button>
 						</div>
-						<div>
-							<label
-								for="reg-phone"
-								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-							>
-								Mobile Number
-							</label>
-							<input
-								id="reg-phone"
-								type="tel"
-								bind:value={registerPhone}
-								required
-								autocomplete="tel"
-								placeholder="98765 43210"
-								inputmode="numeric"
-								maxlength="10"
-								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-							/>
-						</div>
-						<div>
-							<label
-								for="reg-email"
-								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-							>
-								Email Address
-							</label>
-							<input
-								id="reg-email"
-								type="email"
-								bind:value={registerEmail}
-								required
-								autocomplete="email"
-								placeholder="you@example.com"
-								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-							/>
-						</div>
-						<button
-							onclick={sendRegisterOtp}
-							disabled={loading}
-							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-						>
-							{loading ? 'Sending…' : 'Create Account'}
-						</button>
 					</div>
-				</div>
+				{:else}
+					<!-- ── Register ─────────────────────────────────────────────────── -->
+					<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
+						<h2 class="font-display text-2xl font-semibold text-on-surface">Create Account</h2>
+						<p class="mt-1 font-body text-sm text-on-surface-muted">All fields are required.</p>
+						<div class="mt-6 space-y-4">
+							<div>
+								<label
+									for="reg-name"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Full Name
+								</label>
+								<input
+									id="reg-name"
+									type="text"
+									bind:value={registerName}
+									required
+									autocomplete="name"
+									placeholder="John Doe"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-phone"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Mobile Number
+								</label>
+								<input
+									id="reg-phone"
+									type="tel"
+									bind:value={registerPhone}
+									required
+									autocomplete="tel"
+									placeholder="98765 43210"
+									inputmode="numeric"
+									maxlength="10"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-email"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Email Address
+								</label>
+								<input
+									id="reg-email"
+									type="email"
+									bind:value={registerEmail}
+									required
+									autocomplete="email"
+									placeholder="you@example.com"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<button
+								onclick={sendRegisterOtp}
+								disabled={loading}
+								class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+							>
+								{loading ? 'Sending…' : 'Create Account'}
+							</button>
+						</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}

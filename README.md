@@ -18,17 +18,13 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.7.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.8.0-a7295a?style=flat-square)
 
 </div>
 
 ---
 
 ## <div align="center">✨ Features</div>
-
-<table>
-  <tr>
-    <td width="50%">
 
 ### 🛍️ Storefront
 
@@ -40,11 +36,8 @@
 - Razorpay checkout flow
 - Guest checkout (no account required)
 - Order tracking with auto-generated order numbers (KL-XXXX)
-- OTP email sign-in with separate Login & Register flows
+- OTP email sign-in with tab-based Login & Register
 - Email existence check with guided registration prompt
-
-    </td>
-    <td width="50%">
 
 ### 🛠️ Admin Dashboard
 
@@ -52,11 +45,6 @@
 - Category management with display ordering
 - Order management with status updates
 - Inventory tracking
-
-    </td>
-  </tr>
-  <tr>
-    <td>
 
 ### 📄 Pages
 
@@ -66,9 +54,6 @@
 - **FAQ** — Accordion-style common questions
 - **Shipping & Returns** — Policies & delivery estimates
 - **Cart / Checkout / Account / Wishlist**
-
-    </td>
-    <td>
 
 ### 🎨 Design & UX
 
@@ -87,11 +72,6 @@
 - Yarn bounce & gentle float decorative animations
 - Responsive mobile-first design
 - ARIA-compliant accessible components
-
-      </td>
-
-    </tr>
-  </table>
 
 ---
 
