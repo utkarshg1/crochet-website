@@ -253,26 +253,26 @@ export type Database = {
 			profiles: {
 				Row: {
 					created_at: string | null;
-					full_name: string | null;
+					full_name: string;
 					id: string;
 					is_admin: boolean | null;
-					phone: string | null;
+					phone: string;
 					updated_at: string | null;
 				};
 				Insert: {
 					created_at?: string | null;
-					full_name?: string | null;
+					full_name: string;
 					id: string;
 					is_admin?: boolean | null;
-					phone?: string | null;
+					phone: string;
 					updated_at?: string | null;
 				};
 				Update: {
 					created_at?: string | null;
-					full_name?: string | null;
+					full_name?: string;
 					id?: string;
 					is_admin?: boolean | null;
-					phone?: string | null;
+					phone?: string;
 					updated_at?: string | null;
 				};
 				Relationships: [];
@@ -311,6 +311,7 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
+			check_email_exists: { Args: { check_email: string }; Returns: boolean };
 			generate_order_number: { Args: never; Returns: string };
 		};
 		Enums: {

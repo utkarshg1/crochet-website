@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.6.2-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.7.0-a7295a?style=flat-square)
 
 </div>
 
@@ -40,7 +40,8 @@
 - Razorpay checkout flow
 - Guest checkout (no account required)
 - Order tracking with auto-generated order numbers (KL-XXXX)
-- OTP-based phone authentication
+- OTP email sign-in with separate Login & Register flows
+- Email existence check with guided registration prompt
 
     </td>
     <td width="50%">
@@ -122,7 +123,7 @@
 
 |          Table           | Description                                                                                       |
 | :----------------------: | :------------------------------------------------------------------------------------------------ |
-|        `profiles`        | User profiles with admin flag, phone, full name                                                   |
+|        `profiles`        | User profiles with required full name, phone, and admin flag                                      |
 |       `categories`       | Product categories with display order, slug, tagline, image                                       |
 |        `products`        | Full product data — price, stock, images, colors, sizes, materials, care instructions, dimensions |
 |         `orders`         | Order tracking with auto-generated KL-XXXX order numbers, Razorpay IDs, shipping address          |
@@ -130,22 +131,6 @@
 |         `carts`          | Persistent shopping carts linked to session/user with JSON items                                  |
 |       `wishlists`        | Per-user product wishlists with unique constraint                                                 |
 | `newsletter_subscribers` | Email newsletter signups                                                                          |
-
-</div>
-
----
-
-## <div align="center">🛡️ Security</div>
-
-<div align="center">
-
-|    Feature    | Details                              |
-| :-----------: | :----------------------------------- |
-|    **RLS**    | Row Level Security on all tables     |
-|   **Roles**   | Anon, authenticated, admin           |
-| **Functions** | Secure search paths                  |
-|  **Storage**  | Public read, admin write policies    |
-|   **Auth**    | OTP phone verification, session mgmt |
 
 </div>
 

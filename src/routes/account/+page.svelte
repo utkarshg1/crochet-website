@@ -9,12 +9,31 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let emailInput = $state('');
-	let otpInput = $state('');
+	// Shared state
 	let otpSent = $state(false);
 	let sentToEmail = $state('');
 	let loading = $state(false);
 	let error = $state('');
+
+	// Login fields
+	let loginEmail = $state('');
+
+	// Register fields
+	let registerName = $state('');
+	let registerPhone = $state('');
+	let registerEmail = $state('');
+
+	// OTP input
+	let otpInput = $state('');
+
+	// Which flow sent the OTP: 'login' | 'register'
+	let activeFlow = $state<'login' | 'register'>('login');
+
+	// Register section ref for scrolling
+	let registerSection = $state<HTMLElement | null>(null);
+
+	// No-account modal
+	let showNoAccountModal = $state(false);
 
 	// Create client only in browser (onMount) so cookie storage is available
 	let supabase: ReturnType<typeof createClient>;
@@ -22,11 +41,36 @@
 		supabase = createClient();
 	});
 
-	async function sendMagicLink() {
+	function validateEmail(email: string): boolean {
+		return !!email && email.includes('@');
+	}
+
+	function validatePhone(phone: string): boolean {
+		const digits = phone.replace(/\D/g, '');
+		return digits.length === 10;
+	}
+
+	async function sendLoginOtp() {
 		error = '';
-		const email = emailInput.trim();
-		if (!email || !email.includes('@')) {
+		const email = loginEmail.trim();
+		if (!validateEmail(email)) {
 			error = 'Enter a valid email address';
+			return;
+		}
+
+		loading = true;
+		const { data: exists } = await supabase.rpc('check_email_exists', {
+			check_email: email
+		});
+		loading = false;
+
+		if (!exists) {
+			registerEmail = email;
+			showNoAccountModal = true;
+			setTimeout(() => {
+				showNoAccountModal = false;
+				registerSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}, 1000);
 			return;
 		}
 
@@ -34,7 +78,7 @@
 		const { error: err } = await supabase.auth.signInWithOtp({
 			email,
 			options: {
-				shouldCreateUser: true,
+				shouldCreateUser: false,
 				emailRedirectTo: `${window.location.origin}/auth/callback`
 			}
 		});
@@ -44,6 +88,47 @@
 			error = err.message;
 			return;
 		}
+		activeFlow = 'login';
+		sentToEmail = email;
+		otpSent = true;
+	}
+
+	async function sendRegisterOtp() {
+		error = '';
+		const name = registerName.trim();
+		const phone = registerPhone.trim();
+		const email = registerEmail.trim();
+
+		if (!name) {
+			error = 'Enter your full name';
+			return;
+		}
+		if (!validatePhone(phone)) {
+			error = 'Enter a valid 10-digit phone number';
+			return;
+		}
+		if (!validateEmail(email)) {
+			error = 'Enter a valid email address';
+			return;
+		}
+
+		const phoneDigits = phone.replace(/\D/g, '').replace(/^0+/, '');
+
+		loading = true;
+		const { error: err } = await supabase.auth.signInWithOtp({
+			email,
+			options: {
+				data: { full_name: name, phone: `+91${phoneDigits}` },
+				emailRedirectTo: `${window.location.origin}/auth/callback`
+			}
+		});
+		loading = false;
+
+		if (err) {
+			error = err.message;
+			return;
+		}
+		activeFlow = 'register';
 		sentToEmail = email;
 		otpSent = true;
 	}
@@ -114,7 +199,7 @@
 				{#if data.profile?.phone}
 					<div class="mt-3 space-y-1">
 						<p class="font-body text-sm text-on-surface-muted">Phone</p>
-						<p class="font-body text-sm font-medium text-on-surface">+91{data.profile.phone}</p>
+						<p class="font-body text-sm font-medium text-on-surface">{data.profile.phone}</p>
 					</div>
 				{/if}
 				<form method="POST" action="?/signOut" use:enhance class="mt-6">
@@ -206,53 +291,15 @@
 
 		<!-- ── LOGGED OUT STATE ─────────────────────────────────────────────────── -->
 	{:else}
-		<div class="mx-auto max-w-md">
+		<div class="mx-auto max-w-lg">
 			{#if error}
 				<div class="mb-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary">
 					{error}
 				</div>
 			{/if}
 
-			{#if !otpSent}
-				<!-- Step 1: Enter email -->
-				<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
-					<h2 class="font-display text-2xl font-semibold text-on-surface">Sign In</h2>
-					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						We'll send a 6-digit code to your email.
-					</p>
-					<div class="mt-6 space-y-4">
-						<div>
-							<label
-								for="sign-email"
-								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-							>
-								Email Address
-							</label>
-							<input
-								id="sign-email"
-								type="email"
-								bind:value={emailInput}
-								required
-								autocomplete="email"
-								placeholder="you@example.com"
-								onkeydown={(e) => e.key === 'Enter' && sendMagicLink()}
-								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-							/>
-						</div>
-						<button
-							onclick={sendMagicLink}
-							disabled={loading}
-							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-						>
-							{loading ? 'Sending…' : 'Send Code'}
-						</button>
-					</div>
-					<p class="mt-4 text-center font-body text-xs text-on-surface-muted">
-						New here? An account will be created automatically.
-					</p>
-				</div>
-			{:else}
-				<!-- Step 2: Check email (magic link sent) or enter code -->
+			{#if otpSent}
+				<!-- ── OTP Verification ──────────────────────────────────────────── -->
 				<div class="shadow-ambient rounded-3xl bg-surface-card p-8 text-center">
 					<div class="mb-4 text-5xl" aria-hidden="true">📧</div>
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Check Your Email</h2>
@@ -286,6 +333,7 @@
 					<button
 						onclick={() => {
 							otpSent = false;
+							otpInput = '';
 							error = '';
 						}}
 						class="mt-4 font-body text-sm text-on-surface-muted hover:text-primary"
@@ -293,7 +341,132 @@
 						← Use a different email
 					</button>
 				</div>
+			{:else}
+				<!-- ── Login ───────────────────────────────────────────────────── -->
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
+					<h2 class="font-display text-2xl font-semibold text-on-surface">Welcome Back</h2>
+					<p class="mt-1 font-body text-sm text-on-surface-muted">
+						Sign in to view your order history.
+					</p>
+					<div class="mt-6 space-y-4">
+						<div>
+							<label
+								for="login-email"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>
+								Email Address
+							</label>
+							<input
+								id="login-email"
+								type="email"
+								bind:value={loginEmail}
+								required
+								autocomplete="email"
+								placeholder="you@example.com"
+								onkeydown={(e) => e.key === 'Enter' && sendLoginOtp()}
+								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+							/>
+						</div>
+						<button
+							onclick={sendLoginOtp}
+							disabled={loading}
+							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+						>
+							{loading ? 'Sending…' : 'Send Code'}
+						</button>
+					</div>
+				</div>
+
+				<!-- ── Divider ───────────────────────────────────────────────────── -->
+				<div class="my-6 flex items-center gap-4">
+					<div class="h-px flex-1 bg-on-surface/10"></div>
+					<span class="font-body text-xs text-on-surface-muted uppercase">New here?</span>
+					<div class="h-px flex-1 bg-on-surface/10"></div>
+				</div>
+
+				<!-- ── Register ─────────────────────────────────────────────────── -->
+				<div
+					bind:this={registerSection}
+					id="register-section"
+					class="shadow-ambient rounded-3xl bg-surface-card p-8"
+				>
+					<h2 class="font-display text-2xl font-semibold text-on-surface">Create Account</h2>
+					<p class="mt-1 font-body text-sm text-on-surface-muted">All fields are required.</p>
+					<div class="mt-6 space-y-4">
+						<div>
+							<label
+								for="reg-name"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>
+								Full Name
+							</label>
+							<input
+								id="reg-name"
+								type="text"
+								bind:value={registerName}
+								required
+								autocomplete="name"
+								placeholder="John Doe"
+								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+							/>
+						</div>
+						<div>
+							<label
+								for="reg-phone"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>
+								Mobile Number
+							</label>
+							<input
+								id="reg-phone"
+								type="tel"
+								bind:value={registerPhone}
+								required
+								autocomplete="tel"
+								placeholder="98765 43210"
+								inputmode="numeric"
+								maxlength="10"
+								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+							/>
+						</div>
+						<div>
+							<label
+								for="reg-email"
+								class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>
+								Email Address
+							</label>
+							<input
+								id="reg-email"
+								type="email"
+								bind:value={registerEmail}
+								required
+								autocomplete="email"
+								placeholder="you@example.com"
+								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+							/>
+						</div>
+						<button
+							onclick={sendRegisterOtp}
+							disabled={loading}
+							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+						>
+							{loading ? 'Sending…' : 'Create Account'}
+						</button>
+					</div>
+				</div>
 			{/if}
+		</div>
+	{/if}
+
+	<!-- ── No Account Modal ─────────────────────────────────────────────────── -->
+	{#if showNoAccountModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+			<div class="shadow-ambient max-w-sm rounded-3xl bg-surface-card p-8 text-center" role="alert">
+				<div class="mb-3 text-5xl" aria-hidden="true">👋</div>
+				<p class="font-display text-xl font-semibold text-on-surface">No account found</p>
+				<p class="mt-2 font-body text-sm text-on-surface-muted">Please create an account first.</p>
+			</div>
 		</div>
 	{/if}
 </div>
