@@ -28,9 +28,7 @@
 
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>
-				<h1 class="font-display text-5xl leading-tight text-on-surface sm:text-6xl">
-					Your Wishlist
-				</h1>
+				<h1 class="font-display text-4xl font-semibold text-on-surface">Your Wishlist</h1>
 				{#if data.user && wishlistItems.length > 0}
 					<p class="mt-2 font-body text-lg text-on-surface-muted">
 						{wishlistItems.length}

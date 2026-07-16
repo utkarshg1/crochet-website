@@ -125,7 +125,7 @@
 				{#if showAdmin}
 					<li>
 						<a
-							href="/admin"
+							href="/admin/login"
 							class="
                 font-body text-base font-medium transition-colors duration-200
                 {isActive('/admin')
@@ -461,7 +461,7 @@
 					{#if showAdmin}
 						<li>
 							<a
-								href="/admin"
+								href="/admin/login"
 								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
 									{isActive('/admin')
 									? 'bg-secondary/10 text-secondary'

@@ -170,14 +170,21 @@
 </svelte:head>
 
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
-<section class="bg-surface-low py-12">
-	<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+<section class="bg-surface-low px-4 py-16">
+	<div class="mx-auto max-w-7xl">
+		<nav aria-label="Breadcrumb" class="mb-6">
+			<ol class="flex items-center gap-2 font-body text-sm text-on-surface-muted">
+				<li><a href="/" class="transition-colors duration-200 hover:text-primary">Home</a></li>
+				<li aria-hidden="true" class="text-on-surface-muted/50">/</li>
+				<li><span class="font-semibold text-on-surface" aria-current="page">Account</span></li>
+			</ol>
+		</nav>
 		<h1 class="font-display text-4xl font-semibold text-on-surface">
 			{data.user
 				? `Hello, ${data.profile?.full_name ?? data.user.email?.split('@')[0]}!`
 				: 'My Account'}
 		</h1>
-		<p class="mt-1 font-body text-sm text-on-surface-muted">
+		<p class="mt-2 font-body text-lg text-on-surface-muted">
 			{data.user
 				? 'View your orders and manage your account.'
 				: 'Sign in to view your order history.'}

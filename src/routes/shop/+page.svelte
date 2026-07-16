@@ -147,9 +147,7 @@
 
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 			<div>
-				<h1 class="font-display text-5xl leading-tight text-on-surface sm:text-6xl">
-					The Collection
-				</h1>
+				<h1 class="font-display text-4xl font-semibold text-on-surface">The Collection</h1>
 				<p class="mt-2 font-body text-lg text-on-surface-muted">
 					Handmade with care, one loop at a time.
 				</p>
