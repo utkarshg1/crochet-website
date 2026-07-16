@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 };
 
 export const actions: Actions = {
-	sendOtp: async ({ request, locals: { supabase }, url }) => {
+	sendOtp: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
 		const email = String(formData.get('email') ?? '')
 			.trim()
@@ -86,10 +86,7 @@ export const actions: Actions = {
 
 		// ── Send OTP (existing users only — no account creation) ─────────
 		const { error } = await supabase.auth.signInWithOtp({
-			email,
-			options: {
-				emailRedirectTo: `${url.origin}/auth/admin-callback`
-			}
+			email
 		});
 
 		if (error) return fail(400, { error: error.message, step: 'email' });
@@ -120,7 +117,7 @@ export const actions: Actions = {
 		const { error } = await supabase.auth.verifyOtp({
 			email,
 			token,
-			type: 'magiclink'
+			type: 'email'
 		});
 
 		if (error) {
