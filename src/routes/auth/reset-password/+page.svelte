@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { createClient } from '$lib/supabase';
 
 	let status = $state<'loading' | 'form' | 'success' | 'error'>('loading');
@@ -9,29 +8,38 @@
 	let confirmPassword = $state('');
 	let submitting = $state(false);
 	let supabase: ReturnType<typeof createClient>;
-	let sessionEstablished = $state(false);
 
 	onMount(async () => {
-		const params = new URLSearchParams(window.location.search);
-		const access_token = params.get('access_token');
-		const refresh_token = params.get('refresh_token');
-
-		if (!access_token || !refresh_token) {
-			status = 'error';
-			errorMsg = 'Invalid reset link. Please request a new one.';
-			return;
-		}
-
 		supabase = createClient();
-		const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-		if (error) {
-			status = 'error';
-			errorMsg = 'Link expired or invalid. Please request a new password reset.';
+
+		// detectSessionInUrl: true auto-consumes hash tokens on client init
+		const {
+			data: { session }
+		} = await supabase.auth.getSession();
+
+		if (session) {
+			status = 'form';
 			return;
 		}
 
-		sessionEstablished = true;
-		status = 'form';
+		// Fallback: manually parse hash in case auto-detection missed it
+		const hash = window.location.hash.substring(1);
+		if (hash) {
+			const hashParams = new URLSearchParams(hash);
+			const access_token = hashParams.get('access_token');
+			const refresh_token = hashParams.get('refresh_token');
+
+			if (access_token && refresh_token) {
+				const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+				if (!error) {
+					status = 'form';
+					return;
+				}
+			}
+		}
+
+		status = 'error';
+		errorMsg = 'Invalid or expired reset link. Please request a new one.';
 	});
 
 	async function handleReset(event: Event) {

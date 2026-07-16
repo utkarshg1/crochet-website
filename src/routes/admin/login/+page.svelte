@@ -1,29 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { createClient } from '$lib/supabase';
-	import { onMount } from 'svelte';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
 	let loading = $state(false);
-	let resetEmailSent = $state(false);
-	let resetLoading = $state(false);
-	let adminEmail = $state('');
-	let supabase: ReturnType<typeof createClient>;
-
-	onMount(() => {
-		supabase = createClient();
-	});
-
-	async function handleForgotPassword() {
-		if (!adminEmail.trim() || !adminEmail.includes('@')) return;
-		resetLoading = true;
-		await supabase.auth.resetPasswordForEmail(adminEmail.trim().toLowerCase(), {
-			redirectTo: 'https://krafted-loops-studios.vercel.app/auth/reset-password'
-		});
-		resetLoading = false;
-		resetEmailSent = true;
-	}
 </script>
 
 <svelte:head><title>Admin Login — Krafted Loops Studio</title></svelte:head>
@@ -73,7 +53,6 @@
 						type="email"
 						required
 						autocomplete="email"
-						bind:value={adminEmail}
 						class="w-full rounded-2xl bg-surface-low px-4 py-3 font-body text-sm text-on-surface ring-1 ring-transparent transition outline-none focus:ring-primary"
 						placeholder="admin@example.com"
 					/>
@@ -94,21 +73,6 @@
 						class="w-full rounded-2xl bg-surface-low px-4 py-3 font-body text-sm text-on-surface ring-1 ring-transparent transition outline-none focus:ring-primary"
 						placeholder="••••••••"
 					/>
-					<div class="flex items-center justify-between">
-						<span></span>
-						{#if resetEmailSent}
-							<span class="font-body text-xs text-secondary">Check your email!</span>
-						{:else}
-							<button
-								type="button"
-								onclick={handleForgotPassword}
-								disabled={resetLoading}
-								class="font-body text-xs text-on-surface-muted transition-colors hover:text-primary disabled:opacity-60"
-							>
-								{resetLoading ? 'Sending…' : 'Forgot Password?'}
-							</button>
-						{/if}
-					</div>
 				</div>
 				<button
 					type="submit"
