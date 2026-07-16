@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.9.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.10.0-a7295a?style=flat-square)
 
 </div>
 
@@ -39,6 +39,7 @@
 - Password-based sign-in with tab-based Login & Register
 - Email existence check with guided registration prompt
 - Email confirmation on registration
+- Password reset flow with email link
 - Admin password login with allowlist protection
 - Consistent page headers across Account, Shop & Wishlist
 
@@ -193,7 +194,7 @@ src/
 │   │   ├── categories/            # Category management
 │   │   ├── login/                 # Admin login
 │   │   └── orders/                # Order management
-│   ├── auth/                      # Auth callbacks (OTP, admin)
+│   ├── auth/                      # Auth callbacks (recovery, admin)
 │   ├── cart/                      # Cart page
 │   ├── checkout/                  # Checkout + Razorpay
 │   ├── faq/                       # FAQ page

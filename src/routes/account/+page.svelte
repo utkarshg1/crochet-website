@@ -29,9 +29,21 @@
 	let showNoAccountModal = $state(false);
 
 	let supabase: ReturnType<typeof createClient>;
+	let resetEmailSent = $state(false);
+	let resetLoading = $state(false);
 	onMount(() => {
 		supabase = createClient();
 	});
+
+	async function handleForgotPassword() {
+		if (!loginEmail.trim() || !loginEmail.includes('@')) return;
+		resetLoading = true;
+		await supabase.auth.resetPasswordForEmail(loginEmail.trim().toLowerCase(), {
+			redirectTo: 'https://krafted-loops-studios.vercel.app/auth/reset-password'
+		});
+		resetLoading = false;
+		resetEmailSent = true;
+	}
 
 	function validatePhone(phone: string): boolean {
 		const digits = phone.replace(/\D/g, '');
@@ -297,6 +309,21 @@
 									placeholder="••••••••"
 									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 								/>
+							</div>
+							<div class="flex items-center justify-between">
+								<span></span>
+								{#if resetEmailSent}
+									<span class="font-body text-xs text-secondary">Check your email!</span>
+								{:else}
+									<button
+										type="button"
+										onclick={handleForgotPassword}
+										disabled={resetLoading}
+										class="font-body text-xs text-on-surface-muted transition-colors hover:text-primary disabled:opacity-60"
+									>
+										{resetLoading ? 'Sending…' : 'Forgot Password?'}
+									</button>
+								{/if}
 							</div>
 							<button
 								type="submit"

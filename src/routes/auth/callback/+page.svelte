@@ -31,6 +31,15 @@
 		const refresh_token = hashParams.get('refresh_token');
 
 		if (access_token && refresh_token) {
+			const type = hashParams.get('type');
+
+			if (type === 'recovery') {
+				await goto(
+					`/auth/reset-password?access_token=${encodeURIComponent(access_token)}&refresh_token=${encodeURIComponent(refresh_token)}`
+				);
+				return;
+			}
+
 			const supabase = createClient();
 			const { error } = await supabase.auth.setSession({ access_token, refresh_token });
 			if (!error) {
