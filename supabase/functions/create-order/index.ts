@@ -3,12 +3,24 @@
 // Called by the browser — CORS headers are required.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const corsHeaders = {
-	'Access-Control-Allow-Origin': '*',
-	'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-	'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+// ── CORS: restrict to production domain only ───────────────────────────
+const ALLOWED_ORIGINS = [
+	'https://kraftedloops.in',
+	'https://www.kraftedloops.in',
+	'http://localhost:5173', // dev
+	'http://localhost:4173' // preview
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+	const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+	return {
+		'Access-Control-Allow-Origin': allowed,
+		'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+		'Access-Control-Allow-Methods': 'POST, OPTIONS'
+	};
+}
 
 interface CreateOrderRequest {
 	amount_paise: number;
@@ -16,15 +28,10 @@ interface CreateOrderRequest {
 	notes?: Record<string, string>;
 }
 
-interface RazorpayOrderResponse {
-	id: string;
-	amount: number;
-	currency: string;
-	receipt: string;
-	status: string;
-}
-
 serve(async (req: Request): Promise<Response> => {
+	const origin = req.headers.get('Origin');
+	const corsHeaders = getCorsHeaders(origin);
+
 	// Preflight — browsers send this before the real POST
 	if (req.method === 'OPTIONS') {
 		return new Response('ok', { headers: corsHeaders });
@@ -37,13 +44,50 @@ serve(async (req: Request): Promise<Response> => {
 		});
 	}
 
+	// ── Verify caller has a valid Supabase session ─────────────────────
+	const authHeader = req.headers.get('Authorization');
+	if (!authHeader) {
+		return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+			status: 401,
+			headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+		});
+	}
+
+	const supabaseUrl = Deno.env.get('SUPABASE_URL');
+	const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+	if (!supabaseUrl || !anonKey) {
+		return new Response(JSON.stringify({ error: 'Service misconfigured' }), {
+			status: 500,
+			headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+		});
+	}
+
+	const supabase = createClient(supabaseUrl, anonKey, {
+		auth: { autoRefreshToken: false, persistSession: false }
+	});
+
+	// Verify the JWT is valid (even if it's an anon token)
+	const token = authHeader.replace('Bearer ', '');
+	const {
+		data: { user },
+		error: authError
+	} = await supabase.auth.getUser(token);
+
+	if (authError || !user) {
+		return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+			status: 401,
+			headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+		});
+	}
+
 	try {
 		// ── 1. Parse + validate request body ──────────────────────────────────
 		let body: CreateOrderRequest;
 		try {
 			body = await req.json();
 		} catch {
-			return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+			return new Response(JSON.stringify({ error: 'Invalid request' }), {
 				status: 400,
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
 			});
@@ -58,20 +102,15 @@ serve(async (req: Request): Promise<Response> => {
 			!Number.isInteger(amount_paise) ||
 			amount_paise <= 0
 		) {
-			return new Response(
-				JSON.stringify({
-					error: 'amount_paise is required and must be a positive integer (paise)'
-				}),
-				{
-					status: 422,
-					headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-				}
-			);
+			return new Response(JSON.stringify({ error: 'Invalid amount' }), {
+				status: 422,
+				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+			});
 		}
 
 		// Razorpay enforces a minimum of ₹1 (100 paise)
 		if (amount_paise < 100) {
-			return new Response(JSON.stringify({ error: 'amount_paise must be at least 100 (₹1.00)' }), {
+			return new Response(JSON.stringify({ error: 'Amount too small' }), {
 				status: 422,
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
 			});
@@ -82,7 +121,7 @@ serve(async (req: Request): Promise<Response> => {
 		const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
 
 		if (!keyId || !keySecret) {
-			console.error('create-order: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set');
+			console.error('create-order: Razorpay credentials not set');
 			return new Response(JSON.stringify({ error: 'Payment gateway not configured' }), {
 				status: 500,
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -90,7 +129,6 @@ serve(async (req: Request): Promise<Response> => {
 		}
 
 		// ── 3. Call Razorpay Orders API ────────────────────────────────────────
-		// Razorpay uses HTTP Basic auth: key_id:key_secret, base64-encoded.
 		const credentials = btoa(`${keyId}:${keySecret}`);
 
 		const razorpayPayload: Record<string, unknown> = {
@@ -112,25 +150,14 @@ serve(async (req: Request): Promise<Response> => {
 
 		// ── 4. Handle Razorpay errors ──────────────────────────────────────────
 		if (!razorpayRes.ok) {
-			let razorpayError: unknown;
-			try {
-				razorpayError = await razorpayRes.json();
-			} catch {
-				razorpayError = { description: 'Unknown error from Razorpay' };
-			}
-			console.error('create-order: Razorpay API error', razorpayRes.status, razorpayError);
-
-			// Surface a safe message — never leak raw gateway errors to the browser
-			return new Response(
-				JSON.stringify({ error: 'Failed to create payment order. Please try again.' }),
-				{
-					status: 502,
-					headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-				}
-			);
+			console.error('create-order: Razorpay API error', razorpayRes.status);
+			return new Response(JSON.stringify({ error: 'Failed to create payment order' }), {
+				status: 502,
+				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+			});
 		}
 
-		const order: RazorpayOrderResponse = await razorpayRes.json();
+		const order = await razorpayRes.json();
 
 		// ── 5. Return minimal order object the frontend needs ──────────────────
 		return new Response(
@@ -144,10 +171,9 @@ serve(async (req: Request): Promise<Response> => {
 				headers: { ...corsHeaders, 'Content-Type': 'application/json' }
 			}
 		);
-	} catch (err: unknown) {
-		const message = err instanceof Error ? err.message : 'Internal server error';
+	} catch (err) {
 		console.error('create-order: unhandled error', err);
-		return new Response(JSON.stringify({ error: message }), {
+		return new Response(JSON.stringify({ error: 'Internal server error' }), {
 			status: 500,
 			headers: { ...corsHeaders, 'Content-Type': 'application/json' }
 		});

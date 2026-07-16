@@ -7,7 +7,17 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 };
 
 export const actions: Actions = {
-	create: async ({ request, locals: { supabase } }) => {
+	create: async ({ request, locals: { supabase, safeGetSession } }) => {
+		// ── Verify admin ──────────────────────────────────────────────────
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+		const { data: profile } = await supabase
+			.from('profiles')
+			.select('is_admin')
+			.eq('id', user.id)
+			.single();
+		if (!profile?.is_admin) return fail(403, { error: 'Forbidden' });
+
 		const data = await request.formData();
 		const name = data.get('name') as string;
 		const slug = name
@@ -22,10 +32,20 @@ export const actions: Actions = {
 			image_url: (data.get('image_url') as string) || null,
 			display_order: parseInt(data.get('display_order') as string, 10) || 0
 		});
-		if (error) return fail(500, { error: error.message });
+		if (error) return fail(500, { error: 'Failed to create category' });
 		return { success: true };
 	},
-	update: async ({ request, locals: { supabase } }) => {
+	update: async ({ request, locals: { supabase, safeGetSession } }) => {
+		// ── Verify admin ──────────────────────────────────────────────────
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+		const { data: profile } = await supabase
+			.from('profiles')
+			.select('is_admin')
+			.eq('id', user.id)
+			.single();
+		if (!profile?.is_admin) return fail(403, { error: 'Forbidden' });
+
 		const data = await request.formData();
 		const id = data.get('id') as string;
 		const name = data.get('name') as string;
@@ -44,16 +64,26 @@ export const actions: Actions = {
 				display_order: parseInt(data.get('display_order') as string, 10) || 0
 			})
 			.eq('id', id);
-		if (error) return fail(500, { error: error.message });
+		if (error) return fail(500, { error: 'Failed to update category' });
 		return { updated: true };
 	},
-	delete: async ({ request, locals: { supabase } }) => {
+	delete: async ({ request, locals: { supabase, safeGetSession } }) => {
+		// ── Verify admin ──────────────────────────────────────────────────
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+		const { data: profile } = await supabase
+			.from('profiles')
+			.select('is_admin')
+			.eq('id', user.id)
+			.single();
+		if (!profile?.is_admin) return fail(403, { error: 'Forbidden' });
+
 		const data = await request.formData();
 		const { error } = await supabase
 			.from('categories')
 			.delete()
 			.eq('id', data.get('id') as string);
-		if (error) return fail(500, { error: error.message });
+		if (error) return fail(500, { error: 'Failed to delete category' });
 		return { deleted: true };
 	}
 };

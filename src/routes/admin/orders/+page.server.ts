@@ -12,7 +12,17 @@ export const load: PageServerLoad = async ({ locals: { supabase }, url }) => {
 };
 
 export const actions: Actions = {
-	updateStatus: async ({ request, locals: { supabase } }) => {
+	updateStatus: async ({ request, locals: { supabase, safeGetSession } }) => {
+		// ── Verify admin ──────────────────────────────────────────────────
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+		const { data: profile } = await supabase
+			.from('profiles')
+			.select('is_admin')
+			.eq('id', user.id)
+			.single();
+		if (!profile?.is_admin) return fail(403, { error: 'Forbidden' });
+
 		const data = await request.formData();
 		const id = data.get('id') as string;
 		const status = data.get('status') as string;
@@ -21,7 +31,7 @@ export const actions: Actions = {
 		if (!validStatuses.includes(status)) return fail(400, { error: 'Invalid status' });
 
 		const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-		if (error) return fail(500, { error: error.message });
+		if (error) return fail(500, { error: 'Failed to update order' });
 		return { updated: true };
 	}
 };

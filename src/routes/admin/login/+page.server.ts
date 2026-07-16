@@ -126,7 +126,7 @@ export const actions: Actions = {
 		if (error) {
 			// Reset rate bucket on success only — failures keep counting
 			return fail(400, {
-				error: `${error.message} (${error.status})`,
+				error: 'Invalid or expired code. Try again.',
 				step: 'otp',
 				email
 			});

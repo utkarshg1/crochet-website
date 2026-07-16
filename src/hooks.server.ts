@@ -14,7 +14,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 				},
 				setAll(cookiesToSet) {
 					cookiesToSet.forEach(({ name, value, options }) =>
-						event.cookies.set(name, value, { ...options, path: '/' })
+						event.cookies.set(name, value, {
+							...options,
+							path: '/',
+							// Security: enforce secure cookie defaults
+							httpOnly: options.httpOnly ?? true,
+							secure: options.secure ?? true,
+							sameSite: options.sameSite ?? 'lax'
+						})
 					);
 				}
 			}
@@ -42,9 +49,37 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return { session, user };
 	};
 
-	return resolve(event, {
+	const response = await resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range' || name === 'x-supabase-api-version';
 		}
 	});
+
+	// ── Security headers ─────────────────────────────────────────────────
+	response.headers.set('X-Content-Type-Options', 'nosniff');
+	response.headers.set('X-Frame-Options', 'DENY');
+	response.headers.set('X-XSS-Protection', '1; mode=block');
+	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	response.headers.set(
+		'Permissions-Policy',
+		'camera=(), microphone=(), geolocation=(), payment=(self)'
+	);
+	response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+
+	// Content Security Policy — allow only necessary sources
+	const cspDirectives = [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://fonts.googleapis.com",
+		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+		"img-src 'self' data: blob: https:",
+		"font-src 'self' https://fonts.gstatic.com",
+		"connect-src 'self' https://*.supabase.co https://api.razorpay.com",
+		'frame-src https://checkout.razorpay.com',
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'"
+	].join('; ');
+	response.headers.set('Content-Security-Policy', cspDirectives);
+
+	return response;
 };
