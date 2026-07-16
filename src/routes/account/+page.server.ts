@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase } }) => {
@@ -24,6 +24,55 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 };
 
 export const actions: Actions = {
+	signIn: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
+		const password = String(formData.get('password') ?? '');
+
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email', mode: 'login' });
+		if (password.length < 8)
+			return fail(400, { error: 'Password must be at least 8 characters', mode: 'login' });
+
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		if (error) return fail(400, { error: error.message, mode: 'login' });
+
+		throw redirect(303, '/account');
+	},
+
+	signUp: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
+		const password = String(formData.get('password') ?? '');
+		const fullName = String(formData.get('full_name') ?? '').trim();
+		const phone = String(formData.get('phone') ?? '').trim();
+
+		if (!fullName) return fail(400, { error: 'Enter your full name', mode: 'register' });
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email', mode: 'register' });
+		if (password.length < 8)
+			return fail(400, { error: 'Password must be at least 8 characters', mode: 'register' });
+
+		const phoneDigits = phone.replace(/\D/g, '').replace(/^0+/, '');
+		if (phoneDigits.length !== 10)
+			return fail(400, { error: 'Enter a valid 10-digit phone number', mode: 'register' });
+
+		const { error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				data: { full_name: fullName, phone: `+91${phoneDigits}` },
+				emailRedirectTo: `${new URL(request.url).origin}/auth/callback`
+			}
+		});
+
+		if (error) return fail(400, { error: error.message, mode: 'register' });
+
+		return { registered: true, email };
+	},
+
 	signOut: async ({ locals: { supabase } }) => {
 		await supabase.auth.signOut();
 		throw redirect(303, '/');

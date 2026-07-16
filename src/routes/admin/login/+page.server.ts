@@ -3,7 +3,6 @@ import { ADMIN_EMAILS } from '$env/static/private';
 import type { PageServerLoad, Actions } from './$types';
 
 // ── Admin email allowlist ──────────────────────────────────────────
-// Comma-separated list in env var ADMIN_EMAILS (e.g. "admin@example.com,dev@example.com")
 const allowedEmails = new Set(
 	(ADMIN_EMAILS ?? '')
 		.split(',')
@@ -12,8 +11,6 @@ const allowedEmails = new Set(
 );
 
 // ── In-memory rate limiter (per server instance) ───────────────────
-// Simple Map<key, { count, resetAt }> — survives across requests
-// but resets on server restart. Sufficient for single-instance deploys.
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(
@@ -58,79 +55,42 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 };
 
 export const actions: Actions = {
-	sendOtp: async ({ request, locals: { supabase } }) => {
+	signIn: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
 		const email = String(formData.get('email') ?? '')
 			.trim()
 			.toLowerCase();
+		const password = String(formData.get('password') ?? '');
 
-		// ── Rate limit: 5 OTP requests per IP per 10 minutes ─────────────
+		// ── Rate limit: 5 sign-in attempts per IP per 10 minutes ────────────
 		const ip = getClientIp(request);
-		const { ok, retryAfterMs } = checkRateLimit(`otp:${ip}`, 5, 10 * 60 * 1000);
+		const { ok, retryAfterMs } = checkRateLimit(`signin:${ip}`, 5, 10 * 60 * 1000);
 		if (!ok) {
 			const retryMin = Math.ceil(retryAfterMs / 60_000);
 			return fail(429, {
-				error: `Too many requests. Try again in ${retryMin} min.`,
-				step: 'email'
+				error: `Too many requests. Try again in ${retryMin} min.`
 			});
 		}
 
 		// ── Email validation ─────────────────────────────────────────────
-		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email', step: 'email' });
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email' });
+		if (password.length < 8) return fail(400, { error: 'Password must be at least 8 characters' });
 
 		// ── Admin allowlist check ────────────────────────────────────────
 		// Return fake success to avoid leaking which emails are admin
 		if (allowedEmails.size > 0 && !allowedEmails.has(email)) {
-			return { sent: true, email };
-		}
-
-		// ── Send OTP (existing users only — no account creation) ─────────
-		const { error } = await supabase.auth.signInWithOtp({
-			email
-		});
-
-		if (error) return fail(400, { error: error.message, step: 'email' });
-
-		return { sent: true, email };
-	},
-
-	verifyOtp: async ({ request, locals: { supabase } }) => {
-		const formData = await request.formData();
-		const email = String(formData.get('email') ?? '')
-			.trim()
-			.toLowerCase();
-		const token = String(formData.get('token') ?? '').trim();
-
-		// ── Rate limit: 10 failed verifications per IP per 10 minutes ────
-		const ip = getClientIp(request);
-		const rateKey = `verify:${ip}`;
-		const { ok, retryAfterMs } = checkRateLimit(rateKey, 10, 10 * 60 * 1000);
-		if (!ok) {
-			const retryMin = Math.ceil(retryAfterMs / 60_000);
-			return fail(429, {
-				error: `Too many attempts. Try again in ${retryMin} min.`,
-				step: 'otp',
-				email
+			// Perform a dummy hash to prevent timing attacks
+			await supabase.auth.signInWithPassword({
+				email,
+				password: 'dummy_password_to_prevent_timing'
 			});
+			return { success: true };
 		}
 
-		const { error } = await supabase.auth.verifyOtp({
-			email,
-			token,
-			type: 'email'
-		});
+		// ── Sign in with password ────────────────────────────────────────
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-		if (error) {
-			// Reset rate bucket on success only — failures keep counting
-			return fail(400, {
-				error: 'Invalid or expired code. Try again.',
-				step: 'otp',
-				email
-			});
-		}
-
-		// Clear rate bucket on successful verification
-		rateBuckets.delete(rateKey);
+		if (error) return fail(400, { error: 'Invalid email or password' });
 
 		throw redirect(303, '/admin');
 	}
