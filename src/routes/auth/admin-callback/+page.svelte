@@ -10,8 +10,10 @@
 	onMount(async () => {
 		const supabase = createClient();
 
-		// Capture full URL for debugging
-		debugInfo = `search: ${window.location.search} | hash: ${window.location.hash.substring(0, 60)}`;
+		// Capture full URL for debugging (dev only — never expose in production)
+		if (import.meta.env.DEV) {
+			debugInfo = `search: ${window.location.search} | hash: ${window.location.hash.substring(0, 60)}`;
+		}
 
 		const queryParams = new URLSearchParams(window.location.search);
 

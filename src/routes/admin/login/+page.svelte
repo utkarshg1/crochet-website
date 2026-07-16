@@ -9,6 +9,18 @@
 	const step = $derived((form as Record<string, unknown>)?.sent ? 'otp' : 'email');
 	const sentEmail = $derived(String((form as Record<string, unknown>)?.email ?? ''));
 	const errorMsg = $derived(String((form as Record<string, unknown>)?.error ?? ''));
+
+	function handleOtpVerify() {
+		loading = true;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			// If no error returned, OTP verification succeeded
+			if (!errorMsg) {
+				localStorage.setItem('admin_access', 'true');
+			}
+			await update();
+			loading = false;
+		};
+	}
 </script>
 
 <svelte:head><title>Admin Login — Krafted Loops Studio</title></svelte:head>
@@ -77,7 +89,7 @@
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
 						Enter the 6-digit code sent to <strong class="text-on-surface">{sentEmail}</strong>
 					</p>
-					<form method="POST" action="?/verifyOtp">
+					<form method="POST" action="?/verifyOtp" use:enhance={handleOtpVerify}>
 						<input type="hidden" name="email" value={sentEmail} />
 						<input
 							name="token"
@@ -92,9 +104,10 @@
 						/>
 						<button
 							type="submit"
-							class="shadow-ambient mt-4 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white transition hover:brightness-110"
+							disabled={loading}
+							class="shadow-ambient mt-4 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
 						>
-							Sign In
+							{loading ? 'Signing in…' : 'Sign In'}
 						</button>
 					</form>
 					<a

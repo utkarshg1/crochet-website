@@ -8,6 +8,7 @@
 	// Local UI state
 	let cartOpen = $state(false);
 	let mobileMenuOpen = $state(false);
+	let showAdmin = $state(false);
 
 	// Current pathname for active link detection
 	const currentPath = $derived($page.url.pathname);
@@ -32,6 +33,7 @@
 	// Initialise cart from localStorage once we're in the browser
 	onMount(() => {
 		cart.init();
+		showAdmin = localStorage.getItem('admin_access') === 'true';
 	});
 
 	// Close mobile menu on route change
@@ -120,6 +122,29 @@
 						</a>
 					</li>
 				{/each}
+				{#if showAdmin}
+					<li>
+						<a
+							href="/admin"
+							class="
+                font-body text-base font-medium transition-colors duration-200
+                {isActive('/admin')
+								? 'text-secondary'
+								: 'text-on-surface-muted hover:text-secondary'}
+                relative
+              "
+							aria-current={isActive('/admin') ? 'page' : undefined}
+						>
+							Admin
+							{#if isActive('/admin')}
+								<span
+									class="absolute right-0 -bottom-1 left-0 h-0.5 rounded-full bg-secondary"
+									aria-hidden="true"
+								></span>
+							{/if}
+						</a>
+					</li>
+				{/if}
 			</ul>
 
 			<!-- ── Right action icons (desktop: labelled, mobile: compact) ────── -->
@@ -433,6 +458,20 @@
 							</a>
 						</li>
 					{/each}
+					{#if showAdmin}
+						<li>
+							<a
+								href="/admin"
+								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
+									{isActive('/admin')
+									? 'bg-secondary/10 text-secondary'
+									: 'text-on-surface-muted hover:bg-surface-high hover:text-secondary'}"
+								aria-current={isActive('/admin') ? 'page' : undefined}
+							>
+								Admin Dashboard
+							</a>
+						</li>
+					{/if}
 				</ul>
 			</div>
 		{/if}
