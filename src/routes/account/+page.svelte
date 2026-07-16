@@ -339,7 +339,24 @@
 								disabled={loading}
 								class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 							>
-								{loading ? 'Signing In…' : 'Sign In'}
+								{#if loading}
+									<svg
+										class="mr-2 inline h-[18px] w-[18px] animate-spin"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+									>
+										<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+										<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+									</svg>
+									Signing In…
+								{:else}
+									Sign In
+								{/if}
 							</button>
 						</form>
 						<p class="mt-4 text-center">
@@ -356,6 +373,131 @@
 								Forgot Password?
 							</button>
 						</p>
+					</div>
+				{:else if activeTab === 'register'}
+					<!-- ── Register ─────────────────────────────────────────────────── -->
+					<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
+						<h2 class="font-display text-2xl font-semibold text-on-surface">Create Account</h2>
+						<p class="mt-1 font-body text-sm text-on-surface-muted">All fields are required.</p>
+						<form method="POST" action="?/signUp" use:enhance class="mt-6 space-y-4">
+							<div>
+								<label
+									for="reg-name"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Full Name
+								</label>
+								<input
+									id="reg-name"
+									name="full_name"
+									type="text"
+									bind:value={registerName}
+									required
+									autocomplete="name"
+									placeholder="John Doe"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-phone"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Mobile Number
+								</label>
+								<input
+									id="reg-phone"
+									name="phone"
+									type="tel"
+									bind:value={registerPhone}
+									required
+									autocomplete="tel"
+									placeholder="98765 43210"
+									inputmode="numeric"
+									maxlength="10"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-email"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Email Address
+								</label>
+								<input
+									id="reg-email"
+									name="email"
+									type="email"
+									bind:value={registerEmail}
+									required
+									autocomplete="email"
+									placeholder="you@example.com"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-password"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Password
+								</label>
+								<input
+									id="reg-password"
+									name="password"
+									type="password"
+									bind:value={registerPassword}
+									required
+									minlength="8"
+									autocomplete="new-password"
+									placeholder="At least 8 characters"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<div>
+								<label
+									for="reg-confirm"
+									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+								>
+									Confirm Password
+								</label>
+								<input
+									id="reg-confirm"
+									type="password"
+									bind:value={registerConfirm}
+									required
+									minlength="8"
+									autocomplete="new-password"
+									placeholder="Repeat password"
+									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+								/>
+							</div>
+							<button
+								type="submit"
+								disabled={loading}
+								class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+							>
+								{#if loading}
+									<svg
+										class="mr-2 inline h-[18px] w-[18px] animate-spin"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-linecap="round"
+									>
+										<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+										<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+										<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+									</svg>
+									Creating Account…
+								{:else}
+									Create Account
+								{/if}
+							</button>
+						</form>
 					</div>
 				{:else if activeTab === 'reset'}
 					<!-- ── Reset Password ────────────────────────────────────────────── -->
@@ -422,7 +564,24 @@
 									disabled={resetLoading}
 									class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 								>
-									{resetLoading ? 'Sending…' : 'Send Reset Link'}
+									{#if resetLoading}
+										<svg
+											class="mr-2 inline h-[18px] w-[18px] animate-spin"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-linecap="round"
+										>
+											<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+											<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+											<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+											<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+											<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+										</svg>
+										Sending…
+									{:else}
+										Send Reset Link
+									{/if}
 								</button>
 							</form>
 							<p class="mt-4 text-center">

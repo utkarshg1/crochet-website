@@ -73,9 +73,19 @@
 <div class="flex min-h-[60vh] items-center justify-center px-4">
 	{#if status === 'loading'}
 		<div class="text-center">
-			<div
-				class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary"
-			></div>
+			<svg
+				class="mx-auto mb-4 h-10 w-10 animate-spin"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+			>
+				<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+				<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+				<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+				<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+				<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+			</svg>
 			<p class="font-body text-sm text-on-surface-muted">Verifying reset link…</p>
 		</div>
 	{:else if status === 'form'}
@@ -136,7 +146,24 @@
 					disabled={submitting}
 					class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 				>
-					{submitting ? 'Resetting…' : 'Reset Password'}
+					{#if submitting}
+						<svg
+							class="mr-2 inline h-[18px] w-[18px] animate-spin"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+						>
+							<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+							<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+						</svg>
+						Resetting…
+					{:else}
+						Reset Password
+					{/if}
 				</button>
 			</form>
 		</div>

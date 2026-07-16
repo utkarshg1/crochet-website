@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -34,8 +35,12 @@
 				action="?/signIn"
 				use:enhance={() => {
 					loading = true;
-					return async ({ update }) => {
-						await update();
+					return async ({ result, update }) => {
+						if (result.type === 'redirect') {
+							await goto(result.location);
+						} else {
+							await update();
+						}
 						loading = false;
 					};
 				}}
@@ -79,7 +84,24 @@
 					disabled={loading}
 					class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
 				>
-					{loading ? 'Signing In…' : 'Sign In'}
+					{#if loading}
+						<svg
+							class="mr-2 inline h-[18px] w-[18px] animate-spin"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-linecap="round"
+						>
+							<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+							<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+							<path d="M19 7c1 1.5 0 3.5-2 3.5" stroke-width="1.5" opacity="0.4" />
+						</svg>
+						Signing In…
+					{:else}
+						Sign In
+					{/if}
 				</button>
 			</form>
 		</div>

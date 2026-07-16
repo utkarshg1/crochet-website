@@ -15,7 +15,7 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 
 	const { data: profile } = await supabase
 		.from('profiles')
-		.select('is_admin')
+		.select('is_admin, full_name')
 		.eq('id', user.id)
 		.single();
 
@@ -23,5 +23,5 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 		throw redirect(303, '/');
 	}
 
-	return { session, user };
+	return { session, user, profile };
 };

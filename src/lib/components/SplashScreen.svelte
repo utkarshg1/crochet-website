@@ -16,7 +16,7 @@
 				{ transform: 'rotate(360deg)', opacity: 1 }
 			],
 			{
-				duration: 3000,
+				duration: 2000,
 				easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 				fill: 'forwards'
 			}
@@ -57,7 +57,7 @@
 				}
 			],
 			{
-				duration: 3000,
+				duration: 2000,
 				easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 				fill: 'forwards'
 			}

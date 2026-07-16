@@ -5,6 +5,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import SplashScreen from '$lib/components/SplashScreen.svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { logoState } from '$lib/logoState.svelte';
 	import type { LayoutData } from './$types';
 
@@ -39,7 +40,7 @@
   to the bottom even on short pages — no empty space between content and footer.
 -->
 <div class="flex min-h-screen flex-col">
-	{#if browser && !logoState.hasSettled}
+	{#if browser && !logoState.hasSettled && $page.url.pathname === '/'}
 		<SplashScreen />
 	{/if}
 	<Nav />

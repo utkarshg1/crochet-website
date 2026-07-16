@@ -17,7 +17,9 @@
 
 <div class="p-8">
 	<h1 class="font-display text-3xl font-semibold text-on-surface">Dashboard</h1>
-	<p class="mt-1 font-body text-sm text-on-surface-muted">Welcome back, Kalyani!</p>
+	<p class="mt-1 font-body text-sm text-on-surface-muted">
+		Welcome back, {data.profile?.full_name ?? 'Admin'}!
+	</p>
 
 	<!-- Stats -->
 	<div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
