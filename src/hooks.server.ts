@@ -24,25 +24,33 @@ export const handle: Handle = async ({ event, resolve }) => {
 						})
 					);
 				}
+			},
+			auth: {
+				persistSession: false,
+				autoRefreshToken: false
 			}
 		}
 	);
 
 	event.locals.safeGetSession = async () => {
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-
-		if (!session) {
-			return { session: null, user: null };
-		}
-
+		// Call getUser() FIRST — validates the JWT server-side and suppresses
+		// the getSession() warning about unverified user data.
 		const {
 			data: { user },
 			error
 		} = await event.locals.supabase.auth.getUser();
 
 		if (error) {
+			return { session: null, user: null };
+		}
+
+		// Now safely get the session (fast, reads from cookies — no extra network call).
+		// The getUser() call above suppresses the internal warning.
+		const {
+			data: { session }
+		} = await event.locals.supabase.auth.getSession();
+
+		if (!session) {
 			return { session: null, user: null };
 		}
 

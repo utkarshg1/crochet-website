@@ -15,6 +15,8 @@
 	}
 
 	let { data, children }: Props = $props();
+
+	let isAdmin = $derived($page.url.pathname.startsWith('/admin'));
 </script>
 
 <svelte:head>
@@ -38,22 +40,29 @@
 
   We use min-h-screen + flex-col on the wrapper so the footer is always pushed
   to the bottom even on short pages — no empty space between content and footer.
+
+  On admin routes, Nav and Footer are hidden to give the admin dashboard a
+  clean, full-height layout without storefront chrome.
 -->
 <div class="flex min-h-screen flex-col">
 	{#if browser && !logoState.hasSettled && $page.url.pathname === '/'}
 		<SplashScreen />
 	{/if}
-	<Nav />
+	{#if !isAdmin}
+		<Nav />
+	{/if}
 
 	<!--
-    pt-16 clears the fixed nav. The extra pb accounts for the scroll-to-top
-    button (in Footer) so it doesn't overlap the footer's bottom bar.
+    pt-16 clears the fixed nav (only when Nav is rendered).
+    On admin pages, no top padding is needed since there's no fixed nav.
   -->
-	<main class="flex-1 pt-16" id="main-content">
+	<main class="flex-1 {isAdmin ? '' : 'pt-16'}" id="main-content">
 		{@render children()}
 	</main>
 
-	<Footer />
+	{#if !isAdmin}
+		<Footer />
+	{/if}
 </div>
 
 <!--

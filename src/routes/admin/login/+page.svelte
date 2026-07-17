@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -32,16 +31,8 @@
 			<form
 				method="POST"
 				action="?/signIn"
-				use:enhance={() => {
+				onsubmit={() => {
 					loading = true;
-					return async ({ result, update }) => {
-						if (result.type === 'redirect') {
-							window.location.href = result.location;
-						} else {
-							await update();
-							loading = false;
-						}
-					};
 				}}
 				class="space-y-4"
 			>

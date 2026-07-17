@@ -634,7 +634,7 @@
 	<!-- ── No Account Modal ─────────────────────────────────────────────────── -->
 	{#if showNoAccountModal}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-			<div class="shadow-ambient max-w-sm rounded-3xl bg-surface-card p-8 text-center" role="alert">
+			<div class="shadow-ambient max-w-md rounded-2xl bg-surface-card p-8 text-center" role="alert">
 				<div class="mb-3 text-5xl" aria-hidden="true">👋</div>
 				<p class="font-display text-xl font-semibold text-on-surface">No account found</p>
 				<p class="mt-2 font-body text-sm text-on-surface-muted">Please create an account first.</p>
@@ -647,13 +647,14 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-			onclick={() => (showError = false)}
+			onclick={(e) => {
+				if (e.target === e.currentTarget) showError = false;
+			}}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') showError = false;
+			}}
 		>
-			<div
-				class="shadow-ambient max-w-sm rounded-3xl bg-surface-card p-8 text-center"
-				role="alert"
-				onclick={(e) => e.stopPropagation()}
-			>
+			<div class="shadow-ambient max-w-md rounded-2xl bg-surface-card p-8 text-center" role="alert">
 				<div class="mb-3 text-5xl" aria-hidden="true">⚠️</div>
 				<p class="font-display text-xl font-semibold text-on-surface">Oops!</p>
 				<p class="mt-2 font-body text-sm text-on-surface-muted">{errorMessage}</p>

@@ -1,5 +1,6 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { ADMIN_EMAILS } from '$env/static/private';
+import { requireAdmin } from '$lib/server/admin';
 import type { PageServerLoad, Actions } from './$types';
 
 // ── Admin email allowlist ──────────────────────────────────────────
@@ -44,12 +45,8 @@ function getClientIp(request: Request): string {
 export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase } }) => {
 	const { user } = await safeGetSession();
 	if (user) {
-		const { data: profile } = await supabase
-			.from('profiles')
-			.select('is_admin')
-			.eq('id', user.id)
-			.single();
-		if (profile?.is_admin) throw redirect(303, '/admin');
+		const adminCheck = await requireAdmin(supabase, user);
+		if (adminCheck.ok) throw redirect(303, '/admin');
 	}
 	return {};
 };

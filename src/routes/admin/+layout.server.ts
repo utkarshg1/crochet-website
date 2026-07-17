@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import { requireAdmin } from '$lib/server/admin';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabase }, url }) => {
@@ -13,15 +14,16 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 		throw redirect(303, '/admin/login');
 	}
 
+	const adminCheck = await requireAdmin(supabase, user);
+	if (!adminCheck.ok) {
+		throw redirect(303, '/');
+	}
+
 	const { data: profile } = await supabase
 		.from('profiles')
 		.select('is_admin, full_name')
 		.eq('id', user.id)
 		.single();
-
-	if (!profile?.is_admin) {
-		throw redirect(303, '/');
-	}
 
 	return { session, user, profile };
 };
