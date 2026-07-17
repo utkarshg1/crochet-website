@@ -73,6 +73,33 @@ export const actions: Actions = {
 		return { registered: true, email };
 	},
 
+	resetPassword: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
+
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email', mode: 'reset' });
+
+		const { error } = await supabase.auth.resetPasswordForEmail(email, {
+			redirectTo: `${new URL(request.url).origin}/auth/reset-password`
+		});
+
+		if (error) return fail(400, { error: error.message, mode: 'reset' });
+
+		return { resetSent: true, email };
+	},
+
+	checkEmail: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
+
+		const { data: exists } = await supabase.rpc('check_email_exists', { check_email: email });
+		return { exists: exists ?? true };
+	},
+
 	signOut: async ({ locals: { supabase } }) => {
 		await supabase.auth.signOut();
 		throw redirect(303, '/');

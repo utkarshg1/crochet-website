@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -37,11 +36,11 @@
 					loading = true;
 					return async ({ result, update }) => {
 						if (result.type === 'redirect') {
-							await goto(result.location);
+							window.location.href = result.location;
 						} else {
 							await update();
+							loading = false;
 						}
-						loading = false;
 					};
 				}}
 				class="space-y-4"

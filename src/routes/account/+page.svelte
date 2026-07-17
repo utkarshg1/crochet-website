@@ -9,7 +9,16 @@
 	let {
 		data,
 		form
-	}: { data: PageData; form: { error?: string; registered?: boolean; email?: string } } = $props();
+	}: {
+		data: PageData;
+		form: {
+			error?: string;
+			registered?: boolean;
+			email?: string;
+			resetSent?: boolean;
+			exists?: boolean;
+		};
+	} = $props();
 
 	let loading = $state(false);
 	let activeTab = $state<'login' | 'register' | 'reset'>('login');
@@ -27,33 +36,27 @@
 
 	// Reset fields
 	let resetEmail = $state('');
-	let resetEmailSent = $state(false);
 	let resetLoading = $state(false);
-	let resetError = $state('');
+
+	// Modal state
+	let showError = $state(false);
+	let errorMessage = $state('');
 
 	// No-account modal
 	let showNoAccountModal = $state(false);
+
+	// Show error modal whenever form returns an error
+	$effect(() => {
+		if (form?.error) {
+			errorMessage = form.error;
+			showError = true;
+		}
+	});
 
 	let supabase: ReturnType<typeof createClient>;
 	onMount(() => {
 		supabase = createClient();
 	});
-
-	async function handleForgotPassword() {
-		if (!resetEmail.trim() || !resetEmail.includes('@')) return;
-		resetLoading = true;
-		resetError = '';
-		if (!supabase) supabase = createClient();
-		const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim().toLowerCase(), {
-			redirectTo: 'https://krafted-loops-studios.vercel.app/auth/reset-password'
-		});
-		resetLoading = false;
-		if (error) {
-			resetError = error.message;
-			return;
-		}
-		resetEmailSent = true;
-	}
 
 	function validatePhone(phone: string): boolean {
 		const digits = phone.replace(/\D/g, '');
@@ -63,11 +66,13 @@
 	async function checkEmailAndSwitch() {
 		if (!loginEmail.trim() || !loginEmail.includes('@')) return;
 		loading = true;
-		const { data: exists } = await supabase.rpc('check_email_exists', {
-			check_email: loginEmail.trim().toLowerCase()
-		});
+		const formBody = new FormData();
+		formBody.append('email', loginEmail.trim().toLowerCase());
+		const res = await fetch('?/checkEmail', { method: 'POST', body: formBody });
+		const result = await res.json();
 		loading = false;
 
+		const exists = result.data?.exists ?? true;
 		if (!exists) {
 			registerEmail = loginEmail.trim().toLowerCase();
 			showNoAccountModal = true;
@@ -131,7 +136,18 @@
 						<p class="font-body text-sm font-medium text-on-surface">{data.profile.phone}</p>
 					</div>
 				{/if}
-				<form method="POST" action="?/signOut" use:enhance class="mt-6">
+				<form
+					method="POST"
+					action="?/signOut"
+					use:enhance={() => {
+						return async ({ result }) => {
+							if (result.type === 'redirect') {
+								window.location.href = result.location;
+							}
+						};
+					}}
+					class="mt-6"
+				>
 					<button
 						type="submit"
 						class="w-full rounded-full bg-surface-high py-2.5 font-body text-sm font-medium text-on-surface transition-colors hover:bg-surface-low"
@@ -221,12 +237,6 @@
 		<!-- ── LOGGED OUT STATE ─────────────────────────────────────────────────── -->
 	{:else}
 		<div class="mx-auto max-w-lg">
-			{#if form?.error}
-				<div class="mb-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary">
-					{form.error}
-				</div>
-			{/if}
-
 			{#if form?.registered}
 				<!-- ── Email Confirmation ──────────────────────────────────────────── -->
 				<div class="shadow-ambient rounded-3xl bg-surface-card p-8 text-center">
@@ -275,8 +285,6 @@
 					<button
 						onclick={() => {
 							resetEmail = loginEmail;
-							resetEmailSent = false;
-							resetError = '';
 							activeTab = 'reset';
 						}}
 						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
@@ -295,7 +303,22 @@
 						<p class="mt-1 font-body text-sm text-on-surface-muted">
 							Sign in to view your order history.
 						</p>
-						<form method="POST" action="?/signIn" use:enhance class="mt-6 space-y-4">
+						<form
+							method="POST"
+							action="?/signIn"
+							use:enhance={() => {
+								loading = true;
+								return async ({ result, update }) => {
+									if (result.type === 'redirect') {
+										window.location.href = result.location;
+									} else {
+										await update();
+										loading = false;
+									}
+								};
+							}}
+							class="mt-6 space-y-4"
+						>
 							<div>
 								<label
 									for="login-email"
@@ -364,8 +387,6 @@
 								type="button"
 								onclick={() => {
 									resetEmail = loginEmail;
-									resetEmailSent = false;
-									resetError = '';
 									activeTab = 'reset';
 								}}
 								class="font-body text-xs text-on-surface-muted underline transition-colors hover:text-primary"
@@ -379,7 +400,18 @@
 					<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
 						<h2 class="font-display text-2xl font-semibold text-on-surface">Create Account</h2>
 						<p class="mt-1 font-body text-sm text-on-surface-muted">All fields are required.</p>
-						<form method="POST" action="?/signUp" use:enhance class="mt-6 space-y-4">
+						<form
+							method="POST"
+							action="?/signUp"
+							use:enhance={() => {
+								loading = true;
+								return async ({ result, update }) => {
+									await update();
+									loading = false;
+								};
+							}}
+							class="mt-6 space-y-4"
+						>
 							<div>
 								<label
 									for="reg-name"
@@ -507,38 +539,34 @@
 							Enter your email and we'll send you a reset link.
 						</p>
 
-						{#if resetEmailSent}
+						{#if form?.resetSent}
 							<div class="mt-6 rounded-2xl bg-secondary-container/30 px-4 py-5 text-center">
 								<div class="mb-2 text-4xl" aria-hidden="true">📧</div>
 								<p class="font-body text-sm font-medium text-on-surface">Check your email!</p>
 								<p class="mt-1 font-body text-xs text-on-surface-muted">
 									We sent a password reset link to <strong class="text-on-surface"
-										>{resetEmail}</strong
+										>{form.email}</strong
 									>.
 								</p>
 							</div>
 							<button
 								onclick={() => {
 									activeTab = 'login';
-									resetEmailSent = false;
-									resetError = '';
 								}}
 								class="shadow-ambient mt-6 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-3.5 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95"
 							>
 								← Back to Sign In
 							</button>
 						{:else}
-							{#if resetError}
-								<div
-									class="mt-4 rounded-2xl bg-primary/10 px-4 py-3 font-body text-sm text-primary"
-								>
-									{resetError}
-								</div>
-							{/if}
 							<form
-								onsubmit={(e) => {
-									e.preventDefault();
-									handleForgotPassword();
+								method="POST"
+								action="?/resetPassword"
+								use:enhance={() => {
+									resetLoading = true;
+									return async ({ result, update }) => {
+										await update();
+										resetLoading = false;
+									};
 								}}
 								class="mt-6 space-y-4"
 							>
@@ -551,6 +579,7 @@
 									</label>
 									<input
 										id="reset-email"
+										name="email"
 										type="email"
 										bind:value={resetEmail}
 										required
@@ -589,7 +618,6 @@
 									type="button"
 									onclick={() => {
 										activeTab = 'login';
-										resetError = '';
 									}}
 									class="font-body text-xs text-on-surface-muted underline transition-colors hover:text-primary"
 								>
@@ -610,6 +638,31 @@
 				<div class="mb-3 text-5xl" aria-hidden="true">👋</div>
 				<p class="font-display text-xl font-semibold text-on-surface">No account found</p>
 				<p class="mt-2 font-body text-sm text-on-surface-muted">Please create an account first.</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- ── Error Modal ─────────────────────────────────────────────────────── -->
+	{#if showError}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+			onclick={() => (showError = false)}
+		>
+			<div
+				class="shadow-ambient max-w-sm rounded-3xl bg-surface-card p-8 text-center"
+				role="alert"
+				onclick={(e) => e.stopPropagation()}
+			>
+				<div class="mb-3 text-5xl" aria-hidden="true">⚠️</div>
+				<p class="font-display text-xl font-semibold text-on-surface">Oops!</p>
+				<p class="mt-2 font-body text-sm text-on-surface-muted">{errorMessage}</p>
+				<button
+					onclick={() => (showError = false)}
+					class="shadow-ambient mt-6 rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
+				>
+					OK
+				</button>
 			</div>
 		</div>
 	{/if}
