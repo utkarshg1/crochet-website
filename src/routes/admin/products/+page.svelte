@@ -183,9 +183,10 @@
 				}
 				return { ok: false, error: `Upload failed: ${msg}` };
 			}
-			urls.push(
-				`https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
-			);
+			const {
+				data: { publicUrl }
+			} = supabase.storage.from('product-images').getPublicUrl(path);
+			urls.push(publicUrl);
 		}
 		return { ok: true, urls };
 	}

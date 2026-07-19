@@ -100,9 +100,12 @@
 			}
 			return { ok: false, error: `Upload failed: ${msg}` };
 		}
+		const {
+			data: { publicUrl }
+		} = supabase.storage.from('product-images').getPublicUrl(path);
 		return {
 			ok: true,
-			url: `https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
+			url: publicUrl
 		};
 	}
 
