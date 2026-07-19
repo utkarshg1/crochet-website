@@ -2,7 +2,10 @@
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { createClient } from '$lib/supabase';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import type { PageData, ActionData } from './$types';
+
+	const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — must match Supabase storage bucket limit
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	let loading = $state(false);
@@ -13,6 +16,15 @@
 	onMount(() => {
 		supabase = createClient();
 	});
+
+	// ── Error modal state ─────────────────────────────────────────────────────
+	let errorModalOpen = $state(false);
+	let errorModalMessage = $state('');
+
+	function showError(message: string) {
+		errorModalMessage = message;
+		errorModalOpen = true;
+	}
 
 	// ── Create form image state ──────────────────────────────────────────────
 	let newFile = $state<File | null>(null);
@@ -26,6 +38,13 @@
 	function onNewFileChange(e: Event) {
 		const input = e.currentTarget as HTMLInputElement;
 		const file = input.files?.[0] ?? null;
+		if (file && file.size > MAX_FILE_SIZE) {
+			showError(
+				`Image size limit exceeded. The file is ${formatFileSize(file.size)}, but the maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Please choose a smaller image.`
+			);
+			input.value = '';
+			return;
+		}
 		newFile = file;
 		newPreview = file ? URL.createObjectURL(file) : '';
 	}
@@ -33,6 +52,13 @@
 	function onEditFileChange(e: Event) {
 		const input = e.currentTarget as HTMLInputElement;
 		const file = input.files?.[0] ?? null;
+		if (file && file.size > MAX_FILE_SIZE) {
+			showError(
+				`Image size limit exceeded. The file is ${formatFileSize(file.size)}, but the maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Please choose a smaller image.`
+			);
+			input.value = '';
+			return;
+		}
 		editFile = file;
 		editPreview = file ? URL.createObjectURL(file) : '';
 	}
@@ -52,12 +78,32 @@
 		editExistingUrl = '';
 	}
 
-	async function uploadImage(file: File): Promise<string | null> {
+	function formatFileSize(bytes: number): string {
+		if (bytes < 1024) return `${bytes} B`;
+		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	type UploadResult = { ok: true; url: string } | { ok: false; error: string };
+
+	async function uploadImage(file: File): Promise<UploadResult> {
 		const ext = file.name.split('.').pop();
 		const path = `category/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 		const { error } = await supabase.storage.from('product-images').upload(path, file);
-		if (error) return null;
-		return `https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`;
+		if (error) {
+			const msg = error.message ?? 'Unknown upload error';
+			if (msg.includes('file_size') || msg.includes('too large') || msg.includes('File size')) {
+				return {
+					ok: false,
+					error: `Image size limit exceeded. Maximum file size is ${formatFileSize(MAX_FILE_SIZE)}.`
+				};
+			}
+			return { ok: false, error: `Upload failed: ${msg}` };
+		}
+		return {
+			ok: true,
+			url: `https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
+		};
 	}
 
 	$effect(() => {
@@ -104,8 +150,13 @@
 					(async () => {
 						let imageUrl = '';
 						if (newFile) {
-							const url = await uploadImage(newFile);
-							if (url) imageUrl = url;
+							const result = await uploadImage(newFile);
+							if (!result.ok) {
+								showError(result.error);
+								loading = false;
+								return;
+							}
+							imageUrl = result.url;
 						}
 						const hidden = formElement.querySelector<HTMLInputElement>('input[name="image_url"]')!;
 						hidden.value = imageUrl;
@@ -261,8 +312,13 @@
 										(async () => {
 											let imageUrl = editExistingUrl;
 											if (editFile) {
-												const url = await uploadImage(editFile);
-												if (url) imageUrl = url;
+												const result = await uploadImage(editFile);
+												if (!result.ok) {
+													showError(result.error);
+													loading = false;
+													return;
+												}
+												imageUrl = result.url;
 											}
 											const hidden =
 												formElement.querySelector<HTMLInputElement>('input[name="image_url"]')!;
@@ -459,3 +515,12 @@
 		</table>
 	</div>
 </div>
+
+<Modal
+	open={errorModalOpen}
+	title="Upload Error"
+	variant="error"
+	onclose={() => (errorModalOpen = false)}
+>
+	{errorModalMessage}
+</Modal>

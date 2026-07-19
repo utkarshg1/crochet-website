@@ -306,18 +306,18 @@
 					</form>
 
 					{#if form?.resendSuccess}
-						<p class="mt-2 text-xs text-secondary font-body">Confirmation resent!</p>
+						<p class="mt-2 font-body text-xs text-secondary">Confirmation resent!</p>
 					{/if}
 
-				<button
-					onclick={() => {
-						registeredDismissed = true;
-						activeTab = 'login';
-					}}
-					class="shadow-ambient mt-2 inline-block w-full rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-medium text-on-surface transition-colors hover:bg-surface-low"
-				>
-					← Back to Sign In
-				</button>
+					<button
+						onclick={() => {
+							registeredDismissed = true;
+							activeTab = 'login';
+						}}
+						class="shadow-ambient mt-2 inline-block w-full rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-medium text-on-surface transition-colors hover:bg-surface-low"
+					>
+						← Back to Sign In
+					</button>
 				</div>
 			{:else}
 				<!-- ── Tab Bar ─────────────────────────────────────────────────── -->
@@ -400,7 +400,7 @@
 									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 								/>
 							</div>
-								<div>
+							<div>
 								<label
 									for="login-password"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
@@ -422,13 +422,41 @@
 									<button
 										type="button"
 										onclick={() => (showLoginPassword = !showLoginPassword)}
-										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
 										tabindex="-1"
 									>
 										{#if showLoginPassword}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path
+													d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+												/><path
+													d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+												/><line x1="1" y1="1" x2="23" y2="23" /></svg
+											>
 										{:else}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle
+													cx="12"
+													cy="12"
+													r="3"
+												/></svg
+											>
 										{/if}
 									</button>
 								</div>
@@ -544,7 +572,7 @@
 									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 								/>
 							</div>
-								<div>
+							<div>
 								<label
 									for="reg-password"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
@@ -566,18 +594,46 @@
 									<button
 										type="button"
 										onclick={() => (showRegisterPassword = !showRegisterPassword)}
-										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
 										tabindex="-1"
 									>
 										{#if showRegisterPassword}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path
+													d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+												/><path
+													d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+												/><line x1="1" y1="1" x2="23" y2="23" /></svg
+											>
 										{:else}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle
+													cx="12"
+													cy="12"
+													r="3"
+												/></svg
+											>
 										{/if}
 									</button>
 								</div>
 							</div>
-								<div>
+							<div>
 								<label
 									for="reg-confirm"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
@@ -598,13 +654,41 @@
 									<button
 										type="button"
 										onclick={() => (showRegisterConfirm = !showRegisterConfirm)}
-										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										class="absolute top-1/2 right-3 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
 										tabindex="-1"
 									>
 										{#if showRegisterConfirm}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path
+													d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+												/><path
+													d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+												/><line x1="1" y1="1" x2="23" y2="23" /></svg
+											>
 										{:else}
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle
+													cx="12"
+													cy="12"
+													r="3"
+												/></svg
+											>
 										{/if}
 									</button>
 								</div>

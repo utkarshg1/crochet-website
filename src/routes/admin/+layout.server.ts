@@ -5,7 +5,7 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabase }, url }) => {
 	// Let the login page load without auth — it handles itself
 	if (url.pathname === '/admin/login') {
-		return { session: null, user: null };
+		return { session: null, user: null, unauthorized: false };
 	}
 
 	const { session, user } = await safeGetSession();
@@ -16,7 +16,7 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 
 	const adminCheck = await requireAdmin(supabase, user);
 	if (!adminCheck.ok) {
-		throw redirect(303, '/');
+		return { session, user, profile: null, unauthorized: true };
 	}
 
 	const { data: profile } = await supabase
@@ -25,5 +25,5 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
 		.eq('id', user.id)
 		.single();
 
-	return { session, user, profile };
+	return { session, user, profile, unauthorized: false };
 };

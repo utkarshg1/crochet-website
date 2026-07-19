@@ -1,7 +1,10 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
+	import Modal from '$lib/components/ui/Modal.svelte';
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
+
+	let unauthorizedOpen = $state(true);
 
 	const navLinks = [
 		{ href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -45,3 +48,15 @@
 		{@render children()}
 	</main>
 </div>
+
+<Modal
+	open={unauthorizedOpen && !!data.unauthorized}
+	title="Unauthorized"
+	variant="error"
+	onclose={() => (unauthorizedOpen = false)}
+	actionLabel="Back to Shop"
+	onaction={() => (window.location.href = '/')}
+>
+	You do not have permission to access the admin panel. Please contact the store owner if you
+	believe this is a mistake.
+</Modal>

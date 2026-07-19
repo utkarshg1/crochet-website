@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.12.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.13.0-a7295a?style=flat-square)
 
 </div>
 
@@ -51,6 +51,8 @@
 
 - Product CRUD with image uploads
 - Category management with display ordering
+- Image upload error handling with size limit validation & modal feedback
+- Unauthorized access modal for non-admin users
 - Order management with status updates
 - Inventory tracking
 
@@ -176,7 +178,7 @@ src/
 ├── lib/
 │   ├── assets/              # Images, SVGs, favicon
 │   ├── components/
-│   │   ├── ui/              # Reusable UI primitives (Button, Input, Badge)
+│   │   ├── ui/              # Reusable UI primitives (Button, Input, Badge, Modal)
 │   │   ├── CartDrawer.svelte
 │   │   ├── CategoryChip.svelte
 │   │   ├── Footer.svelte

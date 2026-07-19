@@ -40,18 +40,18 @@
 				return;
 			}
 
-		const supabase = createClient();
-		const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-		if (!error) {
-			await invalidateAll();
-			if (type === 'signup') {
-				status = 'confirmed';
-				setTimeout(() => goto('/account'), 3000);
+			const supabase = createClient();
+			const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+			if (!error) {
+				await invalidateAll();
+				if (type === 'signup') {
+					status = 'confirmed';
+					setTimeout(() => goto('/account'), 3000);
+					return;
+				}
+				await goto('/account');
 				return;
 			}
-			await goto('/account');
-			return;
-		}
 			errorMsg = error.message;
 			status = 'error';
 			return;
@@ -73,7 +73,10 @@
 	});
 </script>
 
-<svelte:head><title>{status === 'confirmed' ? 'Email Confirmed' : 'Signing in…'} — Krafted Loops Studio</title></svelte:head>
+<svelte:head
+	><title>{status === 'confirmed' ? 'Email Confirmed' : 'Signing in…'} — Krafted Loops Studio</title
+	></svelte:head
+>
 
 <div class="flex min-h-[60vh] items-center justify-center px-4">
 	{#if status === 'loading'}
@@ -107,8 +110,19 @@
 		</div>
 	{:else if status === 'confirmed'}
 		<div class="shadow-ambient max-w-md rounded-3xl bg-surface-card p-10 text-center">
-			<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+			<div
+				class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-8 w-8 text-green-500"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg
+				>
 			</div>
 			<p class="font-display text-2xl font-semibold text-on-surface">Email Confirmed!</p>
 			<p class="mt-2 font-body text-sm text-on-surface-muted">
@@ -132,8 +146,9 @@
 			<p class="font-display text-xl text-on-surface">Sign-in failed</p>
 			<p class="mt-2 font-body text-sm text-on-surface-muted">{errorMsg}</p>
 			{#if errorMsg === 'No session found. Please request a new link.'}
-				<p class="mt-1 text-xs text-on-surface-muted font-body">
-					This link may have already been used. Your account might already be confirmed — try signing in.
+				<p class="mt-1 font-body text-xs text-on-surface-muted">
+					This link may have already been used. Your account might already be confirmed — try
+					signing in.
 				</p>
 			{/if}
 			<div class="mt-6 flex flex-col gap-3">

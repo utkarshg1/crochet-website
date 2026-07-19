@@ -3,7 +3,10 @@
 	import { enhance } from '$app/forms';
 	import { formatPrice } from '$lib/types';
 	import { createClient } from '$lib/supabase';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import type { PageData, ActionData } from './$types';
+
+	const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — must match Supabase storage bucket limit
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -18,6 +21,31 @@
 	let loading = $state(false);
 	let search = $state('');
 	let editingId = $state<string | null>(null);
+
+	// ── Error modal state ─────────────────────────────────────────────────────
+	let errorModalOpen = $state(false);
+	let errorModalMessage = $state('');
+
+	function showError(message: string) {
+		errorModalMessage = message;
+		errorModalOpen = true;
+	}
+
+	function formatFileSize(bytes: number): string {
+		if (bytes < 1024) return `${bytes} B`;
+		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	function validateFileSize(file: File): boolean {
+		if (file.size > MAX_FILE_SIZE) {
+			showError(
+				`Image size limit exceeded. The file "${file.name}" is ${formatFileSize(file.size)}, but the maximum allowed size is ${formatFileSize(MAX_FILE_SIZE)}. Please choose a smaller image.`
+			);
+			return false;
+		}
+		return true;
+	}
 
 	// ── New-product form image state ───────────────────────────────────────────
 	let newFiles = $state<FileList | null>(null);
@@ -82,14 +110,32 @@
 
 	function onNewFilesChange(e: Event) {
 		const input = e.currentTarget as HTMLInputElement;
-		newFiles = input.files;
+		const files = input.files;
+		if (files) {
+			for (const file of Array.from(files)) {
+				if (!validateFileSize(file)) {
+					input.value = '';
+					return;
+				}
+			}
+		}
+		newFiles = files;
 		newPreviews = buildPreviews(newFiles);
 	}
 
 	function onEditFilesChange(e: Event, productId: string) {
 		const input = e.currentTarget as HTMLInputElement;
+		const files = input.files;
+		if (files) {
+			for (const file of Array.from(files)) {
+				if (!validateFileSize(file)) {
+					input.value = '';
+					return;
+				}
+			}
+		}
 		const state = getEditState(productId);
-		state.files = input.files;
+		state.files = files;
 		state.previews = buildPreviews(state.files);
 		editImageState[productId] = state;
 	}
@@ -118,20 +164,30 @@
 	}
 
 	// ── Upload helper ──────────────────────────────────────────────────────────
-	async function uploadImages(files: FileList | null): Promise<string[]> {
-		if (!files || files.length === 0) return [];
+	type UploadResult = { ok: true; urls: string[] } | { ok: false; error: string };
+
+	async function uploadImages(files: FileList | null): Promise<UploadResult> {
+		if (!files || files.length === 0) return { ok: true, urls: [] };
 		const urls: string[] = [];
 		for (const file of Array.from(files)) {
 			const ext = file.name.split('.').pop();
 			const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 			const { error } = await supabase.storage.from('product-images').upload(path, file);
-			if (!error) {
-				urls.push(
-					`https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
-				);
+			if (error) {
+				const msg = error.message ?? 'Unknown upload error';
+				if (msg.includes('file_size') || msg.includes('too large') || msg.includes('File size')) {
+					return {
+						ok: false,
+						error: `Image size limit exceeded. Maximum file size is ${formatFileSize(MAX_FILE_SIZE)}.`
+					};
+				}
+				return { ok: false, error: `Upload failed: ${msg}` };
 			}
+			urls.push(
+				`https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`
+			);
 		}
-		return urls;
+		return { ok: true, urls };
 	}
 </script>
 
@@ -167,10 +223,15 @@
 					// Upload images first, then inject URLs as a hidden field and submit
 					cancel(); // prevent the default immediate submit
 					(async () => {
-						const uploaded = await uploadImages(newFiles);
+						const uploadResult = await uploadImages(newFiles);
+						if (!uploadResult.ok) {
+							showError(uploadResult.error);
+							loading = false;
+							return;
+						}
 						const hiddenImages =
 							formElement.querySelector<HTMLInputElement>('input[name="images"]')!;
-						hiddenImages.value = JSON.stringify(uploaded);
+						hiddenImages.value = JSON.stringify(uploadResult.urls);
 						// Re-submit with SvelteKit's enhance by triggering a programmatic submit
 						// We bypass cancel by directly calling requestSubmit on a cloned approach —
 						// instead, we swap to a native fetch-based form submission here.
@@ -533,8 +594,13 @@
 										cancel();
 										(async () => {
 											const state = getEditState(product.id);
-											const newUrls = await uploadImages(state.files);
-											const allImages = [...state.existingImages, ...newUrls];
+											const uploadResult = await uploadImages(state.files);
+											if (!uploadResult.ok) {
+												showError(uploadResult.error);
+												loading = false;
+												return;
+											}
+											const allImages = [...state.existingImages, ...uploadResult.urls];
 											const hiddenImages =
 												formElement.querySelector<HTMLInputElement>('input[name="images"]')!;
 											hiddenImages.value = JSON.stringify(allImages);
@@ -798,6 +864,15 @@
 		</table>
 	</div>
 </div>
+
+<Modal
+	open={errorModalOpen}
+	title="Upload Error"
+	variant="error"
+	onclose={() => (errorModalOpen = false)}
+>
+	{errorModalMessage}
+</Modal>
 
 <style>
 	.field {
