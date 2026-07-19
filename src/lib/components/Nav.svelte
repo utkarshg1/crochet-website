@@ -9,6 +9,7 @@
 	let cartOpen = $state(false);
 	let mobileMenuOpen = $state(false);
 	let showAdmin = $state(false);
+	let adminLoading = $state(false);
 
 	// Current pathname for active link detection
 	const currentPath = $derived($page.url.pathname);
@@ -41,6 +42,7 @@
 		// Reading currentPath creates a reactive dependency
 		currentPath;
 		mobileMenuOpen = false;
+		adminLoading = false;
 	});
 </script>
 
@@ -126,6 +128,7 @@
 					<li>
 						<a
 							href="/admin/login"
+							onclick={() => (adminLoading = true)}
 							class="
                 font-body text-base font-medium transition-colors duration-200
                 {isActive('/admin')
@@ -462,6 +465,7 @@
 						<li>
 							<a
 								href="/admin/login"
+								onclick={() => (adminLoading = true)}
 								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
 									{isActive('/admin')
 									? 'bg-secondary/10 text-secondary'
@@ -480,3 +484,24 @@
 
 <!-- Cart drawer — rendered outside the nav so it sits in the stacking context root -->
 <CartDrawer open={cartOpen} onClose={() => (cartOpen = false)} />
+
+{#if adminLoading}
+	<div class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-surface">
+		<img src={logoSvg} alt="" class="logo-spin h-20 w-20 rounded-full" />
+		<p class="mt-4 font-body text-sm text-on-surface-muted">Loading admin panel…</p>
+	</div>
+{/if}
+
+<style>
+	.logo-spin {
+		animation: logo-spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+	}
+	@keyframes logo-spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>
