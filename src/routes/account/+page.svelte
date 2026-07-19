@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { formatPrice } from '$lib/types';
 	import { createClient } from '$lib/supabase';
 	import { onMount } from 'svelte';
@@ -37,6 +38,11 @@
 	// Reset fields
 	let resetEmail = $state('');
 	let resetLoading = $state(false);
+
+	// Password visibility toggles
+	let showLoginPassword = $state(false);
+	let showRegisterPassword = $state(false);
+	let showRegisterConfirm = $state(false);
 
 	// Modal state
 	let showError = $state(false);
@@ -249,8 +255,7 @@
 					</p>
 					<button
 						onclick={() => {
-							activeTab = 'login';
-							loginEmail = form?.email ?? '';
+							goto('/account');
 						}}
 						class="shadow-ambient mt-6 inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
 					>
@@ -338,24 +343,38 @@
 									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 								/>
 							</div>
-							<div>
+								<div>
 								<label
 									for="login-password"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
 								>
 									Password
 								</label>
-								<input
-									id="login-password"
-									name="password"
-									type="password"
-									bind:value={loginPassword}
-									required
-									minlength="8"
-									autocomplete="current-password"
-									placeholder="••••••••"
-									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-								/>
+								<div class="relative">
+									<input
+										id="login-password"
+										name="password"
+										type={showLoginPassword ? 'text' : 'password'}
+										bind:value={loginPassword}
+										required
+										minlength="8"
+										autocomplete="current-password"
+										placeholder="••••••••"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 pr-10 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+									<button
+										type="button"
+										onclick={() => (showLoginPassword = !showLoginPassword)}
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										tabindex="-1"
+									>
+										{#if showLoginPassword}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+										{:else}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+										{/if}
+									</button>
+								</div>
 							</div>
 							<button
 								type="submit"
@@ -468,42 +487,70 @@
 									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 								/>
 							</div>
-							<div>
+								<div>
 								<label
 									for="reg-password"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
 								>
 									Password
 								</label>
-								<input
-									id="reg-password"
-									name="password"
-									type="password"
-									bind:value={registerPassword}
-									required
-									minlength="8"
-									autocomplete="new-password"
-									placeholder="At least 8 characters"
-									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-								/>
+								<div class="relative">
+									<input
+										id="reg-password"
+										name="password"
+										type={showRegisterPassword ? 'text' : 'password'}
+										bind:value={registerPassword}
+										required
+										minlength="8"
+										autocomplete="new-password"
+										placeholder="At least 8 characters"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 pr-10 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+									<button
+										type="button"
+										onclick={() => (showRegisterPassword = !showRegisterPassword)}
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										tabindex="-1"
+									>
+										{#if showRegisterPassword}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+										{:else}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+										{/if}
+									</button>
+								</div>
 							</div>
-							<div>
+								<div>
 								<label
 									for="reg-confirm"
 									class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
 								>
 									Confirm Password
 								</label>
-								<input
-									id="reg-confirm"
-									type="password"
-									bind:value={registerConfirm}
-									required
-									minlength="8"
-									autocomplete="new-password"
-									placeholder="Repeat password"
-									class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
-								/>
+								<div class="relative">
+									<input
+										id="reg-confirm"
+										type={showRegisterConfirm ? 'text' : 'password'}
+										bind:value={registerConfirm}
+										required
+										minlength="8"
+										autocomplete="new-password"
+										placeholder="Repeat password"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 pr-10 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+									<button
+										type="button"
+										onclick={() => (showRegisterConfirm = !showRegisterConfirm)}
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-muted transition-colors hover:text-on-surface"
+										tabindex="-1"
+									>
+										{#if showRegisterConfirm}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+										{:else}
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+										{/if}
+									</button>
+								</div>
 							</div>
 							<button
 								type="submit"
