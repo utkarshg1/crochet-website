@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
+	import { createClient } from '$lib/supabase';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -7,8 +9,63 @@
 	let showForm = $state(false);
 	let editingId = $state<string | null>(null);
 
+	let supabase: ReturnType<typeof createClient>;
+	onMount(() => {
+		supabase = createClient();
+	});
+
+	// ── Create form image state ──────────────────────────────────────────────
+	let newFile = $state<File | null>(null);
+	let newPreview = $state('');
+
+	// ── Edit form image state ────────────────────────────────────────────────
+	let editFile = $state<File | null>(null);
+	let editPreview = $state('');
+	let editExistingUrl = $state('');
+
+	function onNewFileChange(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0] ?? null;
+		newFile = file;
+		newPreview = file ? URL.createObjectURL(file) : '';
+	}
+
+	function onEditFileChange(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0] ?? null;
+		editFile = file;
+		editPreview = file ? URL.createObjectURL(file) : '';
+	}
+
+	function openEdit(cat: { id: string; image_url?: string | null }) {
+		if (editingId === cat.id) {
+			editingId = null;
+			return;
+		}
+		editingId = cat.id;
+		editFile = null;
+		editPreview = '';
+		editExistingUrl = cat.image_url ?? '';
+	}
+
+	function removeEditExisting() {
+		editExistingUrl = '';
+	}
+
+	async function uploadImage(file: File): Promise<string | null> {
+		const ext = file.name.split('.').pop();
+		const path = `category/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+		const { error } = await supabase.storage.from('product-images').upload(path, file);
+		if (error) return null;
+		return `https://wflyfhebauhsgqpfmfrr.supabase.co/storage/v1/object/public/product-images/${path}`;
+	}
+
 	$effect(() => {
-		if ((form as Record<string, unknown>)?.success) showForm = false;
+		if ((form as Record<string, unknown>)?.success) {
+			showForm = false;
+			newFile = null;
+			newPreview = '';
+		}
 		if ((form as Record<string, unknown>)?.updated) editingId = null;
 	});
 </script>
@@ -41,8 +98,27 @@
 			<form
 				method="POST"
 				action="?/create"
-				use:enhance={() => {
+				use:enhance={({ formElement, cancel }) => {
 					loading = true;
+					cancel();
+					(async () => {
+						let imageUrl = '';
+						if (newFile) {
+							const url = await uploadImage(newFile);
+							if (url) imageUrl = url;
+						}
+						const hidden = formElement.querySelector<HTMLInputElement>('input[name="image_url"]')!;
+						hidden.value = imageUrl;
+						const fd = new FormData(formElement);
+						const res = await fetch(formElement.action, { method: 'POST', body: fd });
+						loading = false;
+						if (res.ok) {
+							showForm = false;
+							newFile = null;
+							newPreview = '';
+							window.location.reload();
+						}
+					})();
 					return async ({ update }) => {
 						await update();
 						loading = false;
@@ -50,6 +126,7 @@
 				}}
 				class="grid grid-cols-1 gap-4 sm:grid-cols-2"
 			>
+				<input type="hidden" name="image_url" value="" />
 				<div>
 					<label
 						for="cat-name"
@@ -109,18 +186,27 @@
 					/>
 				</div>
 				<div class="sm:col-span-2">
-					<label
-						for="cat-image-url"
+					<span
 						class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-						>Image URL</label
+						>Category Image</span
 					>
-					<input
-						id="cat-image-url"
-						name="image_url"
-						type="url"
-						placeholder="https://…"
-						class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none"
-					/>
+					<label
+						class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface-low"
+					>
+						<span class="font-body text-sm text-on-surface-muted">
+							{newFile ? newFile.name : 'Click to select an image…'}
+						</span>
+						<input type="file" accept="image/*" class="sr-only" onchange={onNewFileChange} />
+					</label>
+					{#if newPreview}
+						<div class="mt-3">
+							<img
+								src={newPreview}
+								alt="Preview"
+								class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
+							/>
+						</div>
+					{/if}
 				</div>
 				<div class="sm:col-span-2">
 					<button
@@ -169,8 +255,26 @@
 								<form
 									method="POST"
 									action="?/update"
-									use:enhance={() => {
+									use:enhance={({ formElement, cancel }) => {
 										loading = true;
+										cancel();
+										(async () => {
+											let imageUrl = editExistingUrl;
+											if (editFile) {
+												const url = await uploadImage(editFile);
+												if (url) imageUrl = url;
+											}
+											const hidden =
+												formElement.querySelector<HTMLInputElement>('input[name="image_url"]')!;
+											hidden.value = imageUrl;
+											const fd = new FormData(formElement);
+											const res = await fetch(formElement.action, { method: 'POST', body: fd });
+											loading = false;
+											if (res.ok) {
+												editingId = null;
+												window.location.reload();
+											}
+										})();
 										return async ({ update }) => {
 											await update();
 											loading = false;
@@ -179,6 +283,7 @@
 									class="grid grid-cols-1 gap-4 sm:grid-cols-2"
 								>
 									<input type="hidden" name="id" value={cat.id} />
+									<input type="hidden" name="image_url" value={cat.image_url ?? ''} />
 									<div>
 										<label
 											for="edit-{cat.id}-name"
@@ -240,19 +345,58 @@
 										/>
 									</div>
 									<div class="sm:col-span-2">
-										<label
-											for="edit-{cat.id}-img"
+										<span
 											class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
-											>Image URL</label
+											>Category Image</span
 										>
-										<input
-											id="edit-{cat.id}-img"
-											name="image_url"
-											type="url"
-											value={cat.image_url ?? ''}
-											placeholder="https://…"
-											class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none"
-										/>
+										{#if editExistingUrl && !editPreview}
+											<div class="mb-2 flex items-center gap-3">
+												<img
+													src={editExistingUrl}
+													alt=""
+													class="h-20 w-20 rounded-xl object-cover ring-1 ring-on-surface/10"
+												/>
+												<button
+													type="button"
+													onclick={removeEditExisting}
+													class="rounded-lg bg-primary/10 px-2 py-1 font-body text-xs text-primary transition-colors hover:bg-primary hover:text-white"
+												>
+													Remove
+												</button>
+											</div>
+										{/if}
+										{#if editPreview}
+											<div class="mb-2 flex items-center gap-3">
+												<img
+													src={editPreview}
+													alt="Preview"
+													class="h-20 w-20 rounded-xl object-cover ring-1 ring-primary/30"
+												/>
+												<button
+													type="button"
+													onclick={() => {
+														editFile = null;
+														editPreview = '';
+													}}
+													class="rounded-lg bg-primary/10 px-2 py-1 font-body text-xs text-primary transition-colors hover:bg-primary hover:text-white"
+												>
+													Remove
+												</button>
+											</div>
+										{/if}
+										<label
+											class="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-on-surface/20 bg-surface-high px-4 py-3 transition-colors hover:border-primary/40 hover:bg-surface"
+										>
+											<span class="font-body text-sm text-on-surface-muted">
+												{editFile ? editFile.name : 'Click to replace image…'}
+											</span>
+											<input
+												type="file"
+												accept="image/*"
+												class="sr-only"
+												onchange={onEditFileChange}
+											/>
+										</label>
 									</div>
 									<div class="flex gap-3 sm:col-span-2">
 										<button
@@ -285,10 +429,7 @@
 							<td class="px-5 py-4 text-right">
 								<div class="flex items-center justify-end gap-2">
 									<button
-										onclick={() => {
-											editingId = cat.id;
-											showForm = false;
-										}}
+										onclick={() => openEdit(cat)}
 										class="rounded-xl bg-secondary-container px-3 py-1.5 font-body text-xs text-secondary transition-colors hover:bg-secondary hover:text-white"
 										>Edit</button
 									>
