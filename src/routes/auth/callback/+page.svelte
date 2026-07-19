@@ -88,19 +88,22 @@
 			<div class="mb-4 text-4xl">⏱️</div>
 			<p class="font-display text-xl text-on-surface">Sign-in link expired</p>
 			<p class="mt-2 font-body text-sm text-on-surface-muted">
-				This link is no longer valid. Redirecting you to request a new one…
+				This link has expired. Please request a new confirmation link.
 			</p>
-			<div class="mt-6">
-				<div class="mx-auto h-1 w-32 overflow-hidden rounded-full bg-surface-high">
-					<div class="animate-shrink h-full rounded-full bg-primary"></div>
-				</div>
+			<div class="mt-6 flex flex-col gap-3">
+				<a
+					href="/account"
+					class="shadow-ambient inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
+				>
+					Request a new confirmation link
+				</a>
+				<a
+					href="/account"
+					class="inline-block rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-semibold text-on-surface hover:bg-surface-low"
+				>
+					← Back to Sign In
+				</a>
 			</div>
-			<a
-				href="/account"
-				class="shadow-ambient mt-6 inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
-			>
-				Request a new link now
-			</a>
 		</div>
 	{:else if status === 'confirmed'}
 		<div class="shadow-ambient max-w-md rounded-3xl bg-surface-card p-10 text-center">
@@ -128,18 +131,23 @@
 			<div class="mb-4 text-4xl">⏱️</div>
 			<p class="font-display text-xl text-on-surface">Sign-in failed</p>
 			<p class="mt-2 font-body text-sm text-on-surface-muted">{errorMsg}</p>
+			{#if errorMsg === 'No session found. Please request a new link.'}
+				<p class="mt-1 text-xs text-on-surface-muted font-body">
+					This link may have already been used. Your account might already be confirmed — try signing in.
+				</p>
+			{/if}
 			<div class="mt-6 flex flex-col gap-3">
 				<a
 					href="/account"
 					class="shadow-ambient inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
 				>
-					Request a new link
+					Request a new confirmation link
 				</a>
 				<a
-					href="/admin/login"
+					href="/account"
 					class="inline-block rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-semibold text-on-surface hover:bg-surface-low"
 				>
-					Admin sign-in
+					← Back to Sign In
 				</a>
 			</div>
 		</div>

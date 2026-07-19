@@ -24,6 +24,25 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 };
 
 export const actions: Actions = {
+	resendConfirmation: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		const email = String(formData.get('email') ?? '')
+			.trim()
+			.toLowerCase();
+
+		if (!email.includes('@')) return fail(400, { error: 'Enter a valid email' });
+
+		const { error } = await supabase.auth.resend({
+			type: 'signup',
+			email,
+			options: {
+				emailRedirectTo: `${new URL(request.url).origin}/auth/callback`
+			}
+		});
+
+		if (error) return fail(400, { error: error.message });
+		return { resendSuccess: true, email };
+	},
 	signIn: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
 		const email = String(formData.get('email') ?? '')
@@ -59,7 +78,7 @@ export const actions: Actions = {
 		if (phoneDigits.length !== 10)
 			return fail(400, { error: 'Enter a valid 10-digit phone number', mode: 'register' });
 
-		const { error } = await supabase.auth.signUp({
+		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
 			options: {
@@ -69,6 +88,14 @@ export const actions: Actions = {
 		});
 
 		if (error) return fail(400, { error: error.message, mode: 'register' });
+
+		// data.user is null when the email already exists (Supabase returns no error)
+		if (!data.user) {
+			return fail(400, {
+				error: 'An account with this email already exists. Please sign in.',
+				mode: 'register'
+			});
+		}
 
 		return { registered: true, email };
 	},

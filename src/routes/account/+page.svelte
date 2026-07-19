@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import { formatPrice } from '$lib/types';
 	import { createClient } from '$lib/supabase';
 	import { onMount } from 'svelte';
@@ -18,6 +17,8 @@
 			email?: string;
 			resetSent?: boolean;
 			exists?: boolean;
+			resendSuccess?: boolean;
+			resendEmail?: string;
 		};
 	} = $props();
 
@@ -44,12 +45,31 @@
 	let showRegisterPassword = $state(false);
 	let showRegisterConfirm = $state(false);
 
+	// Resend state
+	let resendCooldown = $state(0);
+	let resendTimer: ReturnType<typeof setInterval> | null = null;
+	let resendLoading = $state(false);
+
+	function startResendCooldown() {
+		resendCooldown = 60;
+		resendTimer = setInterval(() => {
+			resendCooldown--;
+			if (resendCooldown <= 0) {
+				if (resendTimer) clearInterval(resendTimer);
+				resendTimer = null;
+			}
+		}, 1000);
+	}
+
 	// Modal state
 	let showError = $state(false);
 	let errorMessage = $state('');
 
 	// No-account modal
 	let showNoAccountModal = $state(false);
+
+	// Dismiss the "Check Your Email" screen without a full page navigation
+	let registeredDismissed = $state(false);
 
 	// Show error modal whenever form returns an error
 	$effect(() => {
@@ -243,7 +263,7 @@
 		<!-- ── LOGGED OUT STATE ─────────────────────────────────────────────────── -->
 	{:else}
 		<div class="mx-auto max-w-lg">
-			{#if form?.registered}
+			{#if form?.registered && !registeredDismissed}
 				<!-- ── Email Confirmation ──────────────────────────────────────────── -->
 				<div class="shadow-ambient rounded-3xl bg-surface-card p-8 text-center">
 					<div class="mb-4 text-5xl" aria-hidden="true">📧</div>
@@ -253,14 +273,51 @@
 						/>
 						Click the link to activate your account, then sign in.
 					</p>
-					<button
-						onclick={() => {
-							goto('/account');
+
+					<form
+						method="POST"
+						action="?/resendConfirmation"
+						use:enhance={() => {
+							resendLoading = true;
+							return async ({ result, update }) => {
+								await update();
+								resendLoading = false;
+								if (result.type === 'success' && !result.data?.error) {
+									startResendCooldown();
+								}
+							};
 						}}
-						class="shadow-ambient mt-6 inline-block rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white hover:brightness-110"
+						class="mt-6"
 					>
-						← Back to Sign In
-					</button>
+						<input type="hidden" name="email" value={form.email ?? ''} />
+						<button
+							type="submit"
+							disabled={resendLoading || resendCooldown > 0}
+							class="shadow-ambient w-full rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50"
+						>
+							{#if resendLoading}
+								Resending…
+							{:else if resendCooldown > 0}
+								Resend in {resendCooldown}s
+							{:else}
+								Resend confirmation email
+							{/if}
+						</button>
+					</form>
+
+					{#if form?.resendSuccess}
+						<p class="mt-2 text-xs text-secondary font-body">Confirmation resent!</p>
+					{/if}
+
+				<button
+					onclick={() => {
+						registeredDismissed = true;
+						activeTab = 'login';
+					}}
+					class="shadow-ambient mt-2 inline-block w-full rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-medium text-on-surface transition-colors hover:bg-surface-low"
+				>
+					← Back to Sign In
+				</button>
 				</div>
 			{:else}
 				<!-- ── Tab Bar ─────────────────────────────────────────────────── -->
