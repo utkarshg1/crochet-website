@@ -31,6 +31,10 @@
 		return currentPath.startsWith(href);
 	}
 
+	function closeMenu(): void {
+		mobileMenuOpen = false;
+	}
+
 	// Initialise cart from localStorage once we're in the browser
 	onMount(() => {
 		cart.init();
@@ -400,87 +404,97 @@
 				</button>
 			</div>
 		</div>
-
-		<!-- ── Mobile dropdown menu ───────────────────────────────────────────── -->
-		<!--
-      Slides down by animating max-height from 0 to auto via CSS.
-      Using overflow-hidden + max-h transition is the GPU-safe way to do
-      height-based reveals without JS measurements.
-    -->
-		{#if mobileMenuOpen}
-			<div class="border-t border-on-surface/5 py-4 md:hidden">
-				<ul class="flex flex-col gap-1" role="list">
-					{#each navLinks as link}
-						<li>
-							<a
-								href={link.href}
-								class="
-                  flex items-center rounded-xl px-3 py-3 font-body text-base font-medium
-                  transition-colors duration-150
-                  {isActive(link.href)
-									? 'bg-primary/10 text-primary'
-									: 'text-on-surface hover:bg-surface-high hover:text-primary'}
-                "
-								aria-current={isActive(link.href) ? 'page' : undefined}
-							>
-								{link.label}
-							</a>
-						</li>
-					{/each}
-					<!-- Extra mobile links -->
-					<li>
-						<a
-							href="/account"
-							class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
-								{currentPath.startsWith('/account')
-								? 'bg-primary/10 text-primary'
-								: 'text-on-surface hover:bg-surface-high hover:text-primary'}"
-						>
-							{user ? 'My Account' : 'Sign In'}
-						</a>
-					</li>
-					<li>
-						<a
-							href="/wishlist"
-							class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium text-on-surface transition-colors duration-150 hover:bg-surface-high hover:text-primary"
-						>
-							Wishlist
-						</a>
-					</li>
-					{#each infoLinks as link}
-						<li>
-							<a
-								href={link.href}
-								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
-									{isActive(link.href)
-									? 'bg-primary/10 text-primary'
-									: 'text-on-surface hover:bg-surface-high hover:text-primary'}"
-								aria-current={isActive(link.href) ? 'page' : undefined}
-							>
-								{link.label}
-							</a>
-						</li>
-					{/each}
-					{#if showAdmin}
-						<li>
-							<a
-								href="/admin/login"
-								onclick={() => (adminLoading = true)}
-								class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
-									{isActive('/admin')
-									? 'bg-secondary/10 text-secondary'
-									: 'text-on-surface-muted hover:bg-surface-high hover:text-secondary'}"
-								aria-current={isActive('/admin') ? 'page' : undefined}
-							>
-								Admin Dashboard
-							</a>
-						</li>
-					{/if}
-				</ul>
-			</div>
-		{/if}
 	</nav>
 </header>
+
+<!-- ── Mobile drawer overlay ──────────────────────────────────────────── -->
+{#if mobileMenuOpen}
+	<!-- Dark backdrop: covers page content, closes menu on click -->
+	<div
+		class="fixed inset-0 z-40 bg-black/40 md:hidden"
+		onclick={closeMenu}
+		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
+		role="button"
+		tabindex="-1"
+		aria-label="Close menu"
+	></div>
+
+	<!-- Drawer panel: solid opaque white, positioned below the h-16 header -->
+	<nav
+		class="fixed top-16 right-0 left-0 z-50 border-b border-on-surface/5 bg-white shadow-2xl md:hidden"
+		aria-label="Mobile navigation"
+	>
+		<div class="mx-auto max-w-7xl px-3 py-4 xs:px-4 sm:px-6">
+			<ul class="flex flex-col gap-1" role="list">
+				{#each navLinks as link}
+					<li>
+						<a
+							href={link.href}
+							class="
+								flex items-center rounded-xl px-3 py-3 font-body text-base font-medium
+								transition-colors duration-150
+								{isActive(link.href)
+								? 'bg-primary/10 text-primary'
+								: 'text-on-surface hover:bg-surface-high hover:text-primary'}
+							"
+							aria-current={isActive(link.href) ? 'page' : undefined}
+						>
+							{link.label}
+						</a>
+					</li>
+				{/each}
+				<li>
+					<a
+						href="/account"
+						class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
+							{currentPath.startsWith('/account')
+							? 'bg-primary/10 text-primary'
+							: 'text-on-surface hover:bg-surface-high hover:text-primary'}"
+					>
+						{user ? 'My Account' : 'Sign In'}
+					</a>
+				</li>
+				<li>
+					<a
+						href="/wishlist"
+						class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium text-on-surface transition-colors duration-150 hover:bg-surface-high hover:text-primary"
+					>
+						Wishlist
+					</a>
+				</li>
+				{#each infoLinks as link}
+					<li>
+						<a
+							href={link.href}
+							class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
+								{isActive(link.href)
+								? 'bg-primary/10 text-primary'
+								: 'text-on-surface hover:bg-surface-high hover:text-primary'}"
+							aria-current={isActive(link.href) ? 'page' : undefined}
+						>
+							{link.label}
+						</a>
+					</li>
+				{/each}
+				{#if showAdmin}
+					<li>
+						<a
+							href="/admin/login"
+							onclick={() => (adminLoading = true)}
+							class="flex items-center rounded-xl px-3 py-3 font-body text-base font-medium transition-colors duration-150
+								{isActive('/admin')
+								? 'bg-secondary/10 text-secondary'
+								: 'text-on-surface-muted hover:bg-surface-high hover:text-secondary'}"
+							aria-current={isActive('/admin') ? 'page' : undefined}
+						>
+							Admin Dashboard
+						</a>
+					</li>
+				{/if}
+			</ul>
+		</div>
+	</nav>
+{/if}
 
 <!-- Cart drawer — rendered outside the nav so it sits in the stacking context root -->
 <CartDrawer open={cartOpen} onClose={() => (cartOpen = false)} />

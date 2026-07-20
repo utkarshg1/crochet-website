@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.13.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.13.1-a7295a?style=flat-square)
 
 </div>
 
@@ -36,6 +36,8 @@
 - Razorpay checkout flow
 - Guest checkout (no account required)
 - Order tracking with auto-generated order numbers (KL-XXXX)
+- Vertical stacked auth tabs on mobile for improved readability
+- Opaque mobile navigation drawer with backdrop overlay
 - Password-based sign-in with tab-based Login & Register
 - Email existence check with guided registration prompt
 - Email confirmation on registration

@@ -321,12 +321,14 @@
 				</div>
 			{:else}
 				<!-- ── Tab Bar ─────────────────────────────────────────────────── -->
-				<div class="mb-6 flex rounded-2xl bg-surface-high p-1">
+				<div
+					class="mb-6 flex flex-col gap-2 rounded-2xl bg-surface-high p-2 md:flex-row md:gap-0 md:p-1"
+				>
 					<button
 						onclick={() => {
 							activeTab = 'login';
 						}}
-						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
+						class="w-full rounded-xl py-2.5 font-body text-sm font-semibold transition-all md:flex-1 {activeTab ===
 						'login'
 							? 'bg-primary text-white shadow-md'
 							: 'text-on-surface-muted hover:text-on-surface'}"
@@ -337,7 +339,7 @@
 						onclick={() => {
 							activeTab = 'register';
 						}}
-						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
+						class="w-full rounded-xl py-2.5 font-body text-sm font-semibold transition-all md:flex-1 {activeTab ===
 						'register'
 							? 'bg-primary text-white shadow-md'
 							: 'text-on-surface-muted hover:text-on-surface'}"
@@ -349,7 +351,7 @@
 							resetEmail = loginEmail;
 							activeTab = 'reset';
 						}}
-						class="flex-1 rounded-xl py-2.5 font-body text-sm font-semibold transition-all {activeTab ===
+						class="w-full rounded-xl py-2.5 font-body text-sm font-semibold transition-all md:flex-1 {activeTab ===
 						'reset'
 							? 'bg-primary text-white shadow-md'
 							: 'text-on-surface-muted hover:text-on-surface'}"
