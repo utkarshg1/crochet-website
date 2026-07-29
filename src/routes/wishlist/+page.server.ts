@@ -48,9 +48,7 @@ export const actions: Actions = {
 			await locals.supabase.from('wishlists').delete().eq('id', existing.id);
 			return { success: true, productId, wishlisted: false };
 		} else {
-			await locals.supabase
-				.from('wishlists')
-				.insert({ product_id: productId, user_id: user.id });
+			await locals.supabase.from('wishlists').insert({ product_id: productId, user_id: user.id });
 			return { success: true, productId, wishlisted: true };
 		}
 	}

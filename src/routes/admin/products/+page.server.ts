@@ -55,10 +55,8 @@ export const actions: Actions = {
 			compare_at_price_paise: comparePricePaise,
 			stock,
 			category_id: (data.get('category_id') as string) || null,
-			colors: (data.get('colors') as string)
-				.split(',')
-				.map((c) => c.trim())
-				.filter(Boolean),
+			has_colours: data.get('has_colours') === 'on',
+			colors: JSON.parse((data.get('colors') as string) || '[]'),
 			materials: (data.get('materials') as string) || null,
 			dimensions: (data.get('dimensions') as string) || null,
 			care_instructions: (data.get('care_instructions') as string) || null,
@@ -112,10 +110,8 @@ export const actions: Actions = {
 				compare_at_price_paise: comparePricePaise,
 				stock,
 				category_id: (data.get('category_id') as string) || null,
-				colors: (data.get('colors') as string)
-					.split(',')
-					.map((c) => c.trim())
-					.filter(Boolean),
+				has_colours: data.get('has_colours') === 'on',
+				colors: JSON.parse((data.get('colors') as string) || '[]'),
 				materials: (data.get('materials') as string) || null,
 				dimensions: (data.get('dimensions') as string) || null,
 				care_instructions: (data.get('care_instructions') as string) || null,

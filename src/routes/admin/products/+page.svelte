@@ -51,6 +51,84 @@
 	let newFiles = $state<FileList | null>(null);
 	let newPreviews = $state<string[]>([]);
 
+	// ── Colour management state ───────────────────────────────────────────────
+	type ProductColor = { name: string; hex: string };
+
+	// New product form colours
+	let newHasColours = $state(false);
+	let newColours = $state<ProductColor[]>([]);
+	let newColourName = $state('');
+	let newColourHex = $state('#a7295a');
+
+	function resetNewColours() {
+		newHasColours = false;
+		newColours = [];
+		newColourName = '';
+		newColourHex = '#a7295a';
+	}
+
+	function addNewColour() {
+		const name = newColourName.trim();
+		if (!name) return;
+		newColours.push({ name, hex: newColourHex || '#e5e7eb' });
+		newColourName = '';
+	}
+
+	function removeNewColour(index: number) {
+		newColours.splice(index, 1);
+	}
+
+	// Edit colour state per product
+	type EditColourState = {
+		hasColours: boolean;
+		colours: ProductColor[];
+		name: string;
+		hex: string;
+	};
+	let editColourState = $state<Record<string, EditColourState>>({});
+
+	function getEditColourState(
+		productId: string,
+		existingColours: ProductColor[],
+		existingHasColours: boolean
+	): EditColourState {
+		if (!editColourState[productId]) {
+			editColourState[productId] = {
+				hasColours: existingHasColours,
+				colours: [...existingColours],
+				name: '',
+				hex: '#a7295a'
+			};
+		}
+		return editColourState[productId];
+	}
+
+	function initEditColourState(
+		productId: string,
+		existingColours: ProductColor[],
+		existingHasColours: boolean
+	) {
+		editColourState[productId] = {
+			hasColours: existingHasColours,
+			colours: [...existingColours],
+			name: '',
+			hex: '#a7295a'
+		};
+	}
+
+	function addEditColour(productId: string) {
+		const st = editColourState[productId];
+		if (!st || !st.name.trim()) return;
+		st.colours.push({ name: st.name.trim(), hex: st.hex || '#e5e7eb' });
+		st.name = '';
+	}
+
+	function removeEditColour(productId: string, index: number) {
+		const st = editColourState[productId];
+		if (!st) return;
+		st.colours.splice(index, 1);
+	}
+
 	// ── Per-product edit image state ───────────────────────────────────────────
 	// Keyed by product.id; each entry holds selected files and a copy of
 	// existing images so the user can remove them before saving.
@@ -68,7 +146,7 @@
 		return editImageState[productId];
 	}
 
-	// Initialise edit state with the product's current images when expanding
+	// Initialise edit state with the product's current images & colours
 	function openEdit(productId: string, existingImages: string[] | null) {
 		editingId = editingId === productId ? null : productId;
 		if (editingId === productId) {
@@ -77,6 +155,15 @@
 				previews: [],
 				existingImages: existingImages ?? []
 			};
+			// Find the product to initialise colour state
+			const prod = data.products.find((p) => p.id === productId);
+			if (prod) {
+				initEditColourState(
+					productId,
+					(prod as unknown as { colors: ProductColor[] }).colors ?? [],
+					(prod as unknown as { has_colours: boolean }).has_colours ?? false
+				);
+			}
 		}
 	}
 
@@ -96,6 +183,7 @@
 			showForm = false;
 			newFiles = null;
 			newPreviews = [];
+			resetNewColours();
 		}
 		if ((form as Record<string, unknown>)?.updated) {
 			editingId = null;
@@ -325,16 +413,71 @@
 						{/each}
 					</select>
 				</div>
-				<div>
-					<label for="new-colors" class="label-field">Colours (comma-separated)</label>
-					<input
-						id="new-colors"
-						name="colors"
-						type="text"
-						placeholder="Cream, Blush Pink, Sage Green"
-						class="field"
-					/>
+				<div class="sm:col-span-2">
+					<label class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface">
+						<input
+							name="has_colours"
+							type="checkbox"
+							bind:checked={newHasColours}
+							onchange={() => {
+								if (!newHasColours) resetNewColours();
+							}}
+							class="rounded"
+						/>
+						Product has colour variants
+					</label>
 				</div>
+
+				{#if newHasColours}
+					<div class="sm:col-span-2">
+						<input type="hidden" name="colors" value={JSON.stringify(newColours)} />
+						<span class="label-field">Colours</span>
+						{#if newColours.length > 0}
+							<div class="mb-3 flex flex-wrap gap-2">
+								{#each newColours as colour, i}
+									<div
+										class="shadow-ambient flex items-center gap-2 rounded-full bg-surface-high py-1 pr-2 pl-1.5"
+									>
+										<span
+											class="inline-block h-5 w-5 rounded-full ring-1 ring-on-surface/10"
+											style="background: {colour.hex || '#e5e7eb'}"
+										></span>
+										<span class="font-body text-sm text-on-surface">{colour.name}</span>
+										<button
+											type="button"
+											onclick={() => removeNewColour(i)}
+											class="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs text-on-surface-muted transition-colors hover:bg-primary hover:text-white"
+											aria-label="Remove {colour.name}"
+										>
+											×
+										</button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+						<div class="flex items-center gap-2">
+							<input
+								type="color"
+								bind:value={newColourHex}
+								class="h-10 w-12 flex-none cursor-pointer rounded-xl border border-on-surface/10 bg-surface-high p-1"
+							/>
+							<input
+								type="text"
+								bind:value={newColourName}
+								placeholder="Colour name…"
+								class="field flex-1"
+							/>
+							<button
+								type="button"
+								onclick={addNewColour}
+								disabled={!newColourName.trim()}
+								class="rounded-full bg-secondary px-4 py-1.5 font-body text-sm font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								Add
+							</button>
+						</div>
+					</div>
+				{/if}
 				<div>
 					<label for="new-tags" class="label-field">Tags (comma-separated)</label>
 					<input
@@ -456,6 +599,10 @@
 						>Category</th
 					>
 					<th
+						class="px-5 py-3 text-left font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+						>Colours</th
+					>
+					<th
 						class="px-5 py-3 text-right font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
 						>Price</th
 					>
@@ -500,6 +647,31 @@
 						</td>
 						<td class="px-5 py-4 font-body text-xs text-on-surface-muted">
 							{product.category?.name ?? '—'}
+						</td>
+						<td class="px-5 py-4">
+							{#if ((product.colors as unknown as ProductColor[]) ?? []).length > 0}
+								{@const chipColours = (product.colors as unknown as ProductColor[]) ?? []}
+								<div class="flex flex-wrap gap-1.5">
+									{#each chipColours.slice(0, 3) as colour}
+										<span
+											class="inline-flex items-center gap-1 rounded-full bg-surface-high py-0.5 pr-2 pl-1 text-xs"
+										>
+											<span
+												class="inline-block h-3 w-3 rounded-full"
+												style="background: {colour.hex || '#e5e7eb'}"
+											></span>
+											{colour.name}
+										</span>
+									{/each}
+									{#if chipColours.length > 3}
+										<span class="font-body text-xs text-on-surface-muted"
+											>+{chipColours.length - 3}</span
+										>
+									{/if}
+								</div>
+							{:else}
+								<span class="font-body text-xs text-on-surface-muted">—</span>
+							{/if}
 						</td>
 						<td class="px-5 py-4 text-right font-body font-semibold text-on-surface">
 							{formatPrice(product.price_paise)}
@@ -586,7 +758,7 @@
 					{#if editingId === product.id}
 						{@const es = getEditState(product.id)}
 						<tr class="bg-surface-low">
-							<td colspan="6" class="px-5 py-5">
+							<td colspan="7" class="px-5 py-5">
 								<form
 									method="POST"
 									action="?/update"
@@ -699,16 +871,80 @@
 											{/each}
 										</select>
 									</div>
-									<div>
-										<label for="edit-colors-{product.id}" class="label-field">Colours</label>
-										<input
-											id="edit-colors-{product.id}"
-											name="colors"
-											type="text"
-											value={product.colors?.join(', ') ?? ''}
-											class="field"
-										/>
-									</div>
+									{#key editingId}
+										{@const esCol = getEditColourState(
+											product.id,
+											(product.colors as unknown as ProductColor[]) ?? [],
+											(product.has_colours as unknown as boolean) ?? false
+										)}
+										<div class="sm:col-span-3">
+											<label
+												class="flex cursor-pointer items-center gap-2 font-body text-sm text-on-surface"
+											>
+												<input
+													name="has_colours"
+													type="checkbox"
+													checked={esCol.hasColours}
+													onchange={() => {
+														esCol.hasColours = !esCol.hasColours;
+														if (!esCol.hasColours) esCol.colours = [];
+													}}
+													class="rounded"
+												/>
+												Product has colour variants
+											</label>
+										</div>
+										{#if esCol.hasColours}
+											<div class="sm:col-span-3">
+												<input type="hidden" name="colors" value={JSON.stringify(esCol.colours)} />
+												<span class="label-field">Colours</span>
+												{#if esCol.colours.length > 0}
+													<div class="mb-3 flex flex-wrap gap-2">
+														{#each esCol.colours as colour, ci}
+															<div
+																class="shadow-ambient flex items-center gap-2 rounded-full bg-surface-high py-1 pr-2 pl-1.5"
+															>
+																<span
+																	class="inline-block h-5 w-5 rounded-full ring-1 ring-on-surface/10"
+																	style="background: {colour.hex || '#e5e7eb'}"
+																></span>
+																<span class="font-body text-sm text-on-surface">{colour.name}</span>
+																<button
+																	type="button"
+																	onclick={() => removeEditColour(product.id, ci)}
+																	class="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs text-on-surface-muted transition-colors hover:bg-primary hover:text-white"
+																	aria-label="Remove {colour.name}"
+																>
+																	×
+																</button>
+															</div>
+														{/each}
+													</div>
+												{/if}
+												<div class="flex items-center gap-2">
+													<input
+														type="color"
+														bind:value={esCol.hex}
+														class="h-10 w-12 flex-none cursor-pointer rounded-xl border border-on-surface/10 bg-surface-high p-1"
+													/>
+													<input
+														type="text"
+														bind:value={esCol.name}
+														placeholder="Colour name…"
+														class="field flex-1"
+													/>
+													<button
+														type="button"
+														onclick={() => addEditColour(product.id)}
+														disabled={!esCol.name.trim()}
+														class="rounded-full bg-secondary px-4 py-1.5 font-body text-sm font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+													>
+														Add
+													</button>
+												</div>
+											</div>
+										{/if}
+									{/key}
 									<div>
 										<label for="edit-tags-{product.id}" class="label-field">Tags</label>
 										<input
@@ -856,7 +1092,7 @@
 					{/if}
 				{:else}
 					<tr>
-						<td colspan="6" class="px-5 py-10 text-center font-body text-sm text-on-surface-muted">
+						<td colspan="7" class="px-5 py-10 text-center font-body text-sm text-on-surface-muted">
 							No products found.
 						</td>
 					</tr>

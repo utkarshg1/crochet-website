@@ -183,11 +183,12 @@ export type Database = {
 				Row: {
 					care_instructions: string | null;
 					category_id: string | null;
-					colors: string[] | null;
+					colors: Json | null;
 					compare_at_price_paise: number | null;
 					created_at: string | null;
 					description: string;
 					dimensions: string | null;
+					has_colours: boolean | null;
 					id: string;
 					images: Json | null;
 					is_featured: boolean | null;
@@ -203,11 +204,12 @@ export type Database = {
 				Insert: {
 					care_instructions?: string | null;
 					category_id?: string | null;
-					colors?: string[] | null;
+					colors?: Json | null;
 					compare_at_price_paise?: number | null;
 					created_at?: string | null;
 					description: string;
 					dimensions?: string | null;
+					has_colours?: boolean | null;
 					id?: string;
 					images?: Json | null;
 					is_featured?: boolean | null;
@@ -223,11 +225,12 @@ export type Database = {
 				Update: {
 					care_instructions?: string | null;
 					category_id?: string | null;
-					colors?: string[] | null;
+					colors?: Json | null;
 					compare_at_price_paise?: number | null;
 					created_at?: string | null;
 					description?: string;
 					dimensions?: string | null;
+					has_colours?: boolean | null;
 					id?: string;
 					images?: Json | null;
 					is_featured?: boolean | null;

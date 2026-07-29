@@ -65,8 +65,8 @@
 
 		adding = true;
 
-		// Pick first color if any — user can change in product detail
-		const color = product.colors?.[0] ?? null;
+		// Pick first color name if any — user can change in product detail
+		const color = product.colors?.[0]?.name ?? null;
 
 		cart.add({
 			product_id: product.id,

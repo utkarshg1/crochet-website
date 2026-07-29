@@ -62,7 +62,7 @@
 
 	// Sync selectedColor when product changes
 	$effect(() => {
-		selectedColor = product.colors[0] ?? '';
+		selectedColor = product.colors[0]?.name ?? '';
 	});
 
 	// ─── Quantity stepper state ───────────────────────────────────────────────
@@ -319,19 +319,23 @@
 						Colour: <span class="font-normal text-on-surface-muted">{selectedColor}</span>
 					</p>
 					<div class="flex flex-wrap gap-2" role="group" aria-label="Select colour">
-						{#each product.colors as color (color)}
+						{#each product.colors as colour (colour.name)}
 							<button
-								onclick={() => (selectedColor = color)}
+								onclick={() => (selectedColor = colour.name)}
 								class="
-									cursor-pointer rounded-full border px-4 py-1.5 font-body text-sm
+									inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-1.5 font-body text-sm
 									transition-all duration-200
-									{selectedColor === color
+									{selectedColor === colour.name
 									? 'shadow-ambient border-primary bg-primary text-white'
 									: 'border-on-surface/20 bg-surface-high text-on-surface hover:border-primary/50 hover:bg-surface-card'}
 								"
-								aria-pressed={selectedColor === color}
+								aria-pressed={selectedColor === colour.name}
 							>
-								{color}
+								<span
+									class="inline-block h-4 w-4 rounded-full"
+									style="background: {colour.hex || '#e5e7eb'}"
+								></span>
+								{colour.name}
 							</button>
 						{/each}
 					</div>

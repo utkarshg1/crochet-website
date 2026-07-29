@@ -17,6 +17,11 @@ export interface ProductImage {
 	alt: string;
 }
 
+export interface ProductColor {
+	name: string;
+	hex: string;
+}
+
 export interface Product {
 	id: string;
 	slug: string;
@@ -28,7 +33,8 @@ export interface Product {
 	category_id: string | null;
 	category?: Category;
 	images: ProductImage[];
-	colors: string[];
+	colors: ProductColor[];
+	has_colours: boolean;
 	dimensions: string | null;
 	materials: string | null;
 	care_instructions: string | null;
