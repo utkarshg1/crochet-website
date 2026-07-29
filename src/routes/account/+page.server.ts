@@ -142,11 +142,14 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const addressId = data.get('address_id') as string;
 		const isDefault = data.get('is_default') === 'true';
+		const rawPhone = (data.get('phone') as string).replace(/\D/g, '').replace(/^0+/, '');
+		const phone = rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone;
+		if (phone.length !== 10) return fail(400, { error: 'Enter a valid 10-digit phone number' });
 
 		const address = {
 			user_id: user.id,
 			full_name: data.get('full_name') as string,
-			phone: data.get('phone') as string,
+			phone,
 			address_line1: data.get('address_line1') as string,
 			address_line2: (data.get('address_line2') as string) || '',
 			city: data.get('city') as string,
@@ -157,7 +160,6 @@ export const actions: Actions = {
 
 		if (
 			!address.full_name ||
-			!address.phone ||
 			!address.address_line1 ||
 			!address.city ||
 			!address.state ||

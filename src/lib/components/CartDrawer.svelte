@@ -11,6 +11,8 @@
 
 	let { open, onClose }: Props = $props();
 
+	let checkoutLoading = $state(false);
+
 	// Derived financials — recalculate whenever cart changes
 	const subtotal = $derived(cart.subtotal);
 	const shipping = $derived(calculateShipping(subtotal));
@@ -32,6 +34,7 @@
 	}
 
 	function handleCheckout() {
+		checkoutLoading = true;
 		onClose();
 		goto('/checkout');
 	}
@@ -268,20 +271,31 @@
 						size="lg"
 						class="mt-1 w-full"
 						onclick={handleCheckout}
+						disabled={checkoutLoading}
 					>
-						Checkout
-						<svg
-							viewBox="0 0 24 24"
-							class="h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<line x1="5" y1="12" x2="19" y2="12" />
-							<polyline points="12 5 19 12 12 19" />
-						</svg>
+						{#if checkoutLoading}
+							<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+								<circle cx="12" cy="12" r="9.5" stroke-width="1.5" opacity="0.2" />
+								<path d="M7 9a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+								<path d="M5.5 13a7 7 0 0 1 13 0" stroke-width="1.5" opacity="0.7" />
+								<path d="M7 17a5.5 5.5 0 0 1 10 0" stroke-width="1.5" opacity="0.7" />
+							</svg>
+							Checking Out…
+						{:else}
+							Checkout
+							<svg
+								viewBox="0 0 24 24"
+								class="h-4 w-4"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<line x1="5" y1="12" x2="19" y2="12" />
+								<polyline points="12 5 19 12 12 19" />
+							</svg>
+						{/if}
 					</Button>
 
 					<button
