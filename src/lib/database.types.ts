@@ -8,6 +8,59 @@ export type Database = {
 	};
 	public: {
 		Tables: {
+			addresses: {
+				Row: {
+					id: string;
+					user_id: string;
+					full_name: string;
+					phone: string;
+					address_line1: string;
+					address_line2: string | null;
+					city: string;
+					state: string;
+					pincode: string;
+					is_default: boolean | null;
+					created_at: string | null;
+					updated_at: string | null;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					full_name: string;
+					phone: string;
+					address_line1: string;
+					address_line2?: string | null;
+					city: string;
+					state: string;
+					pincode: string;
+					is_default?: boolean | null;
+					created_at?: string | null;
+					updated_at?: string | null;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					full_name?: string;
+					phone?: string;
+					address_line1?: string;
+					address_line2?: string | null;
+					city?: string;
+					state?: string;
+					pincode?: string;
+					is_default?: boolean | null;
+					created_at?: string | null;
+					updated_at?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'addresses_user_id_fkey';
+						columns: ['user_id'];
+						isOneToOne: false;
+						referencedRelation: 'users';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			carts: {
 				Row: {
 					created_at: string | null;

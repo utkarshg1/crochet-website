@@ -14,11 +14,7 @@ async function verifySignature(
 		false,
 		['sign']
 	);
-	const sigBytes = await crypto.subtle.sign(
-		'HMAC',
-		key,
-		encoder.encode(`${orderId}|${paymentId}`)
-	);
+	const sigBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(`${orderId}|${paymentId}`));
 	const computed = Array.from(new Uint8Array(sigBytes))
 		.map((b) => b.toString(16).padStart(2, '0'))
 		.join('');

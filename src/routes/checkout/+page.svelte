@@ -8,9 +8,13 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	const user = $derived(data.user);
+
 	// ── Multi-step state ─────────────────────────────────────────────────────
-	type Step = 'form' | 'otp' | 'payment';
-	let step = $state<Step>('form');
+	type Step = 'address' | 'form' | 'otp' | 'payment';
+	// svelte-ignore state_referenced_locally
+	const initialStep: Step = user ? 'address' : 'form';
+	let step = $state<Step>(initialStep);
 	let loading = $state(false);
 	let pageError = $state<string | null>(null);
 
@@ -25,6 +29,29 @@
 		city: '',
 		state_name: '',
 		pincode: ''
+	});
+
+	// ── Address management (logged-in) ────────────────────────────────────────
+	// svelte-ignore state_referenced_locally
+	const initialAddresses = data.addresses ?? [];
+	let addresses = $state<Array<Record<string, unknown>>>(initialAddresses);
+	let selectedAddressId = $state<string>('');
+	let editingAddressId = $state<string>('');
+	let showingAddressForm = $state(false);
+
+	// svelte-ignore state_referenced_locally
+	const initialFullName = user ? ((data.profile?.full_name as string) ?? '') : '';
+	// svelte-ignore state_referenced_locally
+	const initialPhone = user ? ((data.profile?.phone as string) ?? '') : '';
+	let addressForm = $state({
+		full_name: initialFullName,
+		phone: initialPhone,
+		address_line1: '',
+		address_line2: '',
+		city: '',
+		state_name: '',
+		pincode: '',
+		is_default: false
 	});
 
 	// ── OTP ───────────────────────────────────────────────────────────────────
@@ -50,9 +77,26 @@
 			step = 'otp';
 			guestEmail = f.email as string;
 			startResendCooldown();
-		} else if (f.step === 'payment' && f.verified) {
+		} else if ((f.step === 'payment' && f.verified) || (f.addressSaved && f.proceedPayment)) {
 			step = 'payment';
 			loadRazorpay();
+		} else if (f.addressSaved && f.address) {
+			if (f.replacing) {
+				addresses = addresses.map((a) =>
+					(a.id as string) === (f.address as Record<string, unknown>).id
+						? (f.address as Record<string, unknown>)
+						: a
+				);
+			} else {
+				addresses = [...addresses, f.address as Record<string, unknown>];
+			}
+			showingAddressForm = false;
+			editingAddressId = '';
+			resetAddressForm();
+		} else if (f.deleted) {
+			const deletedId = f.address_id as string;
+			addresses = addresses.filter((a) => a.id !== deletedId);
+			if (selectedAddressId === deletedId) selectedAddressId = '';
 		} else if (f.orderId) {
 			cart.clear();
 			goto(`/order/${f.orderId}`);
@@ -82,6 +126,49 @@
 		document.head.appendChild(script);
 	}
 
+	function selectAddress(addressId: string) {
+		selectedAddressId = addressId;
+		const addr = addresses.find((a) => a.id === addressId) as Record<string, unknown>;
+		if (addr) {
+			formValues.full_name = addr.full_name as string;
+			formValues.phone = addr.phone as string;
+		}
+	}
+
+	function editAddress(addr: Record<string, unknown>) {
+		editingAddressId = addr.id as string;
+		addressForm = {
+			full_name: (addr.full_name as string) ?? '',
+			phone: (addr.phone as string) ?? '',
+			address_line1: (addr.address_line1 as string) ?? '',
+			address_line2: (addr.address_line2 as string) ?? '',
+			city: (addr.city as string) ?? '',
+			state_name: (addr.state as string) ?? '',
+			pincode: (addr.pincode as string) ?? '',
+			is_default: (addr.is_default as boolean) ?? false
+		};
+		showingAddressForm = true;
+	}
+
+	function showAddAddress() {
+		editingAddressId = '';
+		resetAddressForm();
+		showingAddressForm = true;
+	}
+
+	function resetAddressForm() {
+		addressForm = {
+			full_name: (data.profile?.full_name as string) ?? '',
+			phone: (data.profile?.phone as string) ?? '',
+			address_line1: '',
+			address_line2: '',
+			city: '',
+			state_name: '',
+			pincode: '',
+			is_default: false
+		};
+	}
+
 	async function initiatePayment() {
 		if (!razorpayLoaded) {
 			pageError = 'Payment gateway is still loading. Please wait a moment.';
@@ -96,8 +183,8 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					amount_paise: total,
-					receipt: `guest-${Date.now()}`,
-					notes: { customer_name: formValues.full_name, email: guestEmail }
+					receipt: `receipt-${Date.now()}`,
+					notes: { customer_name: formValues.full_name, email: guestEmail || data.user?.email }
 				})
 			});
 
@@ -116,7 +203,7 @@
 				image: '/favicon.svg',
 				prefill: {
 					name: formValues.full_name,
-					email: guestEmail,
+					email: guestEmail || (data.user?.email as string),
 					contact: `+91${formValues.phone}`
 				},
 				theme: { color: '#a7295a' },
@@ -143,7 +230,10 @@
 						}
 						submitOrder(razorpay_order_id, razorpay_payment_id, razorpay_signature);
 					} catch (err) {
-						pageError = err instanceof Error ? err.message : 'Payment verification failed. Please contact support.';
+						pageError =
+							err instanceof Error
+								? err.message
+								: 'Payment verification failed. Please contact support.';
 						loading = false;
 						verifyingPayment = false;
 					}
@@ -201,32 +291,64 @@
 <div class="border-b border-surface-high bg-surface-card">
 	<div class="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
 		<ol class="flex items-center gap-0" aria-label="Checkout progress">
-			{#each [{ id: 'form', label: 'Details', num: 1 }, { id: 'otp', label: 'Verify', num: 2 }, { id: 'payment', label: 'Payment', num: 3 }] as s, i}
-				{@const isComplete =
-					(step === 'otp' && s.id === 'form') || (step === 'payment' && s.id !== 'payment')}
-				{@const isActive = step === s.id}
-				<li class="flex items-center">
-					<div class="flex items-center gap-2">
-						<span
-							class="flex h-8 w-8 items-center justify-center rounded-full font-body text-sm font-bold transition-colors {isComplete
-								? 'bg-secondary text-white'
-								: isActive
-									? 'bg-primary text-white'
-									: 'bg-surface-high text-on-surface-muted'}"
-						>
-							{isComplete ? '✓' : s.num}
-						</span>
-						<span
-							class="font-body text-sm font-medium {isActive
-								? 'text-on-surface'
-								: 'text-on-surface-muted'}">{s.label}</span
-						>
-					</div>
-					{#if i < 2}
-						<div class="mx-3 h-px w-8 bg-surface-high sm:w-16"></div>
-					{/if}
-				</li>
-			{/each}
+			{#if user}
+				{@const prog = [
+					{ id: 'address', label: 'Address', num: 1 },
+					{ id: 'payment', label: 'Payment', num: 2 }
+				]}
+				{#each prog as s, i}
+					{@const isComplete = step === 'payment' && s.id === 'address'}
+					{@const isActive = step === s.id}
+					<li class="flex items-center">
+						<div class="flex items-center gap-2">
+							<span
+								class="flex h-8 w-8 items-center justify-center rounded-full font-body text-sm font-bold transition-colors {isComplete
+									? 'bg-secondary text-white'
+									: isActive
+										? 'bg-primary text-white'
+										: 'bg-surface-high text-on-surface-muted'}"
+							>
+								{isComplete ? '✓' : s.num}
+							</span>
+							<span
+								class="font-body text-sm font-medium {isActive
+									? 'text-on-surface'
+									: 'text-on-surface-muted'}">{s.label}</span
+							>
+						</div>
+						{#if i < 1}
+							<div class="mx-3 h-px w-8 bg-surface-high sm:w-16"></div>
+						{/if}
+					</li>
+				{/each}
+			{:else}
+				{#each [{ id: 'form', label: 'Details', num: 1 }, { id: 'otp', label: 'Verify', num: 2 }, { id: 'payment', label: 'Payment', num: 3 }] as s, i}
+					{@const isComplete =
+						(step === 'otp' && s.id === 'form') || (step === 'payment' && s.id !== 'payment')}
+					{@const isActive = step === s.id}
+					<li class="flex items-center">
+						<div class="flex items-center gap-2">
+							<span
+								class="flex h-8 w-8 items-center justify-center rounded-full font-body text-sm font-bold transition-colors {isComplete
+									? 'bg-secondary text-white'
+									: isActive
+										? 'bg-primary text-white'
+										: 'bg-surface-high text-on-surface-muted'}"
+							>
+								{isComplete ? '✓' : s.num}
+							</span>
+							<span
+								class="font-body text-sm font-medium {isActive
+									? 'text-on-surface'
+									: 'text-on-surface-muted'}">{s.label}</span
+							>
+						</div>
+						{#if i < 2}
+							<div class="mx-3 h-px w-8 bg-surface-high sm:w-16"></div>
+						{/if}
+					</li>
+				{/each}
+			{/if}
 		</ol>
 	</div>
 </div>
@@ -243,8 +365,289 @@
 				</div>
 			{/if}
 
-			<!-- ── STEP 1: Guest Details Form ─────────────────────────────────── -->
-			{#if step === 'form'}
+			<!-- ── STEP: Address (logged-in users) ───────────────────────────── -->
+			{#if step === 'address' && user}
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-6 sm:p-8">
+					<h2 class="font-display text-2xl font-semibold text-on-surface">Shipping Address</h2>
+					<p class="mt-1 font-body text-sm text-on-surface-muted">
+						Select a saved address or add a new one.
+					</p>
+
+					<!-- Saved addresses -->
+					{#if addresses.length > 0}
+						<ul class="mt-6 space-y-3">
+							{#each addresses as addr (addr.id as string)}
+								{@const a = addr as Record<string, unknown>}
+								<li>
+									<!-- svelte-ignore a11y_no_static_element_interactions -->
+									<div
+										onclick={() => selectAddress(a.id as string)}
+										onkeydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												selectAddress(a.id as string);
+											}
+										}}
+										role="button"
+										tabindex="0"
+										class="w-full rounded-2xl border-2 p-4 text-left transition-all {selectedAddressId ===
+										(a.id as string)
+											? 'border-primary bg-primary/5'
+											: 'border-on-surface/10 bg-surface-high hover:border-primary/30'}"
+									>
+										<div class="flex items-start justify-between gap-3">
+											<div class="min-w-0 flex-1">
+												<p class="font-body font-semibold text-on-surface">
+													{a.full_name as string}
+												</p>
+												<p class="mt-0.5 font-body text-sm text-on-surface-muted">
+													{a.address_line1 as string}{a.address_line2 ? `, ${a.address_line2}` : ''}
+												</p>
+												<p class="font-body text-sm text-on-surface-muted">
+													{a.city as string}, {a.state as string} — {a.pincode as string}
+												</p>
+												<p class="mt-0.5 font-body text-sm text-on-surface-muted">
+													{a.phone as string}
+												</p>
+											</div>
+											<div class="flex shrink-0 flex-col items-end gap-1">
+												{#if a.is_default}
+													<span
+														class="rounded-full bg-secondary/10 px-2.5 py-0.5 font-body text-[10px] font-semibold text-secondary"
+														>Default</span
+													>
+												{/if}
+												<button
+													type="button"
+													onclick={(e) => {
+														e.stopPropagation();
+														editAddress(a);
+													}}
+													class="font-body text-xs text-secondary underline hover:no-underline"
+												>
+													Edit
+												</button>
+											</div>
+										</div>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+
+					<!-- Add / Edit address form -->
+					{#if showingAddressForm}
+						<div class="mt-6 rounded-2xl border border-on-surface/10 bg-surface-low p-4 sm:p-6">
+							<h3 class="font-display text-lg font-semibold text-on-surface">
+								{editingAddressId ? 'Edit Address' : 'Add New Address'}
+							</h3>
+							<form
+								method="POST"
+								action="?/saveAddress"
+								use:enhance={() => {
+									loading = true;
+									pageError = null;
+									return async ({ update }) => {
+										await update();
+										loading = false;
+									};
+								}}
+								class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
+							>
+								<input type="hidden" name="address_id" value={editingAddressId} />
+								<input
+									type="hidden"
+									name="is_default"
+									value={addressForm.is_default ? 'true' : 'false'}
+								/>
+								<input type="hidden" name="proceed_payment" value="false" />
+								<div class="sm:col-span-2">
+									<label
+										for="addr-name"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>Full Name *</label
+									>
+									<input
+										id="addr-name"
+										name="full_name"
+										type="text"
+										bind:value={addressForm.full_name}
+										required
+										placeholder="Priya Sharma"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+								</div>
+								<div>
+									<label
+										for="addr-phone"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>Phone *</label
+									>
+									<div class="flex gap-2">
+										<span
+											class="flex items-center rounded-xl border border-on-surface/10 bg-surface-card px-3 font-body text-sm text-on-surface-muted"
+											>+91</span
+										>
+										<input
+											id="addr-phone"
+											name="phone"
+											type="tel"
+											bind:value={addressForm.phone}
+											required
+											maxlength="10"
+											placeholder="98765 43210"
+											class="min-w-0 flex-1 rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+										/>
+									</div>
+								</div>
+								<div class="sm:col-span-2">
+									<label
+										for="addr-line1"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>Address *</label
+									>
+									<input
+										id="addr-line1"
+										name="address_line1"
+										type="text"
+										bind:value={addressForm.address_line1}
+										required
+										placeholder="Flat 4B, Rose Apartments, MG Road"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+								</div>
+								<div class="sm:col-span-2">
+									<input
+										id="addr-line2"
+										name="address_line2"
+										type="text"
+										bind:value={addressForm.address_line2}
+										placeholder="Landmark / Apartment name (optional)"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+								</div>
+								<div>
+									<label
+										for="addr-city"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>City *</label
+									>
+									<input
+										id="addr-city"
+										name="city"
+										type="text"
+										bind:value={addressForm.city}
+										required
+										placeholder="Mumbai"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+								</div>
+								<div>
+									<label
+										for="addr-state"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>State *</label
+									>
+									<select
+										id="addr-state"
+										name="state"
+										bind:value={addressForm.state_name}
+										required
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none"
+									>
+										<option value="" disabled>Select state</option>
+										{#each ['Andhra Pradesh', 'Assam', 'Bihar', 'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'] as st}
+											<option value={st}>{st}</option>
+										{/each}
+									</select>
+								</div>
+								<div>
+									<label
+										for="addr-pincode"
+										class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+										>Pincode *</label
+									>
+									<input
+										id="addr-pincode"
+										name="pincode"
+										type="text"
+										bind:value={addressForm.pincode}
+										required
+										inputmode="numeric"
+										pattern="[0-9]{6}"
+										maxlength="6"
+										placeholder="400001"
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+									/>
+								</div>
+								<div class="flex items-center gap-2 sm:col-span-2">
+									<input
+										id="addr-default"
+										name="is_default"
+										type="checkbox"
+										bind:checked={addressForm.is_default}
+										class="h-4 w-4 rounded border-on-surface/30 text-primary focus:ring-primary"
+									/>
+									<label for="addr-default" class="font-body text-sm text-on-surface-muted"
+										>Set as default address</label
+									>
+								</div>
+								<div class="flex gap-3 sm:col-span-2">
+									<button
+										type="submit"
+										disabled={loading}
+										class="shadow-ambient flex-1 rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+									>
+										{editingAddressId ? 'Update Address' : 'Save Address'}
+									</button>
+									<button
+										type="button"
+										onclick={() => {
+											showingAddressForm = false;
+											editingAddressId = '';
+										}}
+										class="rounded-full bg-surface-high px-6 py-3 font-body font-medium text-on-surface transition-colors hover:bg-surface-low"
+									>
+										Cancel
+									</button>
+								</div>
+							</form>
+						</div>
+					{/if}
+
+					<!-- Actions -->
+					<div class="mt-6 flex flex-col gap-3 sm:flex-row">
+						{#if !showingAddressForm}
+							<button
+								onclick={showAddAddress}
+								class="rounded-full border-2 border-dashed border-on-surface/20 bg-surface-card px-6 py-3 font-body text-sm font-medium text-on-surface-muted transition-colors hover:border-primary/30 hover:text-primary"
+							>
+								+ Add New Address
+							</button>
+						{/if}
+						<button
+							onclick={() => {
+								if (!selectedAddressId && addresses.length > 0) {
+									const def = addresses.find((a) => a.is_default) ?? addresses[0];
+									selectAddress(def.id as string);
+								}
+								if (selectedAddressId || addresses.length > 0) {
+									step = 'payment';
+									loadRazorpay();
+								} else {
+									pageError = 'Please add a shipping address first.';
+								}
+							}}
+							disabled={addresses.length === 0 && !showingAddressForm}
+							class="shadow-ambient flex-1 rounded-full bg-gradient-to-r from-primary to-primary-dim py-3 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+						>
+							Continue to Payment
+						</button>
+					</div>
+				</div>
+
+				<!-- ── STEP 1: Guest Details Form ─────────────────────────────────── -->
+			{:else if step === 'form'}
 				<div class="shadow-ambient rounded-3xl bg-surface-card p-6 sm:p-8">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Continue as Guest</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
@@ -405,10 +808,10 @@
 								type="text"
 								bind:value={formValues.pincode}
 								required
-								autocomplete="postal-code"
-								placeholder="400001"
-								maxlength="6"
+								inputmode="numeric"
 								pattern="[0-9]{6}"
+								maxlength="6"
+								placeholder="400001"
 								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 							/>
 						</div>
@@ -516,7 +919,13 @@
 				<div class="shadow-ambient rounded-3xl bg-surface-card p-8">
 					<h2 class="font-display text-2xl font-semibold text-on-surface">Complete Payment</h2>
 					<p class="mt-1 font-body text-sm text-on-surface-muted">
-						Your email <strong class="text-secondary">{guestEmail}</strong> is verified ✓
+						{#if user}
+							Welcome back, <strong class="text-secondary"
+								>{(data.profile?.full_name as string) ?? data.user?.email}</strong
+							> ✓
+						{:else}
+							Your email <strong class="text-secondary">{guestEmail}</strong> is verified ✓
+						{/if}
 					</p>
 
 					<div class="mt-6 rounded-2xl bg-surface-low p-4">
@@ -662,19 +1071,49 @@
 	class="hidden"
 	aria-hidden="true"
 >
-	<input type="hidden" name="email" value={guestEmail} />
+	<input type="hidden" name="email" value={guestEmail || (data.user?.email as string)} />
 	<input type="hidden" name="items" value={JSON.stringify(cart.items)} />
+	<input type="hidden" name="address_id" value={selectedAddressId} />
 	<input
 		type="hidden"
 		name="shipping_address"
 		value={JSON.stringify({
-			full_name: formValues.full_name,
-			phone: formValues.phone,
-			address_line1: formValues.address_line1,
-			address_line2: formValues.address_line2,
-			city: formValues.city,
-			state: formValues.state_name,
-			pincode: formValues.pincode
+			full_name:
+				formValues.full_name ||
+				(selectedAddressId ? addresses.find((a) => a.id === selectedAddressId)?.full_name : ''),
+			phone:
+				formValues.phone ||
+				(selectedAddressId ? addresses.find((a) => a.id === selectedAddressId)?.phone : ''),
+			address_line1:
+				formValues.address_line1 ||
+				(selectedAddressId
+					? ((addresses.find((a) => a.id === selectedAddressId) as Record<string, unknown>)
+							?.address_line1 as string)
+					: ''),
+			address_line2:
+				formValues.address_line2 ||
+				(selectedAddressId
+					? ((addresses.find((a) => a.id === selectedAddressId) as Record<string, unknown>)
+							?.address_line2 as string)
+					: ''),
+			city:
+				formValues.city ||
+				(selectedAddressId
+					? ((addresses.find((a) => a.id === selectedAddressId) as Record<string, unknown>)
+							?.city as string)
+					: ''),
+			state:
+				formValues.state_name ||
+				(selectedAddressId
+					? ((addresses.find((a) => a.id === selectedAddressId) as Record<string, unknown>)
+							?.state as string)
+					: ''),
+			pincode:
+				formValues.pincode ||
+				(selectedAddressId
+					? ((addresses.find((a) => a.id === selectedAddressId) as Record<string, unknown>)
+							?.pincode as string)
+					: '')
 		})}
 	/>
 	<input type="hidden" name="subtotal_paise" value={subtotal} />

@@ -26,9 +26,24 @@ function getClientIp(request: Request): string {
 	);
 }
 
-export const load: PageServerLoad = async ({ locals: { safeGetSession } }) => {
+export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase } }) => {
 	const { session, user } = await safeGetSession();
-	return { session, user };
+	let addresses: Array<Record<string, unknown>> | null = null;
+	let profile = null;
+	if (user) {
+		const [{ data: a }, { data: p }] = await Promise.all([
+			supabase
+				.from('addresses')
+				.select('*')
+				.eq('user_id', user.id)
+				.order('is_default', { ascending: false })
+				.order('created_at', { ascending: false }),
+			supabase.from('profiles').select('*').eq('id', user.id).single()
+		]);
+		addresses = a;
+		profile = p;
+	}
+	return { session, user, addresses, profile };
 };
 
 export const actions: Actions = {
@@ -93,41 +108,116 @@ export const actions: Actions = {
 		return { step: 'payment', verified: true };
 	},
 
-	// ── Step 3: Create order after Razorpay payment ─────────────────────────
+	// ── Step 3: Save address (logged-in users) ────────────────────────────
+	saveAddress: async ({ request, locals: { supabase, safeGetSession } }) => {
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+
+		const data = await request.formData();
+		const addressId = data.get('address_id') as string;
+		const isDefault = data.get('is_default') === 'true';
+
+		const address = {
+			user_id: user.id,
+			full_name: data.get('full_name') as string,
+			phone: data.get('phone') as string,
+			address_line1: data.get('address_line1') as string,
+			address_line2: (data.get('address_line2') as string) || '',
+			city: data.get('city') as string,
+			state: data.get('state') as string,
+			pincode: data.get('pincode') as string,
+			is_default: isDefault
+		};
+
+		if (
+			!address.full_name ||
+			!address.phone ||
+			!address.address_line1 ||
+			!address.city ||
+			!address.state ||
+			!address.pincode
+		) {
+			return fail(400, { error: 'All required fields must be filled' });
+		}
+
+		if (isDefault) {
+			await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id);
+		}
+
+		let saved;
+		if (addressId) {
+			const { data: updated } = await supabase
+				.from('addresses')
+				.update(address)
+				.eq('id', addressId)
+				.eq('user_id', user.id)
+				.select()
+				.single();
+			saved = updated;
+		} else {
+			const { data: inserted } = await supabase.from('addresses').insert(address).select().single();
+			saved = inserted;
+		}
+
+		if (!saved) return fail(500, { error: 'Could not save address' });
+		return { address: saved };
+	},
+
+	// ── Step 4: Delete address (logged-in users) ──────────────────────────
+	deleteAddress: async ({ request, locals: { supabase, safeGetSession } }) => {
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+
+		const data = await request.formData();
+		const addressId = data.get('address_id') as string;
+		if (!addressId) return fail(400, { error: 'Missing address ID' });
+
+		const { error } = await supabase
+			.from('addresses')
+			.delete()
+			.eq('id', addressId)
+			.eq('user_id', user.id);
+		if (error) return fail(500, { error: 'Could not delete address' });
+		return { deleted: true };
+	},
+
+	// ── Step 5: Create order after Razorpay payment ─────────────────────────
 	createOrder: async ({ request, locals: { supabase, safeGetSession }, cookies }) => {
 		const { user } = await safeGetSession();
 		const data = await request.formData();
 
-		// ── Verify OTP gate ──────────────────────────────────────────────
-		const verifiedCookie = cookies.get('checkout_verified');
-		if (!verifiedCookie) {
-			return fail(403, { error: 'Session expired. Please verify your email again.' });
-		}
+		// ── Verify auth: logged-in user or OTP-gated guest ────────────────
+		let guestEmail: string | null = null;
+		if (!user) {
+			const verifiedCookie = cookies.get('checkout_verified');
+			if (!verifiedCookie) {
+				return fail(403, { error: 'Session expired. Please verify your email again.' });
+			}
 
-		const cookieParts = verifiedCookie.split(':');
-		if (cookieParts.length < 3) {
+			const cookieParts = verifiedCookie.split(':');
+			if (cookieParts.length < 3) {
+				cookies.delete('checkout_verified', { path: '/checkout' });
+				return fail(403, { error: 'Invalid session. Please verify your email again.' });
+			}
+
+			const [email, verifiedAt, signature] = cookieParts;
+			const payload = `${email}:${verifiedAt}`;
+			const expectedSig = await signPayload(payload);
+
+			if (signature !== expectedSig) {
+				cookies.delete('checkout_verified', { path: '/checkout' });
+				return fail(403, { error: 'Invalid session. Please verify your email again.' });
+			}
+
+			const age = Date.now() - parseInt(verifiedAt, 10);
+			if (age > 15 * 60 * 1000) {
+				cookies.delete('checkout_verified', { path: '/checkout' });
+				return fail(403, { error: 'Session expired. Please verify your email again.' });
+			}
+
 			cookies.delete('checkout_verified', { path: '/checkout' });
-			return fail(403, { error: 'Invalid session. Please verify your email again.' });
+			guestEmail = email;
 		}
-
-		const [email, verifiedAt, signature] = cookieParts;
-		const payload = `${email}:${verifiedAt}`;
-		const expectedSig = await signPayload(payload);
-
-		if (signature !== expectedSig) {
-			cookies.delete('checkout_verified', { path: '/checkout' });
-			return fail(403, { error: 'Invalid session. Please verify your email again.' });
-		}
-
-		// Check if cookie has expired (15 min window)
-		const age = Date.now() - parseInt(verifiedAt, 10);
-		if (age > 15 * 60 * 1000) {
-			cookies.delete('checkout_verified', { path: '/checkout' });
-			return fail(403, { error: 'Session expired. Please verify your email again.' });
-		}
-
-		// Clear the cookie after use (single-use)
-		cookies.delete('checkout_verified', { path: '/checkout' });
 
 		// ── Parse and validate items ─────────────────────────────────────
 		let items: CartItem[];
@@ -202,11 +292,28 @@ export const actions: Actions = {
 			return fail(500, { error: 'Payment verification error. Please contact support.' });
 		}
 
+		// ── Resolve shipping address ─────────────────────────────────────
+		let shippingAddress: Record<string, unknown>;
+		if (user) {
+			const addressId = data.get('address_id') as string;
+			if (addressId) {
+				const { data: savedAddress } = await supabase
+					.from('addresses')
+					.select('*')
+					.eq('id', addressId)
+					.eq('user_id', user.id)
+					.single();
+				if (!savedAddress) return fail(400, { error: 'Address not found.' });
+				shippingAddress = savedAddress;
+			} else {
+				shippingAddress = JSON.parse(data.get('shipping_address') as string);
+			}
+		} else {
+			shippingAddress = JSON.parse(data.get('shipping_address') as string);
+		}
+
 		// ── Generate order number via DB function ────────────────────────
 		const { data: orderNum } = await supabase.rpc('generate_order_number');
-
-		const guestEmail = (data.get('email') as string)?.trim().toLowerCase();
-		const shippingAddress = JSON.parse(data.get('shipping_address') as string);
 
 		// ── Insert order with server-verified data ───────────────────────
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -216,7 +323,7 @@ export const actions: Actions = {
 				order_number: orderNum ?? `KL-${Date.now()}`,
 				user_id: user?.id ?? null,
 				guest_name: shippingAddress.full_name,
-				guest_email: guestEmail,
+				guest_email: guestEmail ?? user?.email ?? null,
 				guest_phone: shippingAddress.phone,
 				items: validatedItems,
 				shipping_address: shippingAddress,
@@ -255,11 +362,7 @@ async function verifyPaymentSignature(
 		false,
 		['sign']
 	);
-	const sigBytes = await crypto.subtle.sign(
-		'HMAC',
-		key,
-		encoder.encode(`${orderId}|${paymentId}`)
-	);
+	const sigBytes = await crypto.subtle.sign('HMAC', key, encoder.encode(`${orderId}|${paymentId}`));
 	const computed = Array.from(new Uint8Array(sigBytes))
 		.map((b) => b.toString(16).padStart(2, '0'))
 		.join('');
@@ -283,5 +386,3 @@ async function signPayload(payload: string): Promise<string> {
 		.join('')
 		.substring(0, 32);
 }
-
-

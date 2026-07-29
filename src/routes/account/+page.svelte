@@ -19,6 +19,9 @@
 			exists?: boolean;
 			resendSuccess?: boolean;
 			resendEmail?: string;
+			address?: Record<string, unknown>;
+			deleted?: boolean;
+			address_id?: string;
 		};
 	} = $props();
 
@@ -39,6 +42,43 @@
 	// Reset fields
 	let resetEmail = $state('');
 	let resetLoading = $state(false);
+
+	// ── Address management ───────────────────────────────────────────────────
+	let showingAddressForm = $state(false);
+	let editingAddressId = $state<string>('');
+	let addressForm = $state({
+		full_name: '',
+		phone: '',
+		address_line1: '',
+		address_line2: '',
+		city: '',
+		state_name: '',
+		pincode: '',
+		is_default: false
+	});
+
+	function resetAddressForm() {
+		addressForm = {
+			full_name: '',
+			phone: '',
+			address_line1: '',
+			address_line2: '',
+			city: '',
+			state_name: '',
+			pincode: '',
+			is_default: false
+		};
+	}
+
+	// Handle saveAddress / deleteAddress form responses
+	let addressFormError = $state('');
+	$effect(() => {
+		if (form?.address || form?.deleted) {
+			addressFormError = '';
+		} else if (form?.error) {
+			addressFormError = form.error;
+		}
+	});
 
 	// Password visibility toggles
 	let showLoginPassword = $state(false);
@@ -259,6 +299,364 @@
 				{/if}
 			</div>
 		</div>
+
+		<!-- ── Addresses ──────────────────────────────────────────────────────── -->
+		<div class="mt-10">
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="font-display text-xl font-semibold text-on-surface">Saved Addresses</h2>
+				<button
+					onclick={() => {
+						editingAddressId = '';
+						resetAddressForm();
+						showingAddressForm = true;
+					}}
+					class="rounded-full bg-gradient-to-r from-primary to-primary-dim px-4 py-2 font-body text-sm font-semibold text-white transition-all hover:brightness-110"
+				>
+					+ Add Address
+				</button>
+			</div>
+
+			{#if data.addresses && data.addresses.length > 0}
+				<div class="grid gap-4 sm:grid-cols-2">
+					{#each data.addresses as addr (addr.id)}
+						{@const isEditing = editingAddressId === (addr.id as string)}
+						{#if isEditing && showingAddressForm}
+							<!-- inline edit form -->
+							<div class="shadow-ambient rounded-3xl bg-surface-card p-5 sm:col-span-2">
+								<h3 class="mb-4 font-display text-lg font-semibold text-on-surface">
+									Edit Address
+								</h3>
+								<form
+									method="POST"
+									action="?/saveAddress"
+									use:enhance={() => {
+										return async ({ result, update }) => {
+											await update();
+											if (result.type === 'success' && !result.data?.error) {
+												showingAddressForm = false;
+												editingAddressId = '';
+												resetAddressForm();
+											}
+										};
+									}}
+								>
+									<input type="hidden" name="address_id" value={addr.id as string} />
+									{@render addressFormFields()}
+								</form>
+							</div>
+						{:else}
+							<div class="shadow-ambient rounded-3xl bg-surface-card p-5">
+								<div class="flex items-start justify-between gap-2">
+									<div class="min-w-0 flex-1">
+										<p class="font-body font-semibold text-on-surface">
+											{addr.full_name as string}
+										</p>
+										<p class="mt-0.5 font-body text-xs text-on-surface-muted">
+											{addr.phone as string}
+										</p>
+										<p class="mt-1 font-body text-sm text-on-surface">
+											{addr.address_line1 as string}{addr.address_line2
+												? `, ${addr.address_line2 as string}`
+												: ''}
+										</p>
+										<p class="font-body text-sm text-on-surface">
+											{addr.city as string}, {addr.state as string} – {addr.pincode as string}
+										</p>
+										{#if addr.is_default}
+											<span
+												class="mt-2 inline-block rounded-full bg-secondary-container/40 px-2.5 py-0.5 font-body text-xs font-medium text-secondary"
+												>Default</span
+											>
+										{/if}
+									</div>
+									<div class="flex shrink-0 gap-1">
+										<button
+											onclick={() => {
+												editingAddressId = addr.id as string;
+												addressForm = {
+													full_name: addr.full_name as string,
+													phone: addr.phone as string,
+													address_line1: addr.address_line1 as string,
+													address_line2: (addr.address_line2 as string) ?? '',
+													city: addr.city as string,
+													state_name: addr.state as string,
+													pincode: addr.pincode as string,
+													is_default: (addr.is_default as boolean) ?? false
+												};
+												showingAddressForm = true;
+											}}
+											class="rounded-lg p-2 text-on-surface-muted transition-colors hover:bg-surface-high hover:text-on-surface"
+											aria-label="Edit address"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-4 w-4"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												><path
+													d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+												/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg
+											>
+										</button>
+										<form method="POST" action="?/deleteAddress" use:enhance>
+											<input type="hidden" name="address_id" value={addr.id as string} />
+											<button
+												type="submit"
+												class="rounded-lg p-2 text-on-surface-muted transition-colors hover:bg-surface-high hover:text-primary"
+												aria-label="Delete address"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-4 w-4"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													><polyline points="3 6 5 6 21 6" /><path
+														d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+													/></svg
+												>
+											</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			{:else}
+				<div class="shadow-ambient rounded-3xl bg-surface-card p-10 text-center">
+					<p class="font-display text-xl text-on-surface">No addresses saved</p>
+					<p class="mt-2 font-body text-sm text-on-surface-muted">
+						Add an address to use during checkout.
+					</p>
+				</div>
+			{/if}
+
+			<!-- Add new address form -->
+			{#if showingAddressForm && !editingAddressId}
+				<div class="shadow-ambient mt-4 rounded-3xl bg-surface-card p-5">
+					<h3 class="mb-4 font-display text-lg font-semibold text-on-surface">Add New Address</h3>
+					<form
+						method="POST"
+						action="?/saveAddress"
+						use:enhance={() => {
+							return async ({ result, update }) => {
+								await update();
+								if (result.type === 'success' && !result.data?.error) {
+									showingAddressForm = false;
+									resetAddressForm();
+								}
+							};
+						}}
+					>
+						{@render addressFormFields()}
+					</form>
+				</div>
+			{/if}
+		</div>
+
+		{#snippet addressFormFields()}
+			<div class="space-y-4">
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<div>
+						<label
+							for="addr-name"
+							class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>Full Name *</label
+						>
+						<input
+							id="addr-name"
+							name="full_name"
+							type="text"
+							bind:value={addressForm.full_name}
+							required
+							placeholder="Priya Sharma"
+							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+						/>
+					</div>
+					<div>
+						<label
+							for="addr-phone"
+							class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>Phone *</label
+						>
+						<input
+							id="addr-phone"
+							name="phone"
+							type="tel"
+							bind:value={addressForm.phone}
+							required
+							maxlength="10"
+							placeholder="98765 43210"
+							inputmode="numeric"
+							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+						/>
+					</div>
+				</div>
+				<div>
+					<label
+						for="addr-line1"
+						class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+						>Address *</label
+					>
+					<input
+						id="addr-line1"
+						name="address_line1"
+						type="text"
+						bind:value={addressForm.address_line1}
+						required
+						placeholder="Flat 4B, Rose Apartments, MG Road"
+						class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+					/>
+				</div>
+				<div>
+					<label
+						for="addr-line2"
+						class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+						>Address Line 2</label
+					>
+					<input
+						id="addr-line2"
+						name="address_line2"
+						type="text"
+						bind:value={addressForm.address_line2}
+						placeholder="Landmark / Apartment name (optional)"
+						class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+					/>
+				</div>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+					<div>
+						<label
+							for="addr-city"
+							class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>City *</label
+						>
+						<input
+							id="addr-city"
+							name="city"
+							type="text"
+							bind:value={addressForm.city}
+							required
+							placeholder="Mumbai"
+							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+						/>
+					</div>
+					<div>
+						<label
+							for="addr-state"
+							class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>State *</label
+						>
+						<select
+							id="addr-state"
+							name="state"
+							bind:value={addressForm.state_name}
+							required
+							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface focus:border-primary/50 focus:outline-none"
+						>
+							<option value="" disabled>Select state</option>
+							<option value="Andhra Pradesh">Andhra Pradesh</option>
+							<option value="Arunachal Pradesh">Arunachal Pradesh</option>
+							<option value="Assam">Assam</option>
+							<option value="Bihar">Bihar</option>
+							<option value="Chhattisgarh">Chhattisgarh</option>
+							<option value="Goa">Goa</option>
+							<option value="Gujarat">Gujarat</option>
+							<option value="Haryana">Haryana</option>
+							<option value="Himachal Pradesh">Himachal Pradesh</option>
+							<option value="Jharkhand">Jharkhand</option>
+							<option value="Karnataka">Karnataka</option>
+							<option value="Kerala">Kerala</option>
+							<option value="Madhya Pradesh">Madhya Pradesh</option>
+							<option value="Maharashtra">Maharashtra</option>
+							<option value="Manipur">Manipur</option>
+							<option value="Meghalaya">Meghalaya</option>
+							<option value="Mizoram">Mizoram</option>
+							<option value="Nagaland">Nagaland</option>
+							<option value="Odisha">Odisha</option>
+							<option value="Punjab">Punjab</option>
+							<option value="Rajasthan">Rajasthan</option>
+							<option value="Sikkim">Sikkim</option>
+							<option value="Tamil Nadu">Tamil Nadu</option>
+							<option value="Telangana">Telangana</option>
+							<option value="Tripura">Tripura</option>
+							<option value="Uttar Pradesh">Uttar Pradesh</option>
+							<option value="Uttarakhand">Uttarakhand</option>
+							<option value="West Bengal">West Bengal</option>
+							<option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+							<option value="Chandigarh">Chandigarh</option>
+							<option value="Dadra and Nagar Haveli and Daman and Diu"
+								>Dadra and Nagar Haveli and Daman and Diu</option
+							>
+							<option value="Delhi">Delhi</option>
+							<option value="Jammu and Kashmir">Jammu and Kashmir</option>
+							<option value="Ladakh">Ladakh</option>
+							<option value="Lakshadweep">Lakshadweep</option>
+							<option value="Puducherry">Puducherry</option>
+						</select>
+					</div>
+					<div>
+						<label
+							for="addr-pincode"
+							class="mb-1 block font-body text-xs font-semibold tracking-wider text-on-surface-muted uppercase"
+							>Pincode *</label
+						>
+						<input
+							id="addr-pincode"
+							name="pincode"
+							type="text"
+							bind:value={addressForm.pincode}
+							required
+							inputmode="numeric"
+							pattern="[0-9]{6}"
+							maxlength="6"
+							placeholder="400001"
+							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+						/>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<input
+						id="addr-default"
+						name="is_default"
+						type="checkbox"
+						bind:checked={addressForm.is_default}
+						class="h-4 w-4 rounded border-on-surface/10 text-primary focus:ring-primary"
+					/>
+					<label for="addr-default" class="font-body text-sm text-on-surface-muted"
+						>Set as default address</label
+					>
+				</div>
+				{#if addressFormError}
+					<p class="font-body text-sm text-primary">{addressFormError}</p>
+				{/if}
+				<div class="flex gap-3">
+					<button
+						type="submit"
+						class="rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-2.5 font-body text-sm font-semibold text-white transition-all hover:brightness-110"
+					>
+						{editingAddressId ? 'Update Address' : 'Save Address'}
+					</button>
+					<button
+						type="button"
+						onclick={() => {
+							showingAddressForm = false;
+							editingAddressId = '';
+						}}
+						class="rounded-full bg-surface-high px-6 py-2.5 font-body text-sm font-medium text-on-surface transition-colors hover:bg-surface-low"
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/snippet}
 
 		<!-- ── LOGGED OUT STATE ─────────────────────────────────────────────────── -->
 	{:else}

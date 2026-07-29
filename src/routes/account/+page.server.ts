@@ -6,21 +6,28 @@ export const load: PageServerLoad = async ({ locals: { safeGetSession, supabase 
 
 	let orders = null;
 	let profile = null;
+	let addresses = null;
 
 	if (user) {
-		const [{ data: o }, { data: p }] = await Promise.all([
+		const [{ data: o }, { data: p }, { data: a }] = await Promise.all([
 			supabase
 				.from('orders')
 				.select('*')
 				.eq('user_id', user.id)
 				.order('created_at', { ascending: false }),
-			supabase.from('profiles').select('*').eq('id', user.id).single()
+			supabase.from('profiles').select('*').eq('id', user.id).single(),
+			supabase
+				.from('addresses')
+				.select('*')
+				.eq('user_id', user.id)
+				.order('created_at', { ascending: false })
 		]);
 		orders = o ?? [];
 		profile = p;
+		addresses = a ?? [];
 	}
 
-	return { session, user, orders, profile };
+	return { session, user, orders, profile, addresses };
 };
 
 export const actions: Actions = {
@@ -126,6 +133,77 @@ export const actions: Actions = {
 
 		const { data: exists } = await supabase.rpc('check_email_exists', { check_email: email });
 		return { exists: exists ?? true };
+	},
+
+	saveAddress: async ({ request, locals: { supabase, safeGetSession } }) => {
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+
+		const data = await request.formData();
+		const addressId = data.get('address_id') as string;
+		const isDefault = data.get('is_default') === 'true';
+
+		const address = {
+			user_id: user.id,
+			full_name: data.get('full_name') as string,
+			phone: data.get('phone') as string,
+			address_line1: data.get('address_line1') as string,
+			address_line2: (data.get('address_line2') as string) || '',
+			city: data.get('city') as string,
+			state: data.get('state') as string,
+			pincode: data.get('pincode') as string,
+			is_default: isDefault
+		};
+
+		if (
+			!address.full_name ||
+			!address.phone ||
+			!address.address_line1 ||
+			!address.city ||
+			!address.state ||
+			!address.pincode
+		) {
+			return fail(400, { error: 'All required fields must be filled' });
+		}
+
+		if (isDefault) {
+			await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id);
+		}
+
+		let saved;
+		if (addressId) {
+			const { data: updated } = await supabase
+				.from('addresses')
+				.update(address)
+				.eq('id', addressId)
+				.eq('user_id', user.id)
+				.select()
+				.single();
+			saved = updated;
+		} else {
+			const { data: inserted } = await supabase.from('addresses').insert(address).select().single();
+			saved = inserted;
+		}
+
+		if (!saved) return fail(500, { error: 'Could not save address' });
+		return { address: saved };
+	},
+
+	deleteAddress: async ({ request, locals: { supabase, safeGetSession } }) => {
+		const { user } = await safeGetSession();
+		if (!user) return fail(401, { error: 'Unauthorized' });
+
+		const data = await request.formData();
+		const addressId = data.get('address_id') as string;
+		if (!addressId) return fail(400, { error: 'Missing address ID' });
+
+		const { error } = await supabase
+			.from('addresses')
+			.delete()
+			.eq('id', addressId)
+			.eq('user_id', user.id);
+		if (error) return fail(500, { error: 'Could not delete address' });
+		return { deleted: true };
 	},
 
 	signOut: async ({ locals: { supabase } }) => {
