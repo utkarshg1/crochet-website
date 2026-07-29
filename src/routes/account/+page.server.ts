@@ -43,7 +43,7 @@ export const actions: Actions = {
 		if (error) return fail(400, { error: error.message });
 		return { resendSuccess: true, email };
 	},
-	signIn: async ({ request, locals: { supabase } }) => {
+	signIn: async ({ request, locals: { supabase }, url }) => {
 		const formData = await request.formData();
 		const email = String(formData.get('email') ?? '')
 			.trim()
@@ -57,7 +57,8 @@ export const actions: Actions = {
 		const { error } = await supabase.auth.signInWithPassword({ email, password });
 		if (error) return fail(400, { error: error.message, mode: 'login' });
 
-		throw redirect(303, '/account');
+		const redirectTo = url.searchParams.get('redirectTo') || '/account';
+		throw redirect(303, redirectTo);
 	},
 
 	signUp: async ({ request, locals: { supabase } }) => {

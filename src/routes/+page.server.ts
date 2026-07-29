@@ -2,20 +2,32 @@ import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Product, Category } from '$lib/types';
 
-export const load: PageServerLoad = async ({ locals: { supabase } }) => {
-	const [{ data: categories }, { data: featuredProducts }] = await Promise.all([
+export const load: PageServerLoad = async ({ locals: { supabase, safeGetSession } }) => {
+	const { user } = await safeGetSession();
+
+	const [{ data: categories }, { data: featuredProducts }, wishlistPromise] = await Promise.all([
 		supabase.from('categories').select('*').order('display_order'),
 		supabase
 			.from('products')
 			.select('*, category:categories(name, slug)')
 			.eq('is_featured', true)
 			.order('created_at', { ascending: false })
-			.limit(8)
+			.limit(8),
+		user
+			? supabase.from('wishlists').select('product_id').eq('user_id', user.id)
+			: Promise.resolve({ data: [] })
 	]);
+
+	const wishlistIds = new Set(
+		((wishlistPromise as { data: { product_id: string }[] }).data ?? []).map(
+			(w: { product_id: string }) => w.product_id
+		)
+	);
 
 	return {
 		categories: (categories ?? []) as unknown as Category[],
-		featuredProducts: (featuredProducts ?? []) as unknown as Product[]
+		featuredProducts: (featuredProducts ?? []) as unknown as Product[],
+		wishlistIds
 	};
 };
 

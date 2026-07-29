@@ -18,6 +18,19 @@
 	let newsletterEmail = $state('');
 	let newsletterSubmitted = $state(false);
 
+	// ── Wishlist state ────────────────────────────────────────────────────────────
+	let wishlistIds = $state(new Set<string>());
+
+	$effect(() => {
+		wishlistIds = new Set(data.wishlistIds as Set<string>);
+	});
+
+	function handleToggleWishlist(productId: string, isWishlisted: boolean) {
+		wishlistIds = new Set(
+			isWishlisted ? [...wishlistIds, productId] : [...wishlistIds].filter((id) => id !== productId)
+		);
+	}
+
 	// ── Reveal state for hero product images ──────────────────────────────────────
 	let revealed = $derived(logoState.hasSettled);
 
@@ -439,7 +452,11 @@
 			>
 				{#each data.featuredProducts as product (product.id)}
 					<div role="listitem" class="w-[260px] flex-shrink-0 snap-start md:w-auto">
-						<ProductCard {product} />
+						<ProductCard
+							{product}
+							wishlisted={wishlistIds.has(product.id)}
+							onToggleWishlist={handleToggleWishlist}
+						/>
 					</div>
 				{/each}
 			</div>

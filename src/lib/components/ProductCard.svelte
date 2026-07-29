@@ -2,7 +2,10 @@
 	import type { Product } from '$lib/types';
 	import { formatPrice } from '$lib/types';
 	import { cart } from '$lib/cart.svelte';
-	import { createClient } from '$lib/supabase';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { get } from 'svelte/store';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
@@ -33,25 +36,28 @@
 	let adding = $state(false);
 	let togglingWishlist = $state(false);
 
-	const supabase = createClient();
+	let wishlistFormId = $derived(`wl-${product.id}`);
 
-	async function handleToggleWishlist() {
-		if (togglingWishlist) return;
-		togglingWishlist = true;
-
-		try {
-			if (wishlisted) {
-				await supabase.from('wishlists').delete().eq('product_id', product.id);
-				onToggleWishlist?.(product.id, false);
-			} else {
-				await supabase.from('wishlists').insert({ product_id: product.id } as never);
-				onToggleWishlist?.(product.id, true);
-			}
-		} catch {
-			// silently fail — wishlist is non-critical
-		} finally {
-			togglingWishlist = false;
+	// Client-side auth pre-check — redirect to login if not authenticated
+	function handleWishlistClick(e: MouseEvent) {
+		e.stopPropagation();
+		if (!get(page).data?.user) {
+			e.preventDefault();
+			const currentUrl = get(page).url.pathname + get(page).url.search;
+			goto(`/account?redirectTo=${encodeURIComponent(currentUrl)}`);
 		}
+	}
+
+	// Form action enhancement — submits to /wishlist?/toggleWishlist
+	function submitEnhance() {
+		togglingWishlist = true;
+		return async ({ result }: { result: { type: string; data?: Record<string, unknown> } }) => {
+			togglingWishlist = false;
+			if (result.type === 'success' && result.data) {
+				const { productId, wishlisted: isWishlisted } = result.data;
+				onToggleWishlist?.(productId as string, isWishlisted as boolean);
+			}
+		};
 	}
 
 	async function handleAddToCart() {
@@ -90,46 +96,49 @@
   rounded-3xl bg-surface-card transition-shadow duration-300
 "
 >
-	<!-- Image link wrapper -->
-	<a href="/shop/{product.slug}" class="relative m-3 mb-0 block overflow-hidden rounded-2xl">
-		{#if primaryImage}
-			<img
-				src={primaryImage.url}
-				alt={primaryImage.alt}
-				class="
-          mask-organic aspect-square w-full object-cover
-          transition-transform duration-500 ease-out group-hover:scale-105
-        "
-				loading="lazy"
-			/>
-		{:else}
-			<!-- Graceful fallback when no image is attached to the product -->
-			<div
-				class="mask-organic flex aspect-square w-full items-center justify-center bg-surface-high text-5xl"
-			>
-				🧶
+	<!-- Image area: anchor wraps only the image + badges -->
+	<div class="relative m-3 mb-0 overflow-hidden rounded-2xl">
+		<a href="/shop/{product.slug}" class="block">
+			{#if primaryImage}
+				<img
+					src={primaryImage.url}
+					alt={primaryImage.alt}
+					class="
+              mask-organic aspect-square w-full object-cover
+              transition-transform duration-500 ease-out group-hover:scale-105
+            "
+					loading="lazy"
+				/>
+			{:else}
+				<div
+					class="mask-organic flex aspect-square w-full items-center justify-center bg-surface-high text-5xl"
+				>
+					🧶
+				</div>
+			{/if}
+
+			<!-- Stacked badges — absolute overlay on image, top-left -->
+			<div class="absolute top-3 left-3 flex flex-col gap-1.5">
+				{#if product.is_new}
+					<Badge variant="new">New</Badge>
+				{/if}
+				{#if isSale}
+					<Badge variant="sale">Sale</Badge>
+				{/if}
+				{#if isLowStock}
+					<Badge variant="low-stock">Only {product.stock} left</Badge>
+				{/if}
+				{#if isOutOfStock}
+					<Badge variant="low-stock">Sold out</Badge>
+				{/if}
 			</div>
-		{/if}
+		</a>
 
-		<!-- Stacked badges — absolute overlay on image, top-left -->
-		<div class="absolute top-3 left-3 flex flex-col gap-1.5">
-			{#if product.is_new}
-				<Badge variant="new">New</Badge>
-			{/if}
-			{#if isSale}
-				<Badge variant="sale">Sale</Badge>
-			{/if}
-			{#if isLowStock}
-				<Badge variant="low-stock">Only {product.stock} left</Badge>
-			{/if}
-			{#if isOutOfStock}
-				<Badge variant="low-stock">Sold out</Badge>
-			{/if}
-		</div>
-
-		<!-- Wishlist heart button — top-right -->
+		<!-- Wishlist heart button — top-right, outside the anchor -->
 		<button
-			onclick={handleToggleWishlist}
+			type="submit"
+			form={wishlistFormId}
+			onclick={handleWishlistClick}
 			disabled={togglingWishlist}
 			class="absolute top-3 right-3 flex h-9 w-9 items-center justify-center
 				   rounded-full bg-surface/80 backdrop-blur-sm
@@ -153,7 +162,7 @@
 				/>
 			</svg>
 		</button>
-	</a>
+	</div>
 
 	<!-- Card body -->
 	<div class="flex flex-1 flex-col gap-3 p-4 pt-3">
@@ -230,5 +239,48 @@
 				Add to Bag
 			{/if}
 		</Button>
+
+		<!-- Add to / Remove from Wishlist — ghost button, secondary action -->
+		<button
+			type="submit"
+			form={wishlistFormId}
+			onclick={handleWishlistClick}
+			disabled={togglingWishlist}
+			class="
+				mt-1.5 flex w-full items-center justify-center gap-1.5
+				font-display text-sm leading-none text-on-surface italic underline decoration-primary
+				decoration-2 underline-offset-4 transition-colors duration-200
+				hover:text-primary hover:decoration-primary-dim
+				disabled:cursor-not-allowed disabled:opacity-50
+			"
+			aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+		>
+			<svg
+				class="h-4 w-4 {wishlisted ? 'fill-primary text-primary' : 'text-on-surface-muted'}"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path
+					d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+				/>
+			</svg>
+			{wishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+		</button>
 	</div>
+
+	<!-- Hidden wishlist form — submitted by either button above -->
+	<form
+		method="POST"
+		action="/wishlist?/toggleWishlist"
+		use:enhance={submitEnhance}
+		id={wishlistFormId}
+		class="hidden"
+	>
+		<input type="hidden" name="productId" value={product.id} />
+		<input type="hidden" name="redirectTo" value={$page.url.pathname + $page.url.search} />
+	</form>
 </article>

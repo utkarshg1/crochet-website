@@ -5,7 +5,17 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const wishlistItems: WishlistItem[] = $derived(data.wishlistItems as WishlistItem[]);
+	let wishlistItems: WishlistItem[] = $state([]);
+
+	$effect(() => {
+		wishlistItems = data.wishlistItems as WishlistItem[];
+	});
+
+	function handleToggleWishlist(productId: string, isWishlisted: boolean) {
+		if (!isWishlisted) {
+			wishlistItems = wishlistItems.filter((item) => item.product_id !== productId);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -47,7 +57,11 @@
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{#each wishlistItems as item (item.id)}
 						{#if item.product}
-							<ProductCard product={item.product} />
+							<ProductCard
+								product={item.product}
+								wishlisted={true}
+								onToggleWishlist={handleToggleWishlist}
+							/>
 						{/if}
 					{/each}
 				</div>
