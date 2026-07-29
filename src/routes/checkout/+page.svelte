@@ -575,9 +575,11 @@
 										required
 										inputmode="numeric"
 										pattern="[0-9]{6}"
+										title="Pincode must be exactly 6 digits"
 										maxlength="6"
 										placeholder="400001"
-										class="w-full rounded-xl border border-on-surface/10 bg-surface-card px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
+										oninput={() => { addressForm.pincode = addressForm.pincode.replace(/\D/g, ''); }}
+										class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 									/>
 								</div>
 								<div class="flex items-center gap-2 sm:col-span-2">
@@ -810,8 +812,10 @@
 								required
 								inputmode="numeric"
 								pattern="[0-9]{6}"
+								title="Pincode must be exactly 6 digits"
 								maxlength="6"
 								placeholder="400001"
+								oninput={() => { formValues.pincode = formValues.pincode.replace(/\D/g, ''); }}
 								class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 							/>
 						</div>

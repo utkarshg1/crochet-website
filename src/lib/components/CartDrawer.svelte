@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { cart } from '$lib/cart.svelte';
 	import { formatPrice, calculateShipping, FREE_SHIPPING_THRESHOLD_PAISE } from '$lib/types';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -28,6 +29,11 @@
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onClose();
+	}
+
+	function handleCheckout() {
+		onClose();
+		goto('/checkout');
 	}
 </script>
 
@@ -258,11 +264,10 @@
 					</div>
 
 					<Button
-						href="/checkout"
 						variant="primary"
 						size="lg"
 						class="mt-1 w-full"
-						onclick={onClose}
+						onclick={handleCheckout}
 					>
 						Checkout
 						<svg
