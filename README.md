@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.13.1-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.14.0-a7295a?style=flat-square)
 
 </div>
 
@@ -48,6 +48,8 @@
 - Shared `requireAdmin()` helper across all admin routes
 - Fixed RLS policies with SECURITY DEFINER functions (no infinite recursion)
 - Consistent page headers across Account, Shop & Wishlist
+- In-page category filtering on homepage with reactive filter chips for "From the Studio" products
+- Mobile-optimized category grid with uniform stacked layout on small screens
 
 ### 🛠️ Admin Dashboard
 

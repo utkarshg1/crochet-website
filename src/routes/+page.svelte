@@ -18,6 +18,9 @@
 	let newsletterEmail = $state('');
 	let newsletterSubmitted = $state(false);
 
+	// ── Category filter state ─────────────────────────────────────────────────────
+	let selectedCategory = $state<string | null>(null);
+
 	// ── Reveal state for hero product images ──────────────────────────────────────
 	let revealed = $derived(logoState.hasSettled);
 
@@ -64,18 +67,26 @@
 	// 3-col grid), then categories 3+ alternate between a wide (col-span-2) card
 	// and a narrow (col-span-1) card to build visual rhythm.
 	function getGridClass(index: number): string {
-		// index 0, 1: row 1, one column each
-		if (index < 2) return 'col-span-1';
-		// index 2: wide card spanning 2 columns
-		if (index === 2) return 'col-span-2 md:col-span-2';
-		// index 3: narrow companion
-		return 'col-span-1';
+		if (index === 2) return 'md:col-span-2';
+		return '';
 	}
 
-	// The second card in the grid gets a vertical offset to break the grid rigidity
 	function getOffsetClass(index: number): string {
-		if (index === 1) return 'mt-8';
+		if (index === 1) return 'md:mt-8';
 		return '';
+	}
+
+	// ── Category filter ─────────────────────────────────────────────────────────────
+	let filteredFeaturedProducts = $derived(
+		selectedCategory
+			? data.featuredProducts.filter(
+					(p) => p.category?.slug?.toLowerCase() === selectedCategory?.toLowerCase()
+				)
+			: data.featuredProducts
+	);
+
+	function handleSelectCategory(slug: string) {
+		selectedCategory = selectedCategory === slug ? null : slug;
 	}
 </script>
 
@@ -433,7 +444,31 @@
 			</a>
 		</div>
 
-		{#if data.featuredProducts.length > 0}
+		<!-- Category filter chips -->
+		<div class="mb-8 flex flex-wrap gap-2">
+			<button
+				onclick={() => (selectedCategory = null)}
+				class="rounded-full border px-5 py-2 font-body text-sm font-semibold transition-all duration-200
+					   {selectedCategory === null
+					? 'border-secondary bg-secondary text-white'
+					: 'border-on-surface/10 bg-surface-card text-on-surface-muted hover:border-secondary/30 hover:text-secondary'}"
+			>
+				All
+			</button>
+			{#each data.categories as cat (cat.id)}
+				<button
+					onclick={() => handleSelectCategory(cat.slug)}
+					class="rounded-full border px-5 py-2 font-body text-sm font-semibold transition-all duration-200
+						   {selectedCategory === cat.slug
+						? 'border-secondary bg-secondary text-white'
+						: 'border-on-surface/10 bg-surface-card text-on-surface-muted hover:border-secondary/30 hover:text-secondary'}"
+				>
+					{cat.name}
+				</button>
+			{/each}
+		</div>
+
+		{#if filteredFeaturedProducts.length > 0}
 			<!--
         Mobile: flex row with overflow scroll — the negative horizontal margins
         punch through the section padding so cards sit flush to the edge.
@@ -447,11 +482,23 @@
 				role="list"
 				aria-label="Featured products"
 			>
-				{#each data.featuredProducts as product (product.id)}
+				{#each filteredFeaturedProducts as product (product.id)}
 					<div role="listitem" class="w-[260px] flex-shrink-0 snap-start md:w-auto">
 						<ProductCard {product} />
 					</div>
 				{/each}
+			</div>
+		{:else if selectedCategory}
+			<div class="flex flex-col items-center gap-6 py-16 text-center">
+				<span class="text-5xl" aria-hidden="true">🧶</span>
+				<div>
+					<p class="font-display text-xl font-semibold text-on-surface">
+						No pieces in this category
+					</p>
+					<p class="mt-2 font-body text-sm text-on-surface-muted">
+						Try selecting a different category to explore more handcrafted pieces.
+					</p>
+				</div>
 			</div>
 		{:else}
 			<!-- Skeleton grid — 4 placeholder cards while data loads or is empty -->
