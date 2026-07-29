@@ -612,14 +612,14 @@
 							id="addr-pincode"
 							name="pincode"
 							type="text"
-							bind:value={addressForm.pincode}
+							value={addressForm.pincode}
 							required
 							inputmode="numeric"
 							pattern="[0-9]{6}"
 							title="Pincode must be exactly 6 digits"
 							maxlength="6"
 							placeholder="400001"
-							oninput={() => { addressForm.pincode = addressForm.pincode.replace(/\D/g, ''); }}
+							oninput={(e) => { addressForm.pincode = (e.target as HTMLInputElement).value.replace(/\D/g, ''); }}
 							class="w-full rounded-xl border border-on-surface/10 bg-surface-high px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-muted/50 focus:border-primary/50 focus:outline-none"
 						/>
 					</div>
