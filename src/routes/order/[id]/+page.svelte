@@ -3,13 +3,14 @@
 	import { cart } from '$lib/cart.svelte';
 	import { formatPrice } from '$lib/types';
 	import type { PageData } from './$types';
-	import type { CartItem, ShippingAddress } from '$lib/types';
+	import type { CartItem, ShippingAddress, PaymentMethod } from '$lib/types';
 
 	let { data }: { data: PageData } = $props();
 
 	const order = $derived(data.order);
 	const items = $derived(order.items as unknown as CartItem[]);
 	const address = $derived(order.shipping_address as unknown as ShippingAddress);
+	const paymentMethod = $derived(order.payment_method as PaymentMethod);
 
 	const statusMap: Record<string, { label: string; color: string }> = {
 		pending: { label: 'Pending', color: 'bg-mustard/40 text-tertiary' },
@@ -56,7 +57,9 @@
 			Thank You, {order.guest_name ?? 'Friend'}!
 		</h1>
 		<p class="mt-3 font-body text-base text-on-surface-muted">
-			Your order has been placed successfully. We're already getting the yarn ready!
+			{paymentMethod === 'cod'
+				? 'Your order has been placed. Keep cash ready when your order arrives!'
+				: "Your order has been placed successfully. We're already getting the yarn ready!"}
 		</p>
 		<span
 			class="chip mt-4 inline-block bg-secondary-container px-5 py-2 font-body text-sm font-semibold text-on-secondary-container"
@@ -152,6 +155,10 @@
 				🧶 Your item is being handcrafted with love by Kalyani.<br />
 				Allow <strong>3–5 business days</strong> for dispatch. You'll receive a shipping notification
 				via email.
+				{#if paymentMethod === 'cod'}
+					<br /><br />
+					💵 Please keep the exact amount ready when our delivery partner arrives.
+				{/if}
 			</p>
 			{#if order.guest_email}
 				<p class="mt-3 font-body text-xs text-on-secondary-container/70">

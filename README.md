@@ -18,7 +18,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=flat-square&logo=supabase&logoColor=white)
 ![Razorpay](https://img.shields.io/badge/Razorpay-Payments-072653?style=flat-square&logo=razorpay&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deploy-000?style=flat-square&logo=vercel&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.18.0-a7295a?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.19.0-a7295a?style=flat-square)
 
 </div>
 
@@ -33,7 +33,7 @@
 - Persistent shopping cart (localStorage + Supabase sync)
 - Slide-in cart drawer
 - Wishlist with heart toggle &amp; secondary "Add to Wishlist" button on product cards
-- Razorpay checkout flow
+- Razorpay checkout + Cash on Delivery (COD)
 - Guest checkout (no account required)
 - Order tracking with auto-generated order numbers (KL-XXXX)
 - Vertical stacked auth tabs on mobile for improved readability
@@ -120,7 +120,7 @@
 |        `profiles`        | User profiles with required full name, phone, and admin flag                                      |
 |       `categories`       | Product categories with display order, slug, tagline, image                                       |
 |        `products`        | Full product data — price, stock, images, colors, sizes, materials, care instructions, dimensions |
-|         `orders`         | Order tracking with auto-generated KL-XXXX order numbers, Razorpay IDs, shipping address          |
+|         `orders`         | Order tracking with KL-XXXX order numbers, Razorpay IDs / COD, shipping address, payment method   |
 |       `addresses`        | Saved shipping addresses with RLS — users can manage their own addresses                          |
 |       `discounts`        | Discount codes with type, value, max uses, min order, validity                                    |
 |         `carts`          | Persistent shopping carts linked to session/user with JSON items                                  |

@@ -4,6 +4,7 @@
 	import { enhance } from '$app/forms';
 	import { cart } from '$lib/cart.svelte';
 	import { formatPrice, calculateShipping, FREE_SHIPPING_THRESHOLD_PAISE } from '$lib/types';
+	import type { PaymentMethod } from '$lib/types';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -63,6 +64,9 @@
 	let razorpayLoaded = $state(false);
 	let razorpayOrderId = $state('');
 	let verifyingPayment = $state(false);
+
+	// ── Payment method ─────────────────────────────────────────────────────────
+	let paymentMethod = $state<PaymentMethod>('razorpay');
 
 	// ── Derived cart values ───────────────────────────────────────────────────
 	const subtotal = $derived(cart.subtotal);
@@ -170,6 +174,11 @@
 	}
 
 	async function initiatePayment() {
+		if (paymentMethod === 'cod') {
+			submitOrder(null, null, null);
+			return;
+		}
+
 		if (!razorpayLoaded) {
 			pageError = 'Payment gateway is still loading. Please wait a moment.';
 			return;
@@ -257,10 +266,10 @@
 	let hiddenRzpPaymentId = $state('');
 	let hiddenRzpSignature = $state('');
 
-	function submitOrder(rzpOrderId: string, rzpPaymentId: string, rzpSignature: string) {
-		hiddenRzpOrderId = rzpOrderId;
-		hiddenRzpPaymentId = rzpPaymentId;
-		hiddenRzpSignature = rzpSignature;
+	function submitOrder(rzpOrderId: string | null, rzpPaymentId: string | null, rzpSignature: string | null) {
+		hiddenRzpOrderId = rzpOrderId ?? '';
+		hiddenRzpPaymentId = rzpPaymentId ?? '';
+		hiddenRzpSignature = rzpSignature ?? '';
 		setTimeout(() => orderFormEl?.requestSubmit(), 0);
 	}
 
@@ -936,9 +945,68 @@
 						{/if}
 					</div>
 
+					<!-- Payment method selection -->
+					<div class="mt-6 space-y-3">
+						<button
+							type="button"
+							onclick={() => (paymentMethod = 'razorpay')}
+							class="w-full rounded-2xl border-2 p-4 text-left transition-all {paymentMethod ===
+							'razorpay'
+								? 'border-primary bg-primary/5'
+								: 'border-on-surface/10 bg-surface-high hover:border-primary/30'}"
+						>
+							<div class="flex items-center gap-3">
+								<div
+									class="flex h-5 w-5 items-center justify-center rounded-full border-2 {paymentMethod ===
+									'razorpay'
+										? 'border-primary'
+										: 'border-on-surface/30'}"
+								>
+									{#if paymentMethod === 'razorpay'}
+										<div class="h-2.5 w-2.5 rounded-full bg-primary"></div>
+									{/if}
+								</div>
+								<div>
+									<p class="font-body font-semibold text-on-surface">Pay Online (Razorpay)</p>
+									<p class="font-body text-xs text-on-surface-muted">Credit/Debit Card | UPI | Net Banking</p>
+								</div>
+							</div>
+						</button>
+						<button
+							type="button"
+							onclick={() => (paymentMethod = 'cod')}
+							class="w-full rounded-2xl border-2 p-4 text-left transition-all {paymentMethod ===
+							'cod'
+								? 'border-primary bg-primary/5'
+								: 'border-on-surface/10 bg-surface-high hover:border-primary/30'}"
+						>
+							<div class="flex items-center gap-3">
+								<div
+									class="flex h-5 w-5 items-center justify-center rounded-full border-2 {paymentMethod ===
+									'cod'
+										? 'border-primary'
+										: 'border-on-surface/30'}"
+								>
+									{#if paymentMethod === 'cod'}
+										<div class="h-2.5 w-2.5 rounded-full bg-primary"></div>
+									{/if}
+								</div>
+								<div>
+									<p class="font-body font-semibold text-on-surface">Cash on Delivery</p>
+									<p class="font-body text-xs text-on-surface-muted">
+										Pay when your order arrives
+										{#if total > 300000}
+											<span class="font-semibold text-primary"> — Not available for orders over ₹3,000</span>
+										{/if}
+									</p>
+								</div>
+							</div>
+						</button>
+					</div>
+
 					<button
 						onclick={initiatePayment}
-						disabled={loading}
+						disabled={loading || (paymentMethod === 'cod' && total > 300000)}
 						class="shadow-ambient mt-6 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 					>
 						{#if verifyingPayment}
@@ -979,16 +1047,20 @@
 								</svg>
 								Processing…
 							</span>
+						{:else if paymentMethod === 'cod'}
+							Place Order (Cash on Delivery)
 						{:else}
 							Pay {formatPrice(total)} with Razorpay
 						{/if}
 					</button>
 
-					<div class="mt-4 flex items-center justify-center gap-4">
-						<span class="font-body text-xs text-on-surface-muted">🔒 256-bit SSL</span>
-						<span class="font-body text-xs text-on-surface-muted">💳 UPI · Cards · Net Banking</span
-						>
-					</div>
+					{#if paymentMethod === 'razorpay'}
+						<div class="mt-4 flex items-center justify-center gap-4">
+							<span class="font-body text-xs text-on-surface-muted">🔒 256-bit SSL</span>
+							<span class="font-body text-xs text-on-surface-muted">💳 UPI · Cards · Net Banking</span
+							>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -1116,6 +1188,7 @@
 	/>
 	<input type="hidden" name="subtotal_paise" value={subtotal} />
 	<input type="hidden" name="shipping_paise" value={shipping} />
+	<input type="hidden" name="payment_method" value={paymentMethod} />
 	<input type="hidden" name="razorpay_order_id" value={hiddenRzpOrderId} />
 	<input type="hidden" name="razorpay_payment_id" value={hiddenRzpPaymentId} />
 	<input type="hidden" name="razorpay_signature" value={hiddenRzpSignature} />

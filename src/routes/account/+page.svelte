@@ -257,6 +257,9 @@
 												year: 'numeric'
 											})}
 										</p>
+										<p class="mt-1 font-body text-[10px] font-semibold uppercase tracking-wider text-on-surface-muted">
+											{order.payment_method === 'cod' ? 'COD' : 'Online'}
+										</p>
 									</div>
 									<div class="text-right">
 										<span

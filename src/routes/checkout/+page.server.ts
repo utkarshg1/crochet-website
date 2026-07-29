@@ -183,7 +183,7 @@ export const actions: Actions = {
 		return { deleted: true };
 	},
 
-	// ── Step 5: Create order after Razorpay payment ─────────────────────────
+	// ── Step 5: Create order after payment (Razorpay or COD) ───────────────
 	createOrder: async ({ request, locals: { supabase, safeGetSession }, cookies }) => {
 		const { user } = await safeGetSession();
 		const data = await request.formData();
@@ -272,26 +272,38 @@ export const actions: Actions = {
 		const serverShipping = calculateShipping(serverSubtotal);
 		const serverTotal = serverSubtotal + serverShipping;
 
-		// ── Verify Razorpay payment signature ────────────────────────────
-		const razorpayOrderId = data.get('razorpay_order_id') as string;
-		const razorpayPaymentId = data.get('razorpay_payment_id') as string;
-		const razorpaySignature = data.get('razorpay_signature') as string;
+		// ── Determine payment method ─────────────────────────────────────
+		const paymentMethod = (data.get('payment_method') as string) || 'razorpay';
 
-		if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-			return fail(400, { error: 'Missing payment information.' });
-		}
+		let razorpayOrderId: string | null = null;
+		let razorpayPaymentId: string | null = null;
 
-		try {
-			const isValid = await verifyPaymentSignature(
-				razorpayOrderId,
-				razorpayPaymentId,
-				razorpaySignature
-			);
-			if (!isValid) {
-				return fail(400, { error: 'Payment signature verification failed.' });
+		if (paymentMethod === 'cod') {
+			if (serverTotal > 300000) {
+				return fail(400, { error: 'Cash on Delivery is available only for orders under ₹3,000.' });
 			}
-		} catch {
-			return fail(500, { error: 'Payment verification error. Please contact support.' });
+		} else {
+			// ── Verify Razorpay payment signature ──────────────────────────
+			razorpayOrderId = data.get('razorpay_order_id') as string;
+			razorpayPaymentId = data.get('razorpay_payment_id') as string;
+			const razorpaySignature = data.get('razorpay_signature') as string;
+
+			if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+				return fail(400, { error: 'Missing payment information.' });
+			}
+
+			try {
+				const isValid = await verifyPaymentSignature(
+					razorpayOrderId,
+					razorpayPaymentId,
+					razorpaySignature
+				);
+				if (!isValid) {
+					return fail(400, { error: 'Payment signature verification failed.' });
+				}
+			} catch {
+				return fail(500, { error: 'Payment verification error. Please contact support.' });
+			}
 		}
 
 		// ── Resolve shipping address ─────────────────────────────────────
@@ -318,6 +330,7 @@ export const actions: Actions = {
 		const { data: orderNum } = await supabase.rpc('generate_order_number');
 
 		// ── Insert order with server-verified data ───────────────────────
+		const orderStatus = paymentMethod === 'cod' ? 'pending' : 'processing';
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const { data: order, error } = await (supabase as any)
 			.from('orders')
@@ -332,7 +345,8 @@ export const actions: Actions = {
 				subtotal_paise: serverSubtotal,
 				shipping_paise: serverShipping,
 				total_paise: serverTotal,
-				status: 'processing',
+				payment_method: paymentMethod,
+				status: orderStatus,
 				razorpay_order_id: razorpayOrderId,
 				razorpay_payment_id: razorpayPaymentId
 			})

@@ -80,10 +80,13 @@ export interface Order {
 	shipping_paise: number;
 	total_paise: number;
 	status: OrderStatus;
+	payment_method: PaymentMethod;
 	razorpay_order_id: string | null;
 	razorpay_payment_id: string | null;
 	created_at: string;
 }
+
+export type PaymentMethod = 'razorpay' | 'cod';
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
