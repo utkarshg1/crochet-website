@@ -6,6 +6,7 @@
 	import SplashScreen from '$lib/components/SplashScreen.svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { logoState } from '$lib/logoState.svelte';
 	import type { LayoutData } from './$types';
 
@@ -17,6 +18,15 @@
 	let { data, children }: Props = $props();
 
 	let isAdmin = $derived($page.url.pathname.startsWith('/admin'));
+	let navigating = $state(false);
+
+	beforeNavigate(() => {
+		navigating = true;
+	});
+
+	afterNavigate(() => {
+		navigating = false;
+	});
 </script>
 
 <svelte:head>
@@ -45,6 +55,11 @@
   clean, full-height layout without storefront chrome.
 -->
 <div class="flex min-h-screen flex-col">
+	{#if navigating}
+		<div class="fixed top-0 left-0 z-[9999] h-[3px] w-full">
+			<div class="h-full w-1/3 animate-loading-bar bg-gradient-to-r from-primary to-primary-dim"></div>
+		</div>
+	{/if}
 	{#if browser && !logoState.hasSettled && $page.url.pathname === '/'}
 		<SplashScreen />
 	{/if}
@@ -86,5 +101,21 @@
 	}
 	:global(.skip-link:focus) {
 		top: 0;
+	}
+
+	:global(.animate-loading-bar) {
+		animation: loading-bar 1.2s ease-in-out infinite;
+	}
+
+	@keyframes loading-bar {
+		0% {
+			transform: translateX(-100%);
+		}
+		50% {
+			transform: translateX(200%);
+		}
+		100% {
+			transform: translateX(400%);
+		}
 	}
 </style>
