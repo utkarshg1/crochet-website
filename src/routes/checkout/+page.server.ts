@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '$env/static/private';
+import { RAZORPAY_KEY_SECRET } from '$env/static/private';
 import type { Actions, PageServerLoad } from './$types';
 import type { CartItem } from '$lib/types';
 import { calculateShipping } from '$lib/types';
@@ -180,18 +180,26 @@ export const actions: Actions = {
 		const serverShipping = calculateShipping(serverSubtotal);
 		const serverTotal = serverSubtotal + serverShipping;
 
-		// ── Verify Razorpay payment amount ───────────────────────────────
+		// ── Verify Razorpay payment signature ────────────────────────────
 		const razorpayOrderId = data.get('razorpay_order_id') as string;
 		const razorpayPaymentId = data.get('razorpay_payment_id') as string;
+		const razorpaySignature = data.get('razorpay_signature') as string;
 
-		if (!razorpayOrderId || !razorpayPaymentId) {
+		if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
 			return fail(400, { error: 'Missing payment information.' });
 		}
 
-		// Verify the Razorpay order amount matches our calculated total
-		const razorpayAmount = await verifyRazorpayOrder(razorpayOrderId, serverTotal);
-		if (!razorpayAmount) {
-			return fail(400, { error: 'Payment verification failed. Please try again.' });
+		try {
+			const isValid = await verifyPaymentSignature(
+				razorpayOrderId,
+				razorpayPaymentId,
+				razorpaySignature
+			);
+			if (!isValid) {
+				return fail(400, { error: 'Payment signature verification failed.' });
+			}
+		} catch {
+			return fail(500, { error: 'Payment verification error. Please contact support.' });
 		}
 
 		// ── Generate order number via DB function ────────────────────────
@@ -233,6 +241,31 @@ export const actions: Actions = {
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
+/** HMAC-SHA256 verification of Razorpay payment signature */
+async function verifyPaymentSignature(
+	orderId: string,
+	paymentId: string,
+	signature: string
+): Promise<boolean> {
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		'raw',
+		encoder.encode(RAZORPAY_KEY_SECRET),
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
+	const sigBytes = await crypto.subtle.sign(
+		'HMAC',
+		key,
+		encoder.encode(`${orderId}|${paymentId}`)
+	);
+	const computed = Array.from(new Uint8Array(sigBytes))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+	return computed === signature;
+}
+
 /** Simple HMAC-SHA256 signature for checkout cookies */
 async function signPayload(payload: string): Promise<string> {
 	const secret = RAZORPAY_KEY_SECRET || 'fallback-dev-secret';
@@ -251,31 +284,4 @@ async function signPayload(payload: string): Promise<string> {
 		.substring(0, 32);
 }
 
-/** Verify Razorpay order amount matches expected total */
-async function verifyRazorpayOrder(
-	razorpayOrderId: string,
-	expectedTotalPaise: number
-): Promise<boolean> {
-	if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-		console.error('Razorpay credentials not configured');
-		return false;
-	}
 
-	try {
-		const credentials = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
-		const res = await fetch(`https://api.razorpay.com/v1/orders/${razorpayOrderId}`, {
-			headers: {
-				Authorization: `Basic ${credentials}`
-			}
-		});
-
-		if (!res.ok) return false;
-
-		const order = await res.json();
-		// Razorpay amount is in paise, same as our total_paise
-		return order.amount === expectedTotalPaise && order.status === 'created';
-	} catch (err) {
-		console.error('Razorpay verification failed:', err);
-		return false;
-	}
-}

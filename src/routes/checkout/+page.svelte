@@ -4,7 +4,6 @@
 	import { enhance } from '$app/forms';
 	import { cart } from '$lib/cart.svelte';
 	import { formatPrice, calculateShipping, FREE_SHIPPING_THRESHOLD_PAISE } from '$lib/types';
-	import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -36,6 +35,7 @@
 	// ── Razorpay ──────────────────────────────────────────────────────────────
 	let razorpayLoaded = $state(false);
 	let razorpayOrderId = $state('');
+	let verifyingPayment = $state(false);
 
 	// ── Derived cart values ───────────────────────────────────────────────────
 	const subtotal = $derived(cart.subtotal);
@@ -91,13 +91,9 @@
 		pageError = null;
 
 		try {
-			// Call Supabase Edge Function to create Razorpay order
-			const res = await fetch(`${PUBLIC_SUPABASE_URL}/functions/v1/create-order`, {
+			const res = await fetch('/api/create-order', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${PUBLIC_SUPABASE_ANON_KEY}`
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					amount_paise: total,
 					receipt: `guest-${Date.now()}`,
@@ -107,9 +103,8 @@
 
 			const orderData = await res.json();
 			if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
-			razorpayOrderId = orderData.razorpay_order_id;
+			razorpayOrderId = orderData.order_id;
 
-			// Open Razorpay checkout
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const rzp = new (window as any).Razorpay({
 				key: (import.meta.env.PUBLIC_RAZORPAY_KEY_ID as string) || '',
@@ -125,8 +120,33 @@
 					contact: `+91${formValues.phone}`
 				},
 				theme: { color: '#a7295a' },
-				handler: function (response: { razorpay_payment_id: string; razorpay_order_id: string }) {
-					submitOrder(response.razorpay_order_id, response.razorpay_payment_id);
+				handler: async function (response: {
+					razorpay_payment_id: string;
+					razorpay_order_id: string;
+					razorpay_signature: string;
+				}) {
+					const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
+					verifyingPayment = true;
+					try {
+						const verifyRes = await fetch('/api/verify-payment', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								razorpay_order_id,
+								razorpay_payment_id,
+								razorpay_signature
+							})
+						});
+						const verifyData = await verifyRes.json();
+						if (!verifyRes.ok || !verifyData.verified) {
+							throw new Error(verifyData.error || 'Payment verification failed');
+						}
+						submitOrder(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+					} catch (err) {
+						pageError = err instanceof Error ? err.message : 'Payment verification failed. Please contact support.';
+						loading = false;
+						verifyingPayment = false;
+					}
 				},
 				modal: {
 					ondismiss: () => {
@@ -145,11 +165,12 @@
 	let orderFormEl: HTMLFormElement;
 	let hiddenRzpOrderId = $state('');
 	let hiddenRzpPaymentId = $state('');
+	let hiddenRzpSignature = $state('');
 
-	function submitOrder(rzpOrderId: string, rzpPaymentId: string) {
+	function submitOrder(rzpOrderId: string, rzpPaymentId: string, rzpSignature: string) {
 		hiddenRzpOrderId = rzpOrderId;
 		hiddenRzpPaymentId = rzpPaymentId;
-		// Trigger form submit on next tick
+		hiddenRzpSignature = rzpSignature;
 		setTimeout(() => orderFormEl?.requestSubmit(), 0);
 	}
 
@@ -513,7 +534,26 @@
 						disabled={loading}
 						class="shadow-ambient mt-6 w-full rounded-full bg-gradient-to-r from-primary to-primary-dim py-4 font-body font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
 					>
-						{#if loading}
+						{#if verifyingPayment}
+							<span class="inline-flex items-center gap-2">
+								<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									/>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+									/>
+								</svg>
+								Verifying…
+							</span>
+						{:else if loading}
 							<span class="inline-flex items-center gap-2">
 								<svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
 									<circle
@@ -641,4 +681,5 @@
 	<input type="hidden" name="shipping_paise" value={shipping} />
 	<input type="hidden" name="razorpay_order_id" value={hiddenRzpOrderId} />
 	<input type="hidden" name="razorpay_payment_id" value={hiddenRzpPaymentId} />
+	<input type="hidden" name="razorpay_signature" value={hiddenRzpSignature} />
 </form>
