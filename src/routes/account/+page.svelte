@@ -613,10 +613,7 @@
 							name="pincode"
 							type="text"
 							value={addressForm.pincode}
-							required
 							inputmode="numeric"
-							pattern="[0-9]{6}"
-							title="Pincode must be exactly 6 digits"
 							maxlength="6"
 							placeholder="400001"
 							oninput={(e) => { addressForm.pincode = (e.target as HTMLInputElement).value.replace(/\D/g, ''); }}
