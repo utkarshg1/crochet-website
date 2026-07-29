@@ -18,9 +18,6 @@
 	let newsletterEmail = $state('');
 	let newsletterSubmitted = $state(false);
 
-	// ── Category filter state ─────────────────────────────────────────────────────
-	let selectedCategory = $state<string | null>(null);
-
 	// ── Reveal state for hero product images ──────────────────────────────────────
 	let revealed = $derived(logoState.hasSettled);
 
@@ -74,19 +71,6 @@
 	function getOffsetClass(index: number): string {
 		if (index === 1) return 'md:mt-8';
 		return '';
-	}
-
-	// ── Category filter ─────────────────────────────────────────────────────────────
-	let filteredFeaturedProducts = $derived(
-		selectedCategory
-			? data.featuredProducts.filter(
-					(p) => p.category?.slug?.toLowerCase() === selectedCategory?.toLowerCase()
-				)
-			: data.featuredProducts
-	);
-
-	function handleSelectCategory(slug: string) {
-		selectedCategory = selectedCategory === slug ? null : slug;
 	}
 </script>
 
@@ -318,11 +302,6 @@
             "
 						aria-label="Explore {category.name}"
 					>
-						<!--
-              Coloured placeholder for the category image. Each category gets
-              a unique gradient defined in the categoryGradients map above.
-              The group-hover scale is GPU-composited (transform only).
-            -->
 						<div
 							class="mb-5 aspect-video rounded-2xl bg-gradient-to-br {getCategoryGradient(
 								category.slug
@@ -444,31 +423,7 @@
 			</a>
 		</div>
 
-		<!-- Category filter chips -->
-		<div class="mb-8 flex flex-wrap gap-2">
-			<button
-				onclick={() => (selectedCategory = null)}
-				class="rounded-full border px-5 py-2 font-body text-sm font-semibold transition-all duration-200
-					   {selectedCategory === null
-					? 'border-secondary bg-secondary text-white'
-					: 'border-on-surface/10 bg-surface-card text-on-surface-muted hover:border-secondary/30 hover:text-secondary'}"
-			>
-				All
-			</button>
-			{#each data.categories as cat (cat.id)}
-				<button
-					onclick={() => handleSelectCategory(cat.slug)}
-					class="rounded-full border px-5 py-2 font-body text-sm font-semibold transition-all duration-200
-						   {selectedCategory === cat.slug
-						? 'border-secondary bg-secondary text-white'
-						: 'border-on-surface/10 bg-surface-card text-on-surface-muted hover:border-secondary/30 hover:text-secondary'}"
-				>
-					{cat.name}
-				</button>
-			{/each}
-		</div>
-
-		{#if filteredFeaturedProducts.length > 0}
+		{#if data.featuredProducts.length > 0}
 			<!--
         Mobile: flex row with overflow scroll — the negative horizontal margins
         punch through the section padding so cards sit flush to the edge.
@@ -482,23 +437,11 @@
 				role="list"
 				aria-label="Featured products"
 			>
-				{#each filteredFeaturedProducts as product (product.id)}
+				{#each data.featuredProducts as product (product.id)}
 					<div role="listitem" class="w-[260px] flex-shrink-0 snap-start md:w-auto">
 						<ProductCard {product} />
 					</div>
 				{/each}
-			</div>
-		{:else if selectedCategory}
-			<div class="flex flex-col items-center gap-6 py-16 text-center">
-				<span class="text-5xl" aria-hidden="true">🧶</span>
-				<div>
-					<p class="font-display text-xl font-semibold text-on-surface">
-						No pieces in this category
-					</p>
-					<p class="mt-2 font-body text-sm text-on-surface-muted">
-						Try selecting a different category to explore more handcrafted pieces.
-					</p>
-				</div>
 			</div>
 		{:else}
 			<!-- Skeleton grid — 4 placeholder cards while data loads or is empty -->

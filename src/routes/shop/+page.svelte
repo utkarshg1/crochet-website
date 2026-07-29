@@ -60,9 +60,12 @@
 			maxPrice !== ''
 	);
 
-	// Apply client-side price range filter on top of server-filtered list.
+	// Apply client-side category and price range filter.
 	const filteredProducts = $derived(() => {
 		let list = products;
+		if (selectedCategory) {
+			list = list.filter((p) => p.category?.slug?.toLowerCase() === selectedCategory.toLowerCase());
+		}
 		const min = minPrice !== '' ? parseInt(minPrice, 10) * 100 : null;
 		const max = maxPrice !== '' ? parseInt(maxPrice, 10) * 100 : null;
 		if (min !== null) list = list.filter((p) => p.price_paise >= min);

@@ -62,7 +62,7 @@
 
 ### 📄 Pages
 
-- **Home** — Hero, collections grid, featured products, meet the maker, testimonials, newsletter
+- **Home** — Hero, collections grid (drives in-page product filtering), studio products, meet the maker, testimonials, newsletter
 - **Shop** — Full catalog with sidebar filters & mobile drawer
 - **About** — Owner story & Instagram QR code
 - **FAQ** — Accordion-style common questions
